@@ -186,6 +186,8 @@ function renderAddCategories(){
           autoCapitalize={"none"}
       />
           <TextInput
+          multiline={true}
+          numberOfLines={6}
           style={styles.input}
           value={catDetails}
           placeholderTextColor={COLORS.white}

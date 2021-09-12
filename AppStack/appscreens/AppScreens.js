@@ -4,7 +4,7 @@ import "firebase/firestore";
 import { AuthenticatedUserContext } from '../../AuthProvider/AuthProvider';
 import ScreensContainer from './screensContainer';
 import Firebase from '../../firebaseConfig';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { COLORS } from '../../constants/Index';
 
 const Appscreens = () => {
@@ -40,6 +40,7 @@ const Appscreens = () => {
       return (
         <View style={{ backgroundColor:COLORS.darkblue, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <ActivityIndicator color={COLORS.white} size='large'/>
+          <Text style={{color:COLORS.white}}>Loading Please Wait...</Text>
         </View>
       );
     }

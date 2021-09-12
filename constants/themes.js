@@ -21,6 +21,7 @@ export const COLORS = {
     darkgrey2 : "rgb(240, 240, 240)",
     darkgrey3 : ' rgb(255, 253, 180)',
     blackSecondary: 'rgb(12,13,18)',
+    bluelight: 'rgb(12,170,243)'
 };
  export const SIZES = {
      base: 8,

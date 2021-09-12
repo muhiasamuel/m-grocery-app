@@ -159,7 +159,7 @@ export const SignInScreen = ({navigation}) => {
    
       <View style={styles.TitleView}>
           <Text style={{color:COLORS.white,...FONTS.h1,  borderBottomWidth:2,
-           borderBottomColor:COLORS.white,width:SIZES.width*0.4}}>SIGN IN</Text>
+           borderBottomColor:COLORS.white,width:SIZES.width*0.24}}>SIGN IN</Text>
       </View>
      <ScrollView>
        {renderbody()}
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
     },
     TitleView: {
       alignItems:"center",
-      padding:SIZES.padding2*2,
+      padding:SIZES.padding2*1.2,
       marginBottom:0,
      
       backgroundColor:'rgba(0,0,0 ,0.8)'
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
 
   },
   btntext: {
-      padding:SIZES.padding*0.5,
+      padding:SIZES.padding*0.1,
       alignSelf:"center",
       color:COLORS.white,
       ...FONTS.h2

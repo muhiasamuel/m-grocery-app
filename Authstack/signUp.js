@@ -4,7 +4,7 @@ import firebase from 'firebase/app'
 import "firebase/auth";
 import "firebase/firestore";
 import { COLORS, FONTS, images, SIZES } from "../constants/Index";
-import { Feather, FontAwesome5, Fontisto } from "@expo/vector-icons";
+import { Feather, FontAwesome5, Fontisto, Ionicons } from "@expo/vector-icons";
 import * as Animatable from 'react-native-animatable'
 import { color } from "react-native-reanimated";
 import { ScrollView } from "react-native-gesture-handler";
@@ -61,27 +61,8 @@ const Auth = Firebase.auth();
     return false;
     }
   };
-
-  return (
-    <View
-    behavior="padding"
-     style={styles.container}>
-        <ImageBackground 
-           source={images.food11}
-           resizeMode= 'cover'
-            style={styles.image}>
-   
-   
-      <View style={styles.TitleView}>
-        <TouchableOpacity
-          onPress = {() => navigation.navigate('login')}
-        >
-         <Fontisto name="arrow-left" size={24} color={COLORS.white} />
-        </TouchableOpacity>
-        
-          <Text style={{color:COLORS.white,fontSize:26,fontWeight:"bold",paddingHorizontal:SIZES.padding2*1.8}}>SIGN UP</Text>
-      </View>
-
+  function renderBody() {
+    return(
       <Animatable.View      
       animation="fadeInUpBig"
       duration={1900}
@@ -91,8 +72,7 @@ const Auth = Firebase.auth();
             <Text style={styles.sucesstxt}>{successMsg}</Text>                                                            
       </View>:
       <View></View>
-      }
-     <ScrollView>   
+      }  
      <View>   
 
         {/*<Text style={styles.label}>UserName:</Text>*/}
@@ -195,8 +175,31 @@ const Auth = Firebase.auth();
             <Fontisto style={styles.social} name="twitter" size={30} color={COLORS.white}/>
          </TouchableOpacity>
        </View>
-        </ScrollView> 
       </Animatable.View>
+    )
+  }
+
+  return (
+    <View
+    behavior="padding"
+     style={styles.container}>
+        <ImageBackground 
+           source={images.food11}
+           resizeMode= 'cover'
+            style={styles.image}>
+              <View style={styles.TitleView}>
+                <TouchableOpacity
+                  onPress = {() => navigation.navigate('login')}
+                >
+                <Ionicons name="md-arrow-back-circle-outline" size={27} color="white" />
+                </TouchableOpacity>
+                
+                  <Text style={{color:COLORS.white,fontSize:26,fontWeight:"bold",paddingHorizontal:SIZES.padding2*1.8}}>SIGN UP</Text>
+              </View>
+              <ScrollView>
+                {renderBody()}
+               
+              </ScrollView>
  
       </ImageBackground>
     </View>
@@ -215,7 +218,7 @@ const styles = StyleSheet.create({
     },
     TitleView: {
       flexDirection:"row",
-      padding:SIZES.padding2*2,
+      padding:SIZES.padding2*1.3,
       marginBottom:0,
      alignItems:"center",
       backgroundColor:'rgba(0,0,0 ,0.8)'

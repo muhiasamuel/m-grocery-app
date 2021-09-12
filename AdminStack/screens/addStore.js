@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, FONTS, SIZES } from '../../constants/Index';
 import "firebase/storage";
 import 'firebase/firestore';
 import Firebase from '../../firebaseConfig';
+import { AuthenticatedUserContext } from '../../AuthProvider/AuthProvider';
 
 const Store =  ({route, navigation}) => {
     
@@ -17,6 +18,11 @@ const Store =  ({route, navigation}) => {
   const [uploading, setUploading] =useState(null);
   const [submitting, setIsSubmitting] =useState(false);
 
+  const [isLoading, setIsLoading] =React.useState(true);
+
+  
+
+
   const handleSubmit = async() => {
     setIsSubmitting(true)
     const StoreName = storeName
@@ -26,7 +32,7 @@ const Store =  ({route, navigation}) => {
     let imgUrl = await uploadImage();
       const dbh = Firebase.firestore();
       dbh.collection("Stores").doc(StoreName).set({
-        storeId: Date.now().toString(36) + Math.random().toString(36).substr(2) + StoreName,
+        storeId: Date.now().toString(36) + Math.random().toString(36).substr(2),
         storeName: StoreName,
         storeDetails : StoreDetails,
         storeLocation:StoreLocation,
@@ -34,6 +40,10 @@ const Store =  ({route, navigation}) => {
         createdAt: Date.now()
       }).then(() => {
         setIsSubmitting(false)
+        setstoreDetails('');
+        storeName('');
+        setStoreLocation('');
+        setPickedImagePath('');
         console.log('data updated');
       }) 
 
@@ -124,7 +134,7 @@ const Store =  ({route, navigation}) => {
       const name = filename.split('/').slice(0, -1).join('.');
       filename = name + Date.now() + '.' + extension;
   
-      const ref = await firebase.storage().ref().child(`storeims/${filename}`);
+      const ref = await Firebase.storage().ref().child(`storeims/${filename}`);
       const task = await ref.put(blob);
 
       try {
@@ -165,7 +175,7 @@ const Store =  ({route, navigation}) => {
 //add category Data
 function renderAddStore(){
   return(
-    <ScrollView style={styles.container}>       
+    <SafeAreaView style={styles.container}>       
          <TextInput
           style={styles.input}
           value={storeName}
@@ -175,7 +185,9 @@ function renderAddStore(){
           autoCapitalize={"none"}
       />
           <TextInput
-          style={styles.input}
+          multiline={true}
+          numberOfLines={8}
+          style={[styles.input,{borderRadius:5}]}
           value={storeDetails}
           placeholderTextColor="#fff"
           placeholder={"StoreDetails"}
@@ -190,7 +202,7 @@ function renderAddStore(){
           onChangeText={(text) => setStoreLocation(text)}
           autoCapitalize={"none"}
       />
-    </ScrollView>
+    </SafeAreaView>
   )
 }
 //Pick Category image
@@ -237,18 +249,21 @@ function renderstoreim(){
 
     return (
       <View style={styles.screen}>
-      {renderHeader()}     
-      {renderstoreim()}
-      {renderAddStore()}
-      <TouchableOpacity style ={styles.centered}
-      onPress={() => handleSubmit()}
-      >{submitting ?
-        <ActivityIndicator />
-        :
-        <Text style={styles.btnUpdate}>Submit</Text>
-              }
-       
-      </TouchableOpacity>
+      {renderHeader()} 
+      <ScrollView>
+        {renderstoreim()}
+        {renderAddStore()}
+        <TouchableOpacity style ={styles.centered}
+        onPress={() => handleSubmit()}
+        >{submitting ?
+          <ActivityIndicator color={COLORS.white} size='large'/>
+          :
+          <Text style={styles.btnUpdate}>Submit</Text>
+                }
+        
+        </TouchableOpacity> 
+       </ScrollView>    
+    
     </View>
     )
 }
@@ -323,7 +338,7 @@ storeTitle: {
   input: {
     width:SIZES.width*0.95,
     borderColor:COLORS.darkgrey,
-    borderWidth:0.1,
+    borderWidth:0.5,
     paddingHorizontal:SIZES.padding2,
     paddingVertical:10,
     borderRadius:10,
@@ -342,8 +357,8 @@ storeTitle: {
     paddingVertical:SIZES.padding2
   },
   btnUpdate:{
-    paddingHorizontal:SIZES.padding2,
-    paddingVertical:SIZES.padding2*0.5,
+    paddingHorizontal:SIZES.padding2*2.5,
+    paddingVertical:SIZES.padding2,
     color:'#fff',
     ...FONTS.h3,
     backgroundColor:COLORS.primary,

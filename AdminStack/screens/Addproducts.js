@@ -1,44 +1,104 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert } from 'react-native';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
-import { DataContext } from '../../Contexts/dataContext';
 import { COLORS, FONTS, SIZES } from '../../constants/Index';
 import "firebase/storage";
 import 'firebase/firestore';
 import Firebase from '../../firebaseConfig';
+import { AuthenticatedUserContext } from '../../AuthProvider/AuthProvider';
+import PickerCheckBox from 'react-native-picker-checkbox';
 
 const Products = ({route, navigation}) => {
-    const {Store:storeData, Category:cat} = React.useContext(DataContext);
-    
-  const [pickedImagePath, setPickedImagePath] = useState('');
+     
+  const [pickedImagePath, setPickedImagePath] = useState([]);
+  const [photos, setphotos] = useState([]);
   const [prodName, setProdName] = useState('');
   const [prodDetails, setProdDetails] = useState('');
   const [Price, setPrice] = useState('');
-  const [category, setCategory] = useState('')
+  const [category, setCategory] = useState([])
+  const [store, setStore] = useState([]);
   const [discount, setDiscount] = useState('');
-  const [store, setStore] = useState();
   const [transferred, setTransferred] = useState(0);
   const [uploading, setUploading] =useState(null);
   const [submitting, setIsSubmitting] =useState(false);
+  const [selectedValue, setSelectedValue] =  useState('');
 
- 
+  const {storeData, setStoreData, catData, setCatData} = useContext(AuthenticatedUserContext);
+  const [isLoading, setIsLoading] =React.useState(true);
+  
+  React.useEffect(() =>{
+    getCatData();
+    getStoreData();
+    const {params} = route;
+    if (params) {
+      const {photos} = params;
+      if (photos) setphotos(photos);
+      delete params.photos;}
+  }, [])
+
+  const getStoreData = async () => {
+    try{
+      const dataArr = [];
+        const response=Firebase.firestore().collection('Stores');
+        const data=await response.get();
+        data.docs.forEach(item=>{
+          const {storeName, storeDetails,storeLocation, storeimage} = item.data();
+          dataArr.push({
+            key: item.id,
+            storeName,
+            storeDetails,
+            storeLocation,
+            storeimage
+          });
+          setStoreData(dataArr)
+          setIsLoading(false)
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
+
+  const getCatData = async () => {
+    try{
+      const catArr = [];
+        const response=Firebase.firestore().collection('ProductCategories');
+        const data=await response.get();
+        data.docs.forEach(item=>{
+          const {catdetails, catname,catId, catimage} = item.data();
+          catArr.push({
+            key: catId,
+            catdetails,
+            catname,
+            catimage,
+          });
+          setCatData(catArr)
+          setIsLoading(false)
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
   const handleSubmit = async() => {
     setIsSubmitting(true)
     const productName = prodName
     const productDetails = prodDetails
     const productPrice= Price
     const productDiscount = discount
-
-    let imgUrl = await uploadImage();
+    await uploadImage();
       const dbh = Firebase.firestore();
-      dbh.collection("Products").doc(productName).set({
+      dbh.collection("Products").add({
         prodId: Date.now().toString(36) + Math.random().toString(36).substr(2) + productName,
         prodname: productName,
         proddetails : productDetails,
-        prodimage: [imgUrl],
+        prodStore: store,
+        prodcat: category,
         prodprice:productPrice,
+        productUnit:selectedValue,
         proddiscount:productDiscount,
+        prodimage: pickedImagePath,
         createdAt: Date.now()
       }).then(() => {
         setIsSubmitting(false)
@@ -47,6 +107,15 @@ const Products = ({route, navigation}) => {
 
   }
 
+
+  
+  function handlecatConfirm(CItems){  
+    setCategory(CItems); 
+  }
+  function handleStoreConfirm(SItems){
+    setStore(SItems);
+    
+  }
     // This function is triggered when the "Select an image" button pressed
     const showImagePicker = async () => {
         // Ask the user for the permission to access the media library 
@@ -63,7 +132,6 @@ const Products = ({route, navigation}) => {
         quality:0.7,
         aspect:[4,3],
         base64:false,
-        allowsEditing:true,
         allowsMultipleSelection:true
         
         }).then((result) => {
@@ -104,6 +172,7 @@ const Products = ({route, navigation}) => {
     // Explore the result
    
   }
+  
   const getPictureBlob = (uri) => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -121,35 +190,54 @@ const Products = ({route, navigation}) => {
 
   // here I am uploading the image to firebase storage
   const uploadImage = async () => {
-    let blob;
-    
-      setUploading(true);
-      blob = await getPictureBlob(pickedImagePath);
+    const promises = [];
+    photos.forEach( async (file) => {
+        let blob;
+      
+        setUploading(true);
+        blob = await getPictureBlob(file.uri);
 
-      const uploaduri = pickedImagePath;  
-      let filename = uploaduri.substring(uploaduri.lastIndexOf('/') + 1);
+       // const uploaduri = file;  
+      //  let filename = uploaduri.substring(uploaduri.lastIndexOf('/') + 1);
 
-      //add timestamp
-      const extension = filename.split('.').pop();
-      const name = filename.split('/').slice(0, -1).join('.');
-      filename = name + Date.now() + '.' + extension;
-  
-      const ref = await firebase.storage().ref().child(`catImages/${filename}`);
-      const task = await ref.put(blob);
+        //add timestamp
+      //  const extension = filename.split('.').pop();
+      //  const name = filename.split('/').slice(0, -1).join('.');
+       // filename = name + Date.now() + '.' + extension;
+       const metadata = {
+        contentType: file.type,
+      };
+      const time = Date.now();
+        const ref = await Firebase.storage().ref().child(`products/${file.name}`);
+        const task = await ref.put(blob, metadata);
+        promises.push(task);
+        console.log(task);
+        try {
+          
+        await task;
+        task.ref.getDownloadURL().then((image) =>{
+          setPickedImagePath(image);
+        })
+       // const url =  await task.ref.getDownloadURL(); 
+       // const uri = [JSON.parse(JSON.stringify({url})) ]      
+        setTransferred(0)
+        setUploading(false); 
+       // setPickedImagePath([...uri, uri]);
+        
+       // setPickedImagePath
+        alert("saved successfully");
+      } catch (e) {
+        alert(e);
+        console.log(e);
+        setUploading(false);
+      }
+    })
+    Promise.all(promises)
+    .then(() => alert('All files uploaded'))
+    .catch(err => console.log(err.code));
 
-      try {
-      await task;
-      const url =  await task.ref.getDownloadURL(); 
-      console.log(url);
-      setTransferred(0)
-      setUploading(false);
-      alert("saved successfully");  
-      return url
-    } catch (e) {
-      alert("Please Select a Photo First");
-      setUploading(false);
-    }
   };
+  console.log(pickedImagePath);
 
   //header
   function renderHeader(){
@@ -157,13 +245,13 @@ const Products = ({route, navigation}) => {
         <View style={styles.headerView}>
             <TouchableOpacity
              style={styles.backArrow}
-             onPress = {()=> navigation.back('prodstore')}
+             onPress = {()=> uploadImage()}
              >
                 <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
             </TouchableOpacity>
             <View style={styles.storeMainview}>
               <View style={styles.storeSubview}>
-                  <Text style={styles.storeTitle}>AddProductCategories</Text>
+                  <Text style={styles.storeTitle}>Add Products</Text>
               </View>
           </View>
           <TouchableOpacity>                
@@ -174,22 +262,25 @@ const Products = ({route, navigation}) => {
 }
 
 //add category Data
+
 function renderAddCategories(){
   return(
-    <SafeAreaView style={styles.container}> 
-         <Picker
-          selectedValue={store}
-          onValueChange={(value) => setStore(value)}
-          style={[styles.input,{backgroundColor:COLORS.white,color:COLORS.black}]}
-          mode="dropdown"
-          itemStyle={{ color:'red', fontWeight:'900', fontSize: 18, padding:30}}>
-          <Picker.Item label="Select Product Store" value="right" />
-          {storeData && storeData.map((items) =>{
-            return(
-              <Picker.Item key={items?.storeId} multiple={true} label={items?.storeName} value={items?.storeId} />
-            )
-          })}
-        </Picker>      
+    <SafeAreaView style={styles.container}>
+       <View style={styles.CheckBox}> 
+          <PickerCheckBox
+          data={storeData}
+          headerComponent={<Text style={{fontSize:25}} >Stores</Text>}
+          ConfirmButtonTitle='OK'
+          DescriptionField='storeName'
+          KeyField='key'
+          OnConfirm={(SItems) => handleStoreConfirm(SItems)}
+          placeholderSelectedItems    
+          placeholder='select Store'
+          arrowColor='#FFD740'
+          arrowSize={10}
+          placeholderSelectedItems ='$count selected item(s)'
+          /> 
+        </View>    
          <TextInput
           style={styles.input}
           value={prodName}
@@ -200,7 +291,7 @@ function renderAddCategories(){
       />
           <TextInput
               multiline={true}
-              numberOfLines={4}
+              numberOfLines={8}
           style={styles.input}
           value={prodDetails}
           placeholderTextColor="#fff"
@@ -208,15 +299,27 @@ function renderAddCategories(){
           onChangeText={(text) => setProdDetails(text)}
           autoCapitalize={"none"}
       />
-                <TextInput
-          style={styles.input}
+      <View style={styles.pricing}>
+        <TextInput
+          style={[styles.input,{width:SIZES.width*0.4}]}
           value={Price}
           placeholderTextColor="#fff"
           placeholder={"product Price"}
-          keyboardType={'numbers-and-punctuation'}
+          keyboardType={'number-pad'}
           onChangeText={(text) => setPrice(text)}
           autoCapitalize={"none"}
       />
+      <Text style={styles.label}>per</Text>
+      <TextInput
+          style={[styles.input,{width:SIZES.width*0.4}]}
+          value={selectedValue}
+          placeholderTextColor="#fff"
+          placeholder={"Unit eg 200g, 1kg"}
+          onChangeText={(text) => setSelectedValue(text)}
+          autoCapitalize={"none"}
+      />
+       
+      </View>
                 <TextInput
           style={styles.input}
           value={discount}
@@ -226,80 +329,129 @@ function renderAddCategories(){
           onChangeText={(text) => setDiscount(text)}
           autoCapitalize={"none"}
       />
-                 <Picker
-          selectedValue={category}
-          onValueChange={(value) => setCategory(value)}
-          style={[styles.input,{backgroundColor:COLORS.white,color:COLORS.black}]}
-          mode="dropdown"
-          itemStyle={{ color:'red', fontWeight:'900', fontSize: 18, padding:30}}>
-          <Picker.Item label="Select Product Store" value="right" />
-          {cat && cat.map((items) =>{
-            return(
-              <Picker.Item key={items?.catId} multiple={true} label={items?.catname} value={items?.catId} />
-            )
-          })}
-        </Picker>          
+      <View style={styles.CheckBox}>
+        <PickerCheckBox
+          data={catData}
+          headerComponent={<Text style={{fontSize:25}} >Available Categories</Text>}
+          ConfirmButtonTitle='OK'
+          DescriptionField='catname'
+          KeyField='key'
+          OnConfirm={(CItems) => handlecatConfirm(CItems)}    
+          placeholder='Select Product Category'
+          arrowColor='#FFD740'
+          arrowSize={15}
+          placeholderSelectedItems ='$count selected Category(s)'
+          /> 
+      </View>           
     </SafeAreaView>
   )
 }
+const renderImage = ({item}) => (
+  
+    <Image
+     style={styles.image}
+      source={{ uri: item.uri }}
+     
+    />
+  )
+
 //Pick Category image
 function renderCatImage(){
+
   return(
-    <View>
+    <>
+    
+      <View style={{ flex:1}}>
       <View style={styles.buttonContainer}>
-        <Text style={styles.label}>Category Image:</Text>
-        <TouchableOpacity
-          onPress={showImagePicker}
+         <Text style={[styles.label,{width: SIZES.width*0.35}]}>Add Product Image:</Text>
+      <TouchableOpacity
+           onPress={() =>navigation.navigate('ImageBrowser')}
         >
-          <Text style={styles.btbbtn}>Open Gallery</Text>
-        </TouchableOpacity>  
-        
-        <TouchableOpacity
-          onPress={openCamera}>
-             <Feather name='camera' size={38} color={COLORS.white}/>
-          </TouchableOpacity>
-        </View>
-      <View style={styles.imageContainer}>
-        {
-          pickedImagePath !== '' && (
-            <>
-          <Image
-            source={{ uri: pickedImagePath }}
-            style={styles.image}
-          />
-          <TouchableOpacity
-          style={styles.editPic }
-          onPress={openCamera}>
-             <FontAwesome name='camera' size={35} color={COLORS.white}/>
-          </TouchableOpacity></>)
-          
-        }
-        {uploading && (
-        <View>
-          <Text style={styles.label}>uploading...</Text>
-        </View>
-          )}
+          <Text style={styles.btbbtn}>OPEN IMAGE GALLERY</Text>
+        </TouchableOpacity>
+ 
+      </View> 
+      { photos !== '' &&(
+        <View style={{flexDirection:'row' ,width:SIZES.width*0.98, backgroundColor:COLORS.white}}>
+         <FlatList
+          horizontal
+          showshorizontalScrollIndicator={false}
+          data={photos}
+          renderItem={renderImage}
+          keyExtractor={item => `${item.name}`}         
+       
+        />
+        </View>)} 
       </View>
-    </View>
+   
+    </>
+       
+
+  //  <View>
+    //  <View style={styles.buttonContainer}>
+      //  <Text style={styles.label}>Category Image:</Text>
+        //<TouchableOpacity
+   //       onPress={showImagePicker}
+     //   >
+   //       <Text style={styles.btbbtn}>Open Gallery</Text>
+     //   </TouchableOpacity>  
+        
+   //     <TouchableOpacity
+     //     onPress={openCamera}>
+       //      <Feather name='camera' size={38} color={COLORS.white}/>
+    //      </TouchableOpacity>
+     //   </View>
+     // <View style={styles.imageContainer}>
+   //     {
+   //       pickedImagePath !== '' && (
+    //        <>
+    //      <Image
+  //          source={{ uri: pickedImagePath }}
+    //        style={styles.image}
+      //    />
+ //         <TouchableOpacity
+   //       style={styles.editPic }
+  //        onPress={openCamera}>
+   //          <FontAwesome name='camera' size={35} color={COLORS.white}/>
+//          </TouchableOpacity></>)
+          
+  //      }
+    //    {uploading && (
+      //  <View>
+        //  <Text style={styles.label}>uploading...</Text>
+      //  </View>
+   //       )}
+    //  </View>
+  //  </View>
   )
 }
-
+      if (isLoading) {
+        return (
+          <View style={{ backgroundColor:COLORS.darkblue, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <ActivityIndicator color={COLORS.white} size='large'/>
+            <Text style={{color:COLORS.white}}>Loading Please Wait...</Text>
+          </View>
+        );
+      }
     return (
       <View style={styles.screen}>
       {renderHeader()} 
+
+    
       <ScrollView>        
       {renderCatImage()}
-      {renderAddCategories()}
-        </ScrollView>    
-      <TouchableOpacity style ={styles.centered}
-      onPress={() => handleSubmit()}
-      >{submitting ?
-        <ActivityIndicator />
-        :
-        <Text style={styles.btnUpdate}>Submit</Text>
-              }
-       
-      </TouchableOpacity>
+          {renderAddCategories()}
+          <TouchableOpacity style ={styles.centered}
+          onPress={() => handleSubmit()}
+          >{submitting ?
+            <ActivityIndicator color={COLORS.white} size='large'/>
+            :
+            <Text style={styles.btnUpdate}>Submit</Text>
+                  }
+          
+          </TouchableOpacity>
+      </ScrollView>    
+     
     </View>
     )
 }
@@ -351,7 +503,7 @@ storeTitle: {
     flexDirection: 'row',
     paddingVertical: SIZES.padding2,
     paddingHorizontal:SIZES.padding2,
-    justifyContent:'space-between'
+    justifyContent:'space-around'
   },
   btbbtn: {
     borderRadius:10,
@@ -366,15 +518,18 @@ storeTitle: {
   },
   image: {
     alignSelf:'center',
-    borderRadius:100,
-    width: 180,
-    height: 150,
+    marginHorizontal:SIZES.padding2*0.2,
+    marginVertical:SIZES.padding2*0.5,
+    borderRadius:10,
+    padding:4,
+    width: 83,
+    height: 80,
     resizeMode: 'cover'
   },
   input: {
     width:SIZES.width*0.95,
     borderColor:COLORS.darkgrey,
-    borderWidth:0.1,
+    borderWidth:0.5,
     paddingHorizontal:SIZES.padding2,
     paddingVertical:10,
     borderRadius:10,
@@ -393,8 +548,10 @@ storeTitle: {
     paddingVertical:SIZES.padding2
   },
   btnUpdate:{
-    paddingHorizontal:SIZES.padding2,
-    paddingVertical:SIZES.padding2*0.5,
+    borderColor:COLORS.white,
+    borderWidth:2,
+    paddingHorizontal:SIZES.padding2*5,
+    paddingVertical:SIZES.padding2,
     color:'#fff',
     ...FONTS.h3,
     backgroundColor:COLORS.primary,
@@ -405,6 +562,18 @@ storeTitle: {
     alignSelf:'center',
     justifyContent:'center',
     top:60
+  },
+  pricing: {
+    flexDirection:'row',
+    justifyContent:'space-around',
+    alignItems:'center'
+  },
+  CheckBox: {
+    width: SIZES.width*0.95,
+    borderWidth:0.5,
+    borderColor:COLORS.darkgrey4,
+    borderRadius:10,
+    marginVertical:10
   }
   
 })
