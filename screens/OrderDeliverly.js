@@ -18,8 +18,7 @@ const OrderDeliverly = ({route, navigation})=> {
 const destination = {latitude: -3.14206, longitude: 39.14593};
 const GOOGLE_MAPS_APIKEY = 'AIzaSyCUfR1H5K2DBXaGvXGlezNG5h3wwGFU9fM';
   React.useEffect(() =>{
-      let{ Restaurant, currentLocation} = route.params;
-         
+      let{ Restaurant, currentLocation} = route.params;         
           SetRestaurant(Restaurant)
           SetCurrentLocation(currentLocation)
 
