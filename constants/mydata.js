@@ -6,6 +6,8 @@ const initialCurrentLocation= {
         longitude: 123.7836353424
     }
 }
+
+
 const categoryData = [
    { id: 1,
     name: "vegetables",

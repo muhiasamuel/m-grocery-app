@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import React, {  useContext, Component } from 'react';
+import useState from 'react-usestateref'
 import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert } from 'react-native';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
@@ -9,10 +10,388 @@ import Firebase from '../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../AuthProvider/AuthProvider';
 import PickerCheckBox from 'react-native-picker-checkbox';
 
+export default class Products extends Component {
+static contextType = AuthenticatedUserContext;
+
+  constructor (props) {
+    
+    super(props)
+    
+    this.state = {
+      photos: [],
+      pickedImagePath: null,
+      prodName:'',
+      prodDetails:'',
+      Price:'',
+      category:'',
+      store: '',
+      discount: '',
+      submitting:false,
+      selectedValue: '',
+      isLoading:false,
+    }
+  }
+  componentDidMount() {
+    this.getStoreData();
+    this.getCatData();
+   
+  }
+  componentWillUnmount() {
+    this.getStoreData();
+    this.getCatData();
+  }
+  componentDidUpdate() {
+    const {params} = this.props.route;
+    if (params) {
+      const {photos} = params;
+      if (photos) this.setState({photos});
+      delete params.photos;
+    }
+  }
+
+   getStoreData = async () => {
+    try{
+      const dataArr = [];
+        const response=Firebase.firestore().collection('Stores');
+        const data= await response.get();
+        data.docs.forEach(item=>{
+          const {storeName,storeId, storeDetails,storeLocation, storeimage} = item.data();
+          dataArr.push({
+            key: item.id,
+            storeId,
+            storeName,
+            storeDetails,
+            storeLocation,
+            storeimage
+          });
+          let {setStoreData} = this.context
+          setStoreData(dataArr)
+          this.setState({
+            isLoading:false
+          })
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
+
+
+  getCatData = async () => {
+    try{
+      const catArr = [];
+        const response=Firebase.firestore().collection('ProductCategories');
+        const data=await response.get();
+        data.docs.forEach(item=>{
+          const {catdetails, catname,catId, catimage} = item.data();
+          catArr.push({
+            key: item.id,
+            catdetails,
+            catId,
+            catname,
+            catimage,
+          });
+          let {setCatData} = this.context;
+          setCatData(catArr)
+          this.setState({
+            isLoading:false
+          })
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
+
+ handleSubmit = async() => {
+   this.setState({submitting: true})
+    const productName = this.state.prodname
+    const productDetails =  this.state.prodDetails
+    const productPrice=  this.state.Price
+    const productDiscount =  this.state.discount
+    const docId = Firebase.firestore().collection("Products").doc().id
+     
+        await Firebase.firestore().collection("Products").doc(docId).set({
+          prodId: Date.now().toString(36) + Math.random().toString(36).substr(2), 
+          prodname: productName,
+          proddetails : productDetails,
+          prodStoreid:  this.state.store,
+          prodcatid:  this.state.category,
+          prodprice:productPrice,
+          productUnit: this.state.selectedValue,
+          proddiscount:productDiscount,
+          createdAt: Date.now()
+        }).then(async() => {
+          this.uploadImage(docId)
+         
+          alert('data updated');
+        })    
+  }    
+  handlecatConfirm(CItems){  
+    CItems.map((d) =>{
+      console.log(d.key);
+      this.setState({
+        category:d.key
+      })
+    })
+  }
+  handleStoreConfirm(SItems){
+    SItems.map((d) =>{
+      console.log(d.key);
+      this.setState({
+        store:d.key
+      })
+    })    
+  }
+
+   getPictureBlob = (uri) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+  };
+
+
+
+ uploadImage = (docId) => {
+    const promises = [];
+    let refURL;
+    const updatedURL = [];  
+    this.state.photos.map( async (file, key) => {
+        let blob;
+        this.setState({
+          uploading:true
+        })
+        blob = await this.getPictureBlob(file.uri);
+
+       const metadata = {
+        contentType: file.type,
+      };
+        const ref = Firebase.storage().ref().child(`products/${file.name}`);
+        const task = await ref.put(blob, metadata);
+        promises.push(task)
+        try {      
+        const url =  await task.ref.getDownloadURL(); 
+        let testURL = { url }
+        refURL = { ...refURL, testURL, key:key }
+        updatedURL.push(testURL) 
+        this.setState({
+          uploading:false,
+            submitting:false
+        }) // setPickedImagePath     
+        console.log(updatedURL);
+        Firebase.firestore().collection('Products').doc(docId).set({
+          imageUrls:updatedURL
+        }, {merge: true});
+        alert("saved successfully");
+      } catch (e) {
+        alert(e);
+        console.log(e);
+         this.setState({
+          uploading:false,
+          submitting:false
+        }) 
+      }
+    })
+
+  };
+  
+  
+ renderHeader(){
+   
+    return(
+        <View style={styles.headerView}>
+            <TouchableOpacity
+             style={styles.backArrow}
+             onPress = {()=> this.uploadImage()}
+             >
+                <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
+            </TouchableOpacity>
+            <View style={styles.storeMainview}>
+              <View style={styles.storeSubview}>
+                  <Text style={styles.storeTitle}>Add Products</Text>
+              </View>
+          </View>
+          <TouchableOpacity>                
+                <MaterialCommunityIcons name= 'menu-swap-outline' size={27} color={COLORS.white}/>
+          </TouchableOpacity>
+        </View>
+    )
+}
+
+ renderAddCategories(storeData, catData){
+  return(
+    <SafeAreaView style={styles.container}>
+       <View style={styles.CheckBox}> 
+          <PickerCheckBox
+          data={storeData}
+          headerComponent={<Text style={{fontSize:25}} >Stores</Text>}
+          ConfirmButtonTitle='OK'
+          DescriptionField='storeName'
+          KeyField='key'
+          OnConfirm={(SItems) => this.handleStoreConfirm(SItems)}
+          placeholderSelectedItems    
+          placeholder='select Store'
+          arrowColor='#FFD740'
+          arrowSize={10}
+          placeholderSelectedItems ='$count selected item(s)'
+          /> 
+        </View>    
+         <TextInput
+          style={styles.input}
+          value={this.state.prodname}
+          placeholderTextColor="#fff"
+          placeholder={"Product Name"}
+          onChangeText={(text) => this.setState({prodname:text})}
+          autoCapitalize={"none"}
+      />
+          <TextInput
+              multiline={true}
+              numberOfLines={8}
+          style={styles.input}
+          value={this.state.prodDetails}
+          placeholderTextColor="#fff"
+          placeholder={"Product Details"}
+          onChangeText={(text) => this.setState({prodDetails:text})}
+          autoCapitalize={"none"}
+      />
+      <View style={styles.pricing}>
+        <TextInput
+          style={[styles.input,{width:SIZES.width*0.4}]}
+          value={this.state.Price}
+          placeholderTextColor="#fff"
+          placeholder={"product Price"}
+          keyboardType={'number-pad'}
+          onChangeText={(text) => this.setState({Price:text})}
+          autoCapitalize={"none"}
+      />
+      <Text style={styles.label}>per</Text>
+      <TextInput
+          style={[styles.input,{width:SIZES.width*0.4}]}
+          value={this.state.selectedValue}
+          placeholderTextColor="#fff"
+          placeholder={"Unit eg 200g, 1kg"}
+          onChangeText={(text) => this.setState({selectedValue:text})}
+          autoCapitalize={"none"}
+      />
+       
+      </View>
+                <TextInput
+          style={styles.input}
+          value={this.state.discount}
+          placeholderTextColor="#fff"
+          placeholder={"Add Discount"}
+          keyboardType={'number-pad'}
+          onChangeText={(text) => this.setState({discount:text})}
+          autoCapitalize={"none"}
+      />
+      <View style={styles.CheckBox}>
+        <PickerCheckBox
+          data={catData}
+          headerComponent={<Text style={{fontSize:25}} >Available Categories</Text>}
+          ConfirmButtonTitle='OK'
+          DescriptionField='catname'
+          KeyField='key'
+          OnConfirm={(CItems) => this.handlecatConfirm(CItems)}    
+          placeholder='Select Product Category'
+          arrowColor='#FFD740'
+          arrowSize={15}
+          placeholderSelectedItems ='$count selected Category(s)'
+          /> 
+      </View>           
+    </SafeAreaView>
+  )
+}
+
+ renderImage = ({item}) => (
+  
+  <Image
+   style={styles.image}
+    source={{ uri: item.uri }}
+   
+  />
+)
+
+ renderCatImage(){
+  const { navigation } = this.props;
+  return(
+    <>
+    
+      <View style={{ flex:1}}>
+      <View style={styles.buttonContainer}>
+         <Text style={[styles.label,{width: SIZES.width*0.35}]}>Add Product Image:</Text>
+      <TouchableOpacity
+           onPress={() =>navigation.navigate('ImageBrowser')}
+        >
+          <Text style={styles.btbbtn}>OPEN IMAGE GALLERY</Text>
+        </TouchableOpacity>
+ 
+      </View> 
+      { this.state.photos !== '' &&(
+        <View style={{flexDirection:'row' ,width:SIZES.width*0.98, backgroundColor:COLORS.white}}>
+         <FlatList
+          horizontal
+          showshorizontalScrollIndicator={false}
+          data={this.state.photos}
+          renderItem={this.renderImage}
+          keyExtractor={item => `${item.name}`}         
+       
+        />
+        </View>)} 
+      </View>
+   
+    </>      
+
+  )
+}
+
+  render() {
+    const {storeData, catData} = this.context;
+    
+    if (this.state.isLoading) {
+      return (
+        <View style={{ backgroundColor:COLORS.darkblue, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator color={COLORS.white} size='large'/>
+          <Text style={{color:COLORS.white}}>Loading Please Wait...</Text>
+        </View>
+      );
+    }
+    return (
+        <View style={styles.screen}>
+        {this.renderHeader()} 
+  
+      
+        <ScrollView>        
+        {this.renderCatImage()}
+            {this.renderAddCategories(storeData, catData)}
+            <TouchableOpacity style ={styles.centered}
+            onPress={() => this.handleSubmit()}
+            >{this.state.submitting ?
+              <ActivityIndicator color={COLORS.white} size='large'/>
+              :
+              <Text style={styles.btnUpdate}>Submit</Text>
+                    }
+            
+            </TouchableOpacity>
+        </ScrollView>    
+       
+      </View>
+    )
+  }
+}
+/*
 const Products = ({route, navigation}) => {
      
   const [pickedImagePath, setPickedImagePath] = useState([]);
-  const [photos, setphotos] = useState([]);
+  const [photos, setphotos, photosref] = useState([]);
   const [prodName, setProdName] = useState('');
   const [prodDetails, setProdDetails] = useState('');
   const [Price, setPrice] = useState('');
@@ -34,8 +413,10 @@ const Products = ({route, navigation}) => {
     if (params) {
       const {photos} = params;
       if (photos) setphotos(photos);
-      delete params.photos;}
-  }, [])
+      delete params.photos}
+ 
+  },[])
+
 
   const getStoreData = async () => {
     try{
@@ -43,9 +424,10 @@ const Products = ({route, navigation}) => {
         const response=Firebase.firestore().collection('Stores');
         const data=await response.get();
         data.docs.forEach(item=>{
-          const {storeName, storeDetails,storeLocation, storeimage} = item.data();
+          const {storeName,storeId, storeDetails,storeLocation, storeimage} = item.data();
           dataArr.push({
             key: item.id,
+            storeId,
             storeName,
             storeDetails,
             storeLocation,
@@ -110,10 +492,12 @@ const Products = ({route, navigation}) => {
 
   
   function handlecatConfirm(CItems){  
-    setCategory(CItems); 
+    const obj = Object.assign({}, CItems);
+    setCategory(obj); 
   }
   function handleStoreConfirm(SItems){
-    setStore(SItems);
+    const obj = Object.assign({}, SItems);
+    setStore(obj);
     
   }
     // This function is triggered when the "Select an image" button pressed
@@ -188,6 +572,7 @@ const Products = ({route, navigation}) => {
     });
   };
 
+
   // here I am uploading the image to firebase storage
   const uploadImage = async () => {
     const promises = [];
@@ -197,13 +582,6 @@ const Products = ({route, navigation}) => {
         setUploading(true);
         blob = await getPictureBlob(file.uri);
 
-       // const uploaduri = file;  
-      //  let filename = uploaduri.substring(uploaduri.lastIndexOf('/') + 1);
-
-        //add timestamp
-      //  const extension = filename.split('.').pop();
-      //  const name = filename.split('/').slice(0, -1).join('.');
-       // filename = name + Date.now() + '.' + extension;
        const metadata = {
         contentType: file.type,
       };
@@ -211,18 +589,14 @@ const Products = ({route, navigation}) => {
         const ref = await Firebase.storage().ref().child(`products/${file.name}`);
         const task = await ref.put(blob, metadata);
         promises.push(task);
-        console.log(task);
-        try {
-          
+        try {          
         await task;
-        task.ref.getDownloadURL().then((image) =>{
-          setPickedImagePath(image);
-        })
-       // const url =  await task.ref.getDownloadURL(); 
-       // const uri = [JSON.parse(JSON.stringify({url})) ]      
+        const url =  await task.ref.getDownloadURL(); 
+        const uri =JSON.parse(JSON.stringify({url}))      
         setTransferred(0)
         setUploading(false); 
-       // setPickedImagePath([...uri, uri]);
+        let urlarray=[];       
+        setPickedImagePath( urlarray.push(url));
         
        // setPickedImagePath
         alert("saved successfully");
@@ -384,45 +758,8 @@ function renderCatImage(){
         </View>)} 
       </View>
    
-    </>
-       
+    </>      
 
-  //  <View>
-    //  <View style={styles.buttonContainer}>
-      //  <Text style={styles.label}>Category Image:</Text>
-        //<TouchableOpacity
-   //       onPress={showImagePicker}
-     //   >
-   //       <Text style={styles.btbbtn}>Open Gallery</Text>
-     //   </TouchableOpacity>  
-        
-   //     <TouchableOpacity
-     //     onPress={openCamera}>
-       //      <Feather name='camera' size={38} color={COLORS.white}/>
-    //      </TouchableOpacity>
-     //   </View>
-     // <View style={styles.imageContainer}>
-   //     {
-   //       pickedImagePath !== '' && (
-    //        <>
-    //      <Image
-  //          source={{ uri: pickedImagePath }}
-    //        style={styles.image}
-      //    />
- //         <TouchableOpacity
-   //       style={styles.editPic }
-  //        onPress={openCamera}>
-   //          <FontAwesome name='camera' size={35} color={COLORS.white}/>
-//          </TouchableOpacity></>)
-          
-  //      }
-    //    {uploading && (
-      //  <View>
-        //  <Text style={styles.label}>uploading...</Text>
-      //  </View>
-   //       )}
-    //  </View>
-  //  </View>
   )
 }
       if (isLoading) {
@@ -456,7 +793,7 @@ function renderCatImage(){
     )
 }
 
-export default Products
+export default Products*/
 
 const styles = StyleSheet.create({
   screen: {

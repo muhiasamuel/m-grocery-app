@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, FONTS, SIZES } from '../../constants/Index';
@@ -25,15 +25,15 @@ const Store =  ({route, navigation}) => {
 
   const handleSubmit = async() => {
     setIsSubmitting(true)
-    const StoreName = storeName
+    const Storename = storeName
     const StoreDetails = storeDetails
     const StoreLocation = location
 
     let imgUrl = await uploadImage();
       const dbh = Firebase.firestore();
-      dbh.collection("Stores").doc(StoreName).set({
+      dbh.collection("Stores").add({
         storeId: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        storeName: StoreName,
+        storeName: Storename,
         storeDetails : StoreDetails,
         storeLocation:StoreLocation,
         storeimage: imgUrl,
@@ -41,10 +41,10 @@ const Store =  ({route, navigation}) => {
       }).then(() => {
         setIsSubmitting(false)
         setstoreDetails('');
-        storeName('');
+        setstoreName('');
         setStoreLocation('');
         setPickedImagePath('');
-        console.log('data updated');
+        Alert.alert('data updated');
       }) 
 
   }
@@ -122,6 +122,7 @@ const Store =  ({route, navigation}) => {
   // here I am uploading the image to firebase storage
   const uploadImage = async () => {
     let blob;
+    
     
       setUploading(true);
       blob = await getPictureBlob(pickedImagePath);

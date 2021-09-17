@@ -4,21 +4,32 @@ import { Animated, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet,
 import { AddProduct, BasketCount, filtredOrderPrds, ProductQty, RemoveAllItem, RemoveProduct, TotalOrder } from '../reducers/Actions';
 import { COLORS, FONTS,SIZES } from '../constants/Index'
 import store from '../reducers/store';
-import { getProductbyId, getproductsByIds } from '../constants/DataApi';
+import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
 // create a component
 
 const myOrderList = ({route, navigation}) => {
+    const {Products} = React.useContext(AuthenticatedUserContext);
     const [myorderItems, setmyItems] = React.useState([]); 
     const [CurrentBasketState, SetCurrentBasketState ] = React.useState(store.getState());
     const [orderDetails, SetOrderDetails] = React.useState([]) 
+    const [productCount,setProductCount] = React.useState();
     const [basketItem,setBasketItem] = React.useState();
     React.useEffect(() =>{ 
         const prods = CurrentBasketState?.orderItems.map(data=>{
            SetOrderDetails(CurrentBasketState?.orderItems)
             return getproductsByIds(data.productId)[0];
         })
+        
         setmyItems(prods) 
     },[])
+    console.log(myorderItems);
+   function getproductsByIds(id) {
+        let prods = Products.filter(a =>a.key == id)
+        if (prods.length > 0) {
+            return prods;  
+        }
+        return ""
+    }
     console.log(orderDetails);
     function AddOrder(id, price) {
         store.dispatch(AddProduct(id, price))
@@ -102,19 +113,19 @@ const myOrderList = ({route, navigation}) => {
           <View underlayColor='rgb(122, 22, 65)'       
           >
             <View style={styles.bodycontainer}>
-              <Image style={styles.bodyphoto} source={item.photo[0]} />
+              <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
               <View>
-                <Text style={[styles.bodytitle,{color: COLORS.darkgrey4, width:SIZES.width*0.40}]}>{item.name}</Text>
+                <Text style={[styles.bodytitle,{color: COLORS.darkgrey4, width:SIZES.width*0.35}]}>{item?.prodname}</Text>
                 
                 <Text style={[styles.bodycategory,
                     {color:COLORS.white,padding:5, }]}>
-                        {item.price[0][0]}ksh / {item.price[0][1]}
+                        ksh {item?.prodprice} / {item?.productUnit}
                 </Text>
                 <View style={styles.OrderIncrementView}>
                     <TouchableOpacity
                         style={[styles.OrderIncrement,{borderTopLeftRadius:25,
                         borderBottomLeftRadius:25}]}
-                        onPress = {() =>  RemoveOrder(item?.id,item?.price[0][0])} >
+                        onPress = {() =>  RemoveOrder(item?.key,item?.prodprice)} >
                         <Text style={{...FONTS.body1}}>
                             <FontAwesome name='minus-circle' size={20} color={COLORS.black}/>    
                         </Text>
@@ -128,7 +139,7 @@ const myOrderList = ({route, navigation}) => {
                     
                     <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
                             borderBottomRightRadius:25}]}
-                            onPress = {() =>  AddOrder(item?.id,item?.price[0][0])} >
+                            onPress = {() =>  AddOrder(item?.key,item?.prodprice)} >
                         <Text style={{...FONTS.body1}}>
                             <FontAwesome name='plus-circle' size={20} color={COLORS.black}/>  
                         </Text>                    
@@ -140,7 +151,7 @@ const myOrderList = ({route, navigation}) => {
               <Text style={[styles.btntext,]}> ksh </Text>
                 <TouchableOpacity
                         style={[styles.btnContinue,{backgroundColor:'rgb(250,170,20)'}]}
-                        onPress={() => removeAll(item?.id)}>
+                        onPress={() => removeAll(item?.key)}>
                         <Text style={styles.btntext}>Reset</Text>
                   </TouchableOpacity>
                
@@ -158,7 +169,7 @@ const myOrderList = ({route, navigation}) => {
             showsVerticalScrollIndicator={false}
             data={myorderItems}
             renderItem={renderItem}
-            keyExtractor={item => `${item.id}`}
+            keyExtractor={item => `${item?.key}`}
           />
         </View>
         )}

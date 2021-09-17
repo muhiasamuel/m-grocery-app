@@ -5,6 +5,7 @@ import { StatusBar, StyleSheet } from 'react-native'
 import { Storeitems, productDetails,  customerDetails } from '../../screens';
 import Tabs from '../../Navigation/tabs';
 import myOrderList from '../../screens/myOrderList';
+import MyComponent from '../../screens/test';
 const Stack = createStackNavigator();
 const ScreensContainer = () => { 
 
@@ -24,6 +25,7 @@ const ScreensContainer = () => {
           <Stack.Screen name = "myOrderList" component={myOrderList}/>
           <Stack.Screen name = "customerDetails" component={customerDetails}/>
           <Stack.Screen name = "userinfo" component={Tabs}/>
+          <Stack.Screen name = "test" component={MyComponent}/>
 
         </Stack.Navigator>
       </NavigationContainer>

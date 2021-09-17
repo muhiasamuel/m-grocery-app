@@ -2,142 +2,53 @@ import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ion
 import React from 'react'
 import { Animated, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text,TouchableHighlight, TouchableOpacity, View, Pressable,Alert } from 'react-native'
 import { RecipeCard } from '../constants/AppStyles'
-import { getProductbyCategory,getCategoryById, getproductsByIds, getProductsbyStore, getStoreCategories } from '../constants/DataApi'
+import { getProductbyCategory, getproductsByIds, getProductsbyStore, getStoreCategories } from '../constants/DataApi'
 import store from '../reducers/store';
 import { COLORS, FONTS, images, SIZES } from '../constants/Index'
 import { items, categoryData } from '../constants/mydata'
-import Firebase from '../firebaseConfig';
-import "firebase/storage";
-import 'firebase/firestore';
-import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
+import Categories from './categories'
 const Storeitems = ({route, navigation}) => {
-    const {Products, setProducts,catData, setCatData, storeData, setStoreData} = React.useContext(AuthenticatedUserContext);
 
     const scrollX = new Animated.Value(0);
     const [Store,SetStore] = React.useState(null)
-    const [storeCatsIds,setStoreCatIds] = React.useState(null)
-    const [StoreProducts,SetStoreProducts] = React.useState(null)
     const [storecategories,SetStoreCategories] = React.useState([]);
     const [storeItems,SetstoreItems] = React.useState();
     const [basketState,setBasketState] = React.useState([]);
     const [selectedCategory, setSelectedCategory ] = React.useState(null)
     React.useEffect(() =>{
-        let {item} = route.params;
-        SetStore(item); 
-        getProductByStoreData(item.key);       
-        getProductsData();
-        getStoreData();
-        getCatData();
-               
+        let{item} = route.params;
+        SetStore(item)
+        setBasketState(store.getState())
+        const categoryId = getStoreCategories(item.id)
+       const catsArray =  categoryId.map(a=>{
+          return getCategoryById(a)[0]
+        })
+        SetStoreCategories(catsArray);
+              
     },[])
-    const getProductsData = async () => {
-        try{
-          const dataArr = [];
-        
-            const response=Firebase.firestore().collection('Products');
-            const data=await response.get();
-            data.docs.forEach(item=>{
-              const {prodname, proddetails,prodprice, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
-              dataArr.push({
-               key: item.id,
-                prodname,
-                proddetails,
-                prodprice,
-                imageUrls,
-                proddiscount,
-                prodStoreid,
-                prodcatid,
-                prodId,
-                productUnit
-              });
-                setProducts(dataArr)
-                          
-                
-            })
-        }
-        catch(e){
-          console.log(e);
-        }
-      }
-   const  getStoreData = async () => {
-        try{
-          const dataArr = [];
-            const response=Firebase.firestore().collection('Stores');
-            const data= await response.get();
-            data.docs.forEach(item=>{
-              const {storeName,storeId, storeDetails,storeLocation, storeimage} = item.data();
-              dataArr.push({
-                key: item.id,
-                storeId,
-                storeName,
-                storeDetails,
-                storeLocation,
-                storeimage
-              });
-              setStoreData(dataArr)
-            })
-        }
-        catch(e){
-          console.log(e);
-        }
-      }   
-    
-     const getCatData = async () => {
-        try{
-          const catArr = [];
-            const response=Firebase.firestore().collection('ProductCategories');
-            const data=await response.get();
-            data.docs.forEach(item=>{
-              const {catdetails, catname,catId, catimage} = item.data();
-              catArr.push({
-                key: item.id,
-                catdetails,
-                catId,
-                catname,
-                catimage,
-              });
-              setCatData(catArr)
-            })
-        }
-        catch(e){
-          console.log(e);
-        }
-      }
-      function getProductByStoreData(id){
-          let storeProducts = Products.filter(a => a.prodStoreid == id)
-          if (storeProducts.length > 0) {
-            SetStoreProducts(storeProducts);
-          const cats = storeProducts.map(d =>{
-               return getCategoryByIds(`${d.prodcatid}`)[0] 
-            }) 
-            const uniq = [ ...new Set(cats ) ];             
-            SetStoreCategories(uniq) 
-            }
-          return "";
-      }
-    function getCategoryByIds(id) {
-        let category = catData.filter(a =>a.key == id) 
-            
+    function getCategoryById(id) {
+        let category = categoryData.filter(a =>a.id == id)
         if (category.length > 0) {
-          return category;           
+          return category;  
         }
         return ""
     }
-     function getProductbyCategory(categoryId){
-        const productsArray = []
-        StoreProducts.map(data =>{
-            if (data.prodcatid == categoryId) {
-                productsArray.push(data);           
-            }  
-            
-        });
-        return productsArray;
-        
-    }
     function onselectCategory(category) {
         //filter data
-        const catsProdsids = getProductbyCategory(category.key)
-        SetstoreItems(catsProdsids);
+        let Storeitems = getProductsbyStore(Store.id)
+        const catsProdsids = getProductbyCategory(category.id)
+        const catsProds = catsProdsids.map(data=>{
+            return getproductsByIds(data)[0].id
+        })
+        const prodsIds= Storeitems.map(data =>{
+            return getproductsByIds(data)[0]
+        })
+        let filtered = prodsIds.filter(data =>(
+            catsProds.includes(data.id)
+        ))
+        SetstoreItems(filtered);
+        console.log(storeItems);
+        
         setSelectedCategory(category)
     }
  
@@ -151,7 +62,7 @@ const Storeitems = ({route, navigation}) => {
                 </TouchableOpacity>
                 <View style={styles.storeMainview}>
                   <View style={styles.storeSubview}>
-                      <Text style={styles.storeTitle}>{Store?.storeName} stores</Text>
+                      <Text style={styles.storeTitle}>{Store?.name} stores</Text>
                   </View>
               </View>
               <TouchableOpacity
@@ -176,12 +87,12 @@ const Storeitems = ({route, navigation}) => {
         })}
         >
           <View style={styles.bodycontainer}>
-            <Image style={styles.bodyphoto} source = {{uri: item?.imageUrls[0].url}} />
-            <Text style={[styles.bodytitle,{color: COLORS.darkgrey4}]}>{item?.prodname}</Text>
+            <Image style={styles.bodyphoto} source={item.photo[0]} />
+            <Text style={[styles.bodytitle,{color: COLORS.darkgrey4}]}>{item.name}</Text>
            
             <Text style={[styles.bodycategory,
                 {color:COLORS.white,padding:5, backgroundColor:COLORS.darkgrey}]}>
-                    {item?.prodprice} ksh / {item?.productUnit}
+                    {item.price[0][0]}ksh / {item.price[0][1]}
             </Text>
           </View>
         </TouchableOpacity>
@@ -193,7 +104,7 @@ const Storeitems = ({route, navigation}) => {
           numColumns={2}
           data={storeItems}
           renderItem={renderCategories}
-          keyExtractor={item => `${item.key}`}
+          keyExtractor={item => `${item.id}`}
           contentContainerStyle={{
             marginBottom:30,
             paddingBottom:185,
@@ -207,14 +118,11 @@ const Storeitems = ({route, navigation}) => {
                    onPress = {() => onselectCategory(item)}>
                     <View style={styles.bodycontainer}>
                         <Image
-                           source = {{uri: item?.catimage}}
+                           source = {item.icon}
                            style={styles.bodyphoto}/>
                     
                     <Text style={[styles.bodytitle,{color: COLORS.darkgrey4}]}>
-                        {item?.catname}
-                    </Text>
-                    <Text style={[styles.bodytitle,{color: COLORS.darkgrey4,bottom:5}]}>
-                        {item?.catdetails}
+                        {item.name}
                     </Text>
                     </View>
                 </TouchableOpacity>         
@@ -240,16 +148,16 @@ const Storeitems = ({route, navigation}) => {
             return(
                 <TouchableOpacity
                    style={[styles.category,
-                   {backgroundColor:(selectedCategory?.catId !=item.catId ? 'rgb(245,240,255)': COLORS.primary),...styles.shandow }]}
+                   {backgroundColor:(selectedCategory?.id !=item.id ? 'rgb(245,240,255)': COLORS.primary),...styles.shandow }]}
                    onPress = {() => onselectCategory(item)}>
                     <View style={styles.categoryView}>
                         <Image
-                           source = {{uri: item?.catimage}}
+                           source = {item.icon}
                            resizeMode="cover"
                            style={styles.categoryIMG}/>
                     </View>
-                    <Text style={[styles.categoryName,{color:(selectedCategory?.catId !=item.catId ?  COLORS.black: COLORS.white),}]}>
-                        {item?.catname}
+                    <Text style={[styles.categoryName,{color:(selectedCategory?.id !=item.id ?  COLORS.black: COLORS.white),}]}>
+                        {item.name}
                     </Text>
                 </TouchableOpacity>         
             )}
@@ -259,7 +167,7 @@ const Storeitems = ({route, navigation}) => {
                    data={storecategories}
                    horizontal
                    showsHorizontalScrollIndicator={false}
-                   keyExtractor={item => `${item.catId}`}
+                   keyExtractor={item => `${item.id}`}
                    renderItem={renderItem}
                    contentContainerStyle={{paddingVertical:SIZES.padding * 0.5}}
                 />
@@ -268,13 +176,12 @@ const Storeitems = ({route, navigation}) => {
     }
    
     return (
-        <SafeAreaView style={styles.Container}>      
+        <SafeAreaView style={styles.Container}>
             {selectedCategory !== null ?
                 <View>
                     {renderHeader()}
                     {renderMainCategories()}
-                    {renderCats()}          
-                   
+                    {renderCats()}
                 </View>
                 :
                 <View>
@@ -283,7 +190,7 @@ const Storeitems = ({route, navigation}) => {
                    {renderCatsvertically()}
                 </View>
             }         
-       
+            
             
         </SafeAreaView>
     )

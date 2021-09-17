@@ -5,11 +5,10 @@ import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplet
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import store from '../reducers/store';
 import { COLORS, FONTS, SIZES } from '../constants/Index';
-import { AuthContext } from '../AuthProvider/AuthProvider';
 
 const customerDetails = () => {
 
-  const {UserToken, userName:name, Email:usermail} = React.useContext(AuthContext);
+  const { user} = React.useContext(AuthenticatedUserContext);
   const [CustomerEmail, setCustomerEmail] = React.useState(Email);
   const [CustomerName, setCustomerName] = React.useState(name);
   const [CustomerPhoneNo, setCustomerPhoneNo] = React.useState('');

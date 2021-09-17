@@ -1,7 +1,10 @@
 import React from 'react'
 import { View, Text } from 'react-native'
+import Firebase from '../firebaseConfig';
+import "firebase/storage";
+import 'firebase/firestore';
 import { categoryData, restaurantData, products } from './mydata';
-
+import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
 //getting a category based on the id
 export function  getCategoryById(categoryId){
     let category;
@@ -51,6 +54,7 @@ export function getProductbyCategory(categoryId){
 
 //getting products in a store
 
+
 export function getProductsbyStore(storeId) {
     let products;
     restaurantData.map(data => {
@@ -87,3 +91,39 @@ export function getProductsbyStore(storeId) {
     }
     return ""
 }
+
+export function getProductByStoreData(id){
+  
+  let storeProducts = Products.filter(a => a.prodStoreid == id)
+  if (storeProducts.length > 0) {
+    return storeProducts
+  }
+  return "";
+}
+
+export function getcatStoreData() {
+  
+  getCatData = async () => {
+    try{
+      const catArr = [];
+        const response=Firebase.firestore().collection('ProductCategories');
+        const data=await response.get();
+        data.docs.forEach(item=>{
+          const {catdetails, catname,catId, catimage} = item.data();
+          catArr.push({
+            key: item.id,
+            catdetails,
+            catId,
+            catname,
+            catimage,
+          });          
+          setCatData(catArr)  
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
+} 
+
+

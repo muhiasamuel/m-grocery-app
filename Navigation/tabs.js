@@ -15,14 +15,14 @@ const TabBarCustomButton = ({ accessibilityState, children,onPress}) =>{
         return(
          <View style={{flex: 1, alignItems:'center'}}>
              <View style={{flexDirection:'row', position: 'absolute', top:0}}>
-                 <View style={{flex:1, backgroundColor:COLORS.white}}></View>
-                <Svg height={75} width={60} viewBox="0 0 75 60">
+                 <View style={{flex:1, backgroundColor:COLORS.backgroundColor1}}></View>
+                <Svg height={80} width={80} viewBox="0 0 75 50">
                     <Path 
                         d="M75.2 0v61H0V0c4.1 0 7.4 3.1 7.9 7.1C10 21.7 22.5 33 37.7 33c15.2 0 27.7-11.3 29.7-25.9.5-4 3.9-7.1 7.9-7.1h-.1z"
-                        fill={COLORS.white}
+                        fill={COLORS.backgroundColor1}
                     />
                 </Svg>
-                <View style= {{flex:1, backgroundColor: COLORS.white}}></View>
+                <View style= {{flex:1, backgroundColor: COLORS.backgroundColor1}}></View>
              </View>
                  <TouchableOpacity
                     style={{
@@ -47,7 +47,7 @@ const TabBarCustomButton = ({ accessibilityState, children,onPress}) =>{
             style={{
                 flex:1,
                 height:60,
-                backgroundColor:COLORS.white
+                backgroundColor:COLORS.backgroundColor1
             }}
             activeOpacity={1} 
             onPress={onPress}>
@@ -74,7 +74,7 @@ const tabs = () => {
            options={{
             headerShown:false,
                tabBarIcon: ({focused}) =>(
-                 <MaterialCommunityIcons name ="home-circle" size={28} color ={focused ?COLORS.primary: COLORS.black }/>
+                 <MaterialCommunityIcons name ="home-circle" size={28} color ={focused ?COLORS.primary: COLORS.darkgrey4 }/>
                ),
                tabBarButton: (props) => (
                    <TabBarCustomButton
@@ -89,7 +89,7 @@ const tabs = () => {
            options={{
             headerShown:false,
                tabBarIcon: ({focused}) =>(
-                 <FontAwesome name = "heart" size={25} color ={focused ?COLORS.primary: COLORS.black }/>
+                 <FontAwesome name = "heart" size={25} color ={focused ?COLORS.primary: COLORS.darkgrey4 }/>
                ),
                tabBarButton: (props) => (
                 <TabBarCustomButton
@@ -103,7 +103,7 @@ const tabs = () => {
            options={{
                headerShown:false,
                tabBarIcon: ({focused}) =>(
-                 <AntDesign name = "user" size={25} color ={focused ?COLORS.primary: COLORS.black }/>
+                 <AntDesign name = "user" size={25} color ={focused ?COLORS.primary: COLORS.darkgrey4 }/>
                ),
                tabBarButton: (props) => (
                 <TabBarCustomButton

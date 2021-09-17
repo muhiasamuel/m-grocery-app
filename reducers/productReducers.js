@@ -56,7 +56,7 @@ function productReducers( state=initialState, action){
             let total = state.orderItems.reduce((a,b) => a + (b.total || 0), 0)
             return{ 
                 ...state,
-                total:total.toFixed(2)
+                total:total
              } 
         case Action.OrderQuantity:
             let orderItem = state.orderItems.filter(a => a.productId == action.payload.productId)

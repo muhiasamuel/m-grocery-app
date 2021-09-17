@@ -5,6 +5,7 @@ import { Animated, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet,
 import { AddProduct, BasketCount, filtredOrderPrds, ProductQty, RemoveAllItem, RemoveProduct, TotalOrder } from '../reducers/Actions';
 import { COLORS, FONTS,SIZES } from '../constants/Index'
 import store from '../reducers/store';
+import { useTheme } from 'react-native-paper';
 // create a component
 const productDetails =  ({route, navigation}) => {
     const scrollX = new Animated.Value(0);
@@ -104,7 +105,7 @@ const productDetails =  ({route, navigation}) => {
                 </TouchableOpacity>
                 <View style={styles.storeMainview}>
                   <View style={styles.storeSubview}>
-                      <Text style={styles.storeTitle}>{product?.name}</Text>
+                      <Text style={styles.storeTitle}>{product?.prodname}</Text>
                   </View>
               </View>
               <TouchableOpacity
@@ -137,7 +138,7 @@ const productDetails =  ({route, navigation}) => {
               <View style={styles.centeredView}>
                 <View style={styles.modalView}>
                 <Text style={[styles.Titles,{marginBottom:10,alignSelf:'center'}]}>Cart Details:</Text>
-                  <Text style={styles.modalText}>Quantity Variation: {product?.price[0][1]}</Text>
+                  <Text style={styles.modalText}>Quantity Variation: {product?.prodprice}</Text>
                   <View style={styles.centered} >                    
                        <Text style={styles.textStyle}>Unit Price: ksh {basketItem?.price}</Text>
                       <Text style={styles.textStyle}style={styles.textStyle}>Total Price: Ksh {basketItem?.total}</Text>
@@ -149,7 +150,7 @@ const productDetails =  ({route, navigation}) => {
                             <TouchableOpacity
                                 style={[styles.OrderIncrement,{borderTopLeftRadius:25,
                                   borderBottomLeftRadius:25}]}
-                                onPress = {() =>  RemoveOrder(product?.id,product?.price[0][0])}
+                                onPress = {() =>  RemoveOrder(product?.key,product?.prodprice)}
                             >
                                 <Text style={{...FONTS.body1}}>
                                 <FontAwesome name='minus-circle' size={20} color={COLORS.black}/>    
@@ -161,7 +162,7 @@ const productDetails =  ({route, navigation}) => {
                             </View>
                             <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
                                     borderBottomRightRadius:25}]}
-                                onPress = {() =>  AddOrder(product?.id,product?.price[0][0])}
+                                onPress = {() =>  AddOrder(product?.key,product?.prodprice)}
                             >
                                 <Text style={{...FONTS.body1}}>
                                   <FontAwesome name='plus-circle' size={20} color={COLORS.black}/>  
@@ -178,7 +179,7 @@ const productDetails =  ({route, navigation}) => {
 
                   <TouchableOpacity
                     style={[styles.btn, styles.buttonReset]}
-                    onPress={() => removeAll(product?.id)}
+                    onPress={() => removeAll(product?.key)}
                   >
                     <Text style={styles.textStyle}>Reset</Text>
                   </TouchableOpacity>
@@ -202,16 +203,17 @@ const productDetails =  ({route, navigation}) => {
                 {nativeEvent: {contentOffset:{x : scrollX}}}
             ], {useNativeDriver: false})}>
                 {
-                product?.photo.map((item, index) =>(
-                    <View
-                        key={`photo-${index}`}
+                product?.imageUrls.map((item, index) =>(
+                  
+                    <View                    
+                        key={`imageUrls-${index}`}
                         style={{alignItems:'center'}}>
                         <View style={{
                             height: SIZES.height * 0.35,
                             backgroundColor:'rgb(13,12,9)'
                             }}>
                             <Image
-                        source={item}
+                        source={{uri: item.url}}
                         resizeMode='cover'
                         style={styles.productIMGS}/>
                         </View>
@@ -222,23 +224,19 @@ const productDetails =  ({route, navigation}) => {
             </Animated.ScrollView>
             {renderDots()}
             <View style={styles.productInfoView}>
-                    <Text style={styles.productName}> {product?.name}</Text>
+                    <Text style={styles.productName}> {product?.prodname}</Text>
                     <View style={styles.productPricingView}>
                     <Text style={styles.Titles}>Product Pricing</Text>
-                    {
-                        product?.price.map((item, index) =>(
                             <View
-                            key={`price-${index}`}
                             style={styles.centered}>
-                                    <Text style={[styles.SmallText, {flexDirection:'row'}]}>Ksh {item[0]} / {item[1]} </Text>   
+                                    <Text style={[styles.SmallText, {flexDirection:'row'}]}>Ksh {product?.prodprice} / {product?.productUnit} </Text>   
                             </View>
-                        ))
-                    }
+                     
                     
                     </View>
                     <Text style={[styles.Titles,{marginTop:15,}]}>Product Specifications</Text>
                     <View style={styles.prodDescriptionView}>                  
-                        <Text style={styles.SmallText}> {product?.description} </Text>   
+                        <Text style={styles.SmallText}> {product?.proddatails} </Text>   
                     </View>
                 </View>
                
@@ -252,7 +250,7 @@ const productDetails =  ({route, navigation}) => {
             <View style={styles.DotmainView}>
                 <View style={styles.DotsView}>
                     {
-                        product?.photo.map((item, index) =>{
+                        product?.imageUrls.map((item, index) =>{
                           const opacity = dotsPosition.interpolate({
                               inputRange:[index-1, index, index+1],
                               outputRange:[0.9, 1, 0.9],

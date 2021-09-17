@@ -12,8 +12,6 @@ const Appscreens = () => {
     const { user, } = useContext(AuthenticatedUserContext);
     const [isLoading, setIsLoading] =React.useState(true);
   
-    console.log(user.email);
-    
     React.useEffect(() =>{
       getAuthUserRole();
     }, [])
@@ -26,7 +24,6 @@ const Appscreens = () => {
         .get()
         .then((querySnapshot) => {
           querySnapshot.forEach((doc) =>{
-           console.log(doc.data());
            setAuthUserRole(doc.data())
            setIsLoading(false);
           })

@@ -33,8 +33,8 @@ const ProductCategories = ({route, navigation}) => {
 
     let imgUrl = await uploadImage();
       const dbh = Firebase.firestore();
-      dbh.collection("ProductCategories").doc(CategoryName).set({
-        catId: Date.now().toString(36) + Math.random().toString(36).substr(2) + CategoryName,
+      dbh.collection("ProductCategories").add({
+        catId: Date.now().toString(36) + Math.random().toString(36).substr(2),
         catname: CategoryName,
         catdetails : CategoryDetails,
         catimage: imgUrl,
@@ -249,7 +249,7 @@ function renderCatImage(){
           <TouchableOpacity style ={styles.centered}
           onPress={() => handleSubmit()}
           >{submitting ?
-            <ActivityIndicator />
+            <ActivityIndicator color={COLORS.white} size='large'/>
             :
             <Text style={styles.btnUpdate}>Submit</Text>
                   }
@@ -336,7 +336,8 @@ storeTitle: {
     paddingVertical:10,
     borderRadius:10,
     marginBottom: 12,    
-    color:COLORS.blackSecondary,
+    color:COLORS.white,
+    fontSize:18,
     backgroundColor: COLORS.transparent,
   },
   label: {
