@@ -15,7 +15,6 @@ const Storeitems = ({route, navigation}) => {
 
     const scrollX = new Animated.Value(0);
     const [Store,SetStore] = React.useState(null)
-    const [storeCatsIds,setStoreCatIds] = React.useState(null)
     const [StoreProducts,SetStoreProducts] = React.useState(null)
     const [storecategories,SetStoreCategories] = React.useState([]);
     const [storeItems,SetstoreItems] = React.useState();

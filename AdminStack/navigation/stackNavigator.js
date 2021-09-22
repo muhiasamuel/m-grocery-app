@@ -4,17 +4,18 @@ import React from "react";
 import { createStackNavigator } from '@react-navigation/stack'
 import Adminhome from "../screens/adminhome";
 import Users from "../screens/users";
-import { Store } from "../screens";
+import { CustomersOrder, EditCat, EditStore, ProductCategories, Products, Store } from "../screens";
 import { COLORS } from "../../constants/Index";
 import Ims from "../screens/ims";
 import MainScreen from "../screens/Mainscreen";
+import EditProds from "../screens/Products/editProducts";
 
 const Stack = createStackNavigator();
 
 const screenOptionStyle = {
         headerShown:true,
   headerStyle: {
-    backgroundColor: COLORS.bluelight,
+    backgroundColor: COLORS.darkblue,
   },
   headerTintColor: "white",
   headerBackTitle: "Back",
@@ -23,13 +24,13 @@ const screenOptionStyle = {
 const MainStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      <Stack.Screen options={{title: 'Home'}} name="adminHome" component={Adminhome} />
+      <Stack.Screen options={{title: 'Home',  headerShown:false}} name="adminHome" component={Adminhome} />
       <Stack.Screen options={{title: 'Users'}} name="users" component={Users} />
       <Stack.Screen
-          name='ImageBrowser'
-          component={Ims}
+          name="editStore"
+          component={EditStore}
           options={{
-            title: 'Selected 0 files',
+            title: 'Edit Store ',
           }}
         />
          <Stack.Screen
@@ -46,9 +47,61 @@ const MainStackNavigator = () => {
 const ContactStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      <Stack.Screen name="Contact" component={Store} />
+      <Stack.Screen name="Contact" options={{
+        headerShown:false,
+      }} component={Store} />
     </Stack.Navigator>
   );
 }
 
-export { MainStackNavigator, ContactStackNavigator };
+const StoresStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+       <Stack.Screen name="addStores" component={Store} options={{
+        title: "Add Store",
+        headerShown:false,
+      }}/>
+      <Stack.Screen name="editStore" component={EditStore} options={{
+        title: "Edit Store",
+      }}/>
+    </Stack.Navigator>
+  );  
+}
+const ProductsStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+       <Stack.Screen name="addProducts" component={Products} options={{
+        title: "Add Store",
+        headerShown:false,
+      }}/>
+      <Stack.Screen name="editProducts" component={EditProds} options={{
+        title: "Edit Products",
+      }}/>
+    </Stack.Navigator>
+  );  
+}
+
+const CategoryStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+       <Stack.Screen name="addCats" component={ProductCategories} options={{
+        title: "Add Categories",
+        headerShown:false,
+      }}/>
+      <Stack.Screen name="editCats" component={EditCat} options={{
+        title: "Edit Categories",
+      }}/>
+    </Stack.Navigator>
+  );  
+}
+const OrdersStackNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+       <Stack.Screen name="Orders" component={CustomersOrder} options={{
+        title: "Orders",
+        headerShown:false,
+      }}/>
+    </Stack.Navigator>
+  );  
+}
+export { MainStackNavigator, ContactStackNavigator,OrdersStackNavigator, StoresStackNavigator,CategoryStackNavigator,ProductsStackNavigator };

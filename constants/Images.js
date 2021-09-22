@@ -27,8 +27,10 @@ const food12 = require ("../assets/images/food12.jpg");
 const food13 = require ("../assets/images/food13.jpg");
 
 const google = require ('../assets/images/googleLogo.png')
+const user = require ('../assets/images/download.png')
 
 export default {
+    user,
     pizza,
 food1,
 food2,

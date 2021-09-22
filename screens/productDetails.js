@@ -29,8 +29,8 @@ const productDetails =  ({route, navigation}) => {
     //store.dispatch(TotalOrder())
     //store.dispatch(ProductQty(1))
     //const state = store.getState()
-    function AddOrder(id, price) {
-      store.dispatch(AddProduct(id, price))
+    function AddOrder(id, price, name,image,unit) {
+      store.dispatch(AddProduct(id, price,name,image,unit))
       store.dispatch(filtredOrderPrds(id))      
       store.dispatch(ProductQty(id))
       store.dispatch(TotalOrder())
@@ -162,7 +162,7 @@ const productDetails =  ({route, navigation}) => {
                             </View>
                             <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
                                     borderBottomRightRadius:25}]}
-                                onPress = {() =>  AddOrder(product?.key,product?.prodprice)}
+                                onPress = {() =>  AddOrder(product?.key,product?.prodprice,product?.prodname, product?.imageUrls[0].url,product?.productUnit)}
                             >
                                 <Text style={{...FONTS.body1}}>
                                   <FontAwesome name='plus-circle' size={20} color={COLORS.black}/>  

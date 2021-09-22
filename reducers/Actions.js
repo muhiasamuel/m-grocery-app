@@ -1,25 +1,24 @@
 import * as Actions from "./actionTypes";
 
-export function AddProduct(productId, price,name,photo) {
+export function AddProduct(productId, price,name,image,unit) {
     return{
         type:Actions.ADD_ITEM,
         payload:{
             productId,
             price,
             name,
-            photo
+            image,
+            unit
         }
     }
 }
 
-export function RemoveProduct(productId, price,name,photo) {
+export function RemoveProduct(productId, price) {
     return{
         type: Actions.REMOVE_ITEM,
         payload:{
             productId,
-            price,
-            name,
-            photo
+            price
         }
     }
 }

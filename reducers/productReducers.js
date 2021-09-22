@@ -21,6 +21,9 @@ function productReducers( state=initialState, action){
                       const newItem = {
                           productId: action.payload.productId,
                           qty: 1,
+                          name: action.payload.name,
+                          image:action.payload.image,
+                          unit:action.payload.unit,
                           price: action.payload.price,
                           total: action.payload.price,
                       }

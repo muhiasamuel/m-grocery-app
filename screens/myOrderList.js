@@ -4,6 +4,8 @@ import { Animated, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet,
 import { AddProduct, BasketCount, filtredOrderPrds, ProductQty, RemoveAllItem, RemoveProduct, TotalOrder } from '../reducers/Actions';
 import { COLORS, FONTS,SIZES } from '../constants/Index'
 import store from '../reducers/store';
+import * as Location from 'expo-location';
+
 import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
 // create a component
 
@@ -15,6 +17,15 @@ const myOrderList = ({route, navigation}) => {
     const [productCount,setProductCount] = React.useState();
     const [basketItem,setBasketItem] = React.useState();
     React.useEffect(() =>{ 
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== 'granted') {
+              setErrorMsg('Permission to access location was denied');
+              return;
+            }
+      
+            let location = await Location.getCurrentPositionAsync({});
+          })();
         const prods = CurrentBasketState?.orderItems.map(data=>{
            SetOrderDetails(CurrentBasketState?.orderItems)
             return getproductsByIds(data.productId)[0];
@@ -22,7 +33,6 @@ const myOrderList = ({route, navigation}) => {
         
         setmyItems(prods) 
     },[])
-    console.log(myorderItems);
    function getproductsByIds(id) {
         let prods = Products.filter(a =>a.key == id)
         if (prods.length > 0) {
@@ -113,19 +123,19 @@ const myOrderList = ({route, navigation}) => {
           <View underlayColor='rgb(122, 22, 65)'       
           >
             <View style={styles.bodycontainer}>
-              <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
+              <Image style={styles.bodyphoto} source={{uri: item?.image}} />
               <View>
-                <Text style={[styles.bodytitle,{color: COLORS.darkgrey4, width:SIZES.width*0.35}]}>{item?.prodname}</Text>
+                <Text style={[styles.bodytitle,{color: COLORS.darkgrey4, width:SIZES.width*0.35}]}>{item?.name}</Text>
                 
                 <Text style={[styles.bodycategory,
                     {color:COLORS.white,padding:5, }]}>
-                        ksh {item?.prodprice} / {item?.productUnit}
+                        ksh {item?.price} / {item?.unit}
                 </Text>
                 <View style={styles.OrderIncrementView}>
                     <TouchableOpacity
                         style={[styles.OrderIncrement,{borderTopLeftRadius:25,
                         borderBottomLeftRadius:25}]}
-                        onPress = {() =>  RemoveOrder(item?.key,item?.prodprice)} >
+                        onPress = {() =>  RemoveOrder(item?.productId,item?.price)} >
                         <Text style={{...FONTS.body1}}>
                             <FontAwesome name='minus-circle' size={20} color={COLORS.black}/>    
                         </Text>
@@ -133,13 +143,13 @@ const myOrderList = ({route, navigation}) => {
                    
                         <View 
                         style={styles.OrderIncrement} >
-                        <Text style={{...FONTS.h2, fontWeight:'bold'}}>{orderDetails?.qty} </Text>
+                        <Text style={{...FONTS.h2, fontWeight:'bold'}}>{item?.qty} </Text>
                     </View>
                    
                     
                     <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
                             borderBottomRightRadius:25}]}
-                            onPress = {() =>  AddOrder(item?.key,item?.prodprice)} >
+                            onPress = {() =>  AddOrder(item?.productId,item?.price)} >
                         <Text style={{...FONTS.body1}}>
                             <FontAwesome name='plus-circle' size={20} color={COLORS.black}/>  
                         </Text>                    
@@ -148,7 +158,7 @@ const myOrderList = ({route, navigation}) => {
               </View>
               <View>
               <Text style={[styles.btntext,]}> Total:</Text>
-              <Text style={[styles.btntext,]}> ksh </Text>
+              <Text style={[styles.btntext,]}> ksh {item.total} </Text>
                 <TouchableOpacity
                         style={[styles.btnContinue,{backgroundColor:'rgb(250,170,20)'}]}
                         onPress={() => removeAll(item?.key)}>
@@ -167,9 +177,9 @@ const myOrderList = ({route, navigation}) => {
           <FlatList
             vertical
             showsVerticalScrollIndicator={false}
-            data={myorderItems}
+            data={orderDetails}
             renderItem={renderItem}
-            keyExtractor={item => `${item?.key}`}
+            keyExtractor={item => `${item?.productId}`}
           />
         </View>
         )}

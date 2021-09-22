@@ -15,9 +15,9 @@ const BottomTabNavigator = () => {
         headerShown:false
     }}
     >
-      <Tab.Screen name="home" component={MainStackNavigator}/>
+      <Tab.Screen name="mainStack" component={MainStackNavigator}/>
       <Tab.Screen name="search" component={Store}/>
-      <Tab.Screen name="contact" component={ContactStackNavigator} />
+      <Tab.Screen name="Contacts" component={ContactStackNavigator} />
     </Tab.Navigator>
   );
 };

@@ -1,4 +1,4 @@
-import { AntDesign, EvilIcons, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { AntDesign, Entypo, EvilIcons, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons, Octicons } from '@expo/vector-icons'
 import React, { useContext, useState } from 'react'
 import { Alert, FlatList, Image, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider'
@@ -28,7 +28,7 @@ const getStoreData = async () => {
     try{
       const dataArr = [];
         const response=Firebase.firestore().collection('Stores');
-        const data=await response.orderBy("storeName", "asc").get()
+        const data=await response.orderBy("storeName", "desc").get()
         data.docs.forEach(item=>{
           const {storeName, storeDetails,storeLocation, storeimage} = item.data();
           dataArr.push({
@@ -63,20 +63,78 @@ function renderWidget(){
                 Alert.alert("Modal has been closed.");
                 setModalVisible(!modalVisible);
                 }}>
+                   <View styles={styles.OrderIncrementView}>
+                    <TouchableOpacity
+                    styles={styles.OrderIncrement} 
+                        onPress={() => setModalVisible(!modalVisible)}
+                      >
+                        <Ionicons style={{left: SIZES.width*0.48,top:22}} name='close-outline' size ={32} color={COLORS.white} />
+                        
+                      </TouchableOpacity>
+                    </View>
                 <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                   <TouchableOpacity
-                      style={[styles.button, styles.buttonClose]}
+               
+                  <View style={styles.modalView}> 
+                  <View style={styles.userImageView}>
+                    <Image
+                      source={images.user}
+                      style={styles.userImage}
+                    />
+                  </View>
+                  <View style={styles.modalContent}>
+                 
+                    <TouchableOpacity
+                      style={[ styles.buttonClose]}
                       onPress={() => setModalVisible(!modalVisible)}
                     >
-                      <Ionicons styles={styles.OrderIncrementView} name='menu' size ={20} color={COLORS.white} />
+                      <Entypo name="eye" size={24} color="white" />
+                      <Text style={styles.textModal}>ORDER TRACK</Text>
                     </TouchableOpacity> 
                     <TouchableOpacity
-                      style={[styles.button, styles.buttonClose]}
+                      style={[ styles.buttonClose]}
                       onPress={() => setModalVisible(!modalVisible)}
                     >
-                      <Text style={[styles.textStyle,{color:COLORS.blackSecondary}]}> OK </Text>
+                      <MaterialIcons name="account-box" size={24} color="white" />
+                      <Text style={styles.textModal}> MY ACCOUNT </Text>
                     </TouchableOpacity> 
+                    <TouchableOpacity
+                      style={[ styles.buttonClose]}
+                      onPress={() => setModalVisible(!modalVisible)}
+                    >
+                      <Ionicons name="md-notifications-circle-outline" size={28} color="white" />
+                      <Text style={styles.textModal}>NOTIFICATIONS </Text>
+                    </TouchableOpacity> 
+                    <TouchableOpacity
+                      style={ styles.buttonClose}
+                      onPress={() => setModalVisible(!modalVisible)}
+                    >
+                      <Octicons name="history" size={24} color="white" />
+                      <Text style={styles.textModal}> ORDER HISTORY  </Text>
+                    </TouchableOpacity> 
+                    <TouchableOpacity
+                      style={ styles.buttonClose}
+                      onPress={() => setModalVisible(!modalVisible)}
+                    >
+                      <Ionicons name="ios-settings-outline" size={24} color="white" />
+                      <Text style={styles.textModal}>SETTINGS</Text>
+                    </TouchableOpacity> 
+                    <TouchableOpacity
+                      style={ styles.buttonClose}
+                      onPress={() => setModalVisible(!modalVisible)}
+                    >
+                      <Entypo name="switch" size={30} color="white" />
+                      <Text style={styles.textModal}>THEME </Text>
+                    </TouchableOpacity> 
+                    <TouchableOpacity
+                      style={ styles.buttonClose}
+                      onPress = {() => LogOutUser()}
+                    >
+                      <AntDesign name="logout" size={24} color="white" />
+                      <Text style={styles.textModal}> LOG OUT </Text>
+                    </TouchableOpacity>
+                  </View>
+                                  
+                    
                     </View>
                   </View>     
             </Modal>
@@ -87,6 +145,18 @@ function renderWidget(){
   function renderHeader() {
       return(
           <View style={styles.headerMainview}>
+            {modalVisible == true ? 
+              <TouchableOpacity
+              onPress ={() => setModalVisible(true)}
+                style={{                    
+                    padding: SIZES.padding*0.5,
+                    justifyContent: 'center'
+                }}
+              >
+                  <MaterialIcons name="menu-open" size={30} color="white" />
+
+              </TouchableOpacity>
+              :
               <TouchableOpacity
               onPress ={() => setModalVisible(true)}
                 style={{                    
@@ -97,6 +167,8 @@ function renderWidget(){
                   <Ionicons name= 'menu-outline' size={30} color={'white'} />
 
               </TouchableOpacity>
+          }
+            
               <View style={{
                   flex: 1, alignItems:'center',justifyContent:'center' 
               }}>
@@ -183,7 +255,7 @@ function renderWidget(){
                  renderItem={renderItem}
                  showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
-                    paddingBottom:25,
+                 paddingBottom:25,
                 }}
             />
         )
@@ -254,13 +326,13 @@ const styles = StyleSheet.create({
           marginTop: 78,
         },
         modalView: {
-            top:10,
-          width:SIZES.width*0.445, 
+          top:-3,
+          width:SIZES.width*0.59, 
           height:SIZES.height,
-          left:-100,       
-          backgroundColor:  COLORS.white || 'rgb(20, 30, 38)',
+          left:-100,  
+          alignItems:'center',     
+          backgroundColor:  'rgb(20, 30, 38)',
           borderRadius: 0,
-          padding: 35,
           shadowColor: "#000",
           shadowOffset: {
             width: 0,
@@ -270,26 +342,15 @@ const styles = StyleSheet.create({
           shadowRadius: 4,
           elevation: 5
         },
-        btn: {
-
-            width:SIZES.width*0.2,
-            position:'absolute',
-            bottom:-2,
-            right:0,
-            borderBottomRightRadius:20,
-            borderRadius: 10,
-            borderColor:COLORS.blackSecondary,
-            borderWidth:1,
-            padding: 10,
-          },
+    
           buttonClose: {
-            backgroundColor: COLORS.darkgrey4,
+            flexDirection:'row',
+            alignItems:'center',
+            paddingVertical:SIZES.padding2,
+            marginLeft:10,
             color:COLORS.blackSecondary,
           },
-          buttonReset: {
-            backgroundColor: COLORS.primary,
-            color:COLORS.white,
-          },
+         
           textStyle: {
             color:COLORS.white,
             fontWeight: "bold",
@@ -301,12 +362,41 @@ const styles = StyleSheet.create({
             color:COLORS.white,
           },
           OrderIncrementView: {
+            top:30,
+            width:SIZES.width*0.445, 
+            height:SIZES.height,
+            left:-100, 
             position:'absolute',
-            top:-22,
-            width: SIZES.width,
-            height: 45,
+            width: SIZES.width*0.5,
             justifyContent:'center',
             flexDirection:'row'
           },
+          OrderIncrement: {
+            width:20,
+            backgroundColor: COLORS.white,
+            alignItems:'center',
+            justifyContent:'center',
+          },
+          userImage: {
+            width:130,
+            height:130,
+            backgroundColor:COLORS.backgroundColor1,
+            borderRadius:100,
+           
+          },
+          userImageView:{
+            width:'100%',
+            alignItems:'center',
+            paddingVertical:SIZES.padding2*1.5,
+            backgroundColor:COLORS.backgroundColor1,
+          },
+          textModal:{
+            ...FONTS.h5,
+            color:COLORS.white,
+            marginLeft:15,
+          },
+          modalContent:{
+            marginTop:SIZES.padding2*2,
+          }
 
 })

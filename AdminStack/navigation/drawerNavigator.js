@@ -4,15 +4,13 @@ import React from "react";
 
 import { createDrawerNavigator,  DrawerContentScrollView,
     DrawerItem } from "@react-navigation/drawer";
-import { ContactStackNavigator, MainStackNavigator } from "./stackNavigator";
+import { CategoryStackNavigator, ContactStackNavigator, MainStackNavigator, OrdersStackNavigator, ProductsStackNavigator, StoresStackNavigator } from "./stackNavigator";
 import BottomTabNavigator from "./tabNavigator";
-import { ProductCategories, Products, Store } from "../screens";
+import { ProductCategories, Products, Store,CustomersOrder,Stocks } from "../screens";
 import { COLORS } from "../../constants/Index";
 import { StyleSheet, Text } from "react-native";
 import { EvilIcons, Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import Users from "../screens/users";
-import CustomersOrder from "../screens/CustomersOrder";
-import Stocks from "../screens/Stocks";
 
 const Drawer = createDrawerNavigator();
 
@@ -21,7 +19,7 @@ const DrawerNavigator = ({navigation}) => {
       <>   
     <Drawer.Navigator
         screenOptions={{
-            headerShown:false,
+            headerShown:true,
             headerStyle: {
                 backgroundColor: COLORS.darkblue
               },
@@ -69,7 +67,7 @@ const DrawerNavigator = ({navigation}) => {
             />
         ),
         }}
-      name="products" component={Products} />
+      name="products" component={ProductsStackNavigator} />
       <Drawer.Screen 
        options={{
         title: 'Product Categories',
@@ -81,7 +79,7 @@ const DrawerNavigator = ({navigation}) => {
             />
         ),
         }}
-      name="productcategories" component={ProductCategories} />
+      name="Categories" component={CategoryStackNavigator} />
       <Drawer.Screen 
        options={{
         title: 'Stores',
@@ -93,7 +91,7 @@ const DrawerNavigator = ({navigation}) => {
             />
         ),
         }}
-      name="store" component={Store}/>
+      name="store" component={StoresStackNavigator}/>
 
        <Drawer.Screen 
        options={{
@@ -106,7 +104,7 @@ const DrawerNavigator = ({navigation}) => {
             />
         ),
         }}
-      name="orders" component={CustomersOrder}/>
+      name="CustomersOrders" component={OrdersStackNavigator}/>
 
         <Drawer.Screen 
        options={{

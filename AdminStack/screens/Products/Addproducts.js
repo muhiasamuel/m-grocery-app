@@ -3,11 +3,11 @@ import useState from 'react-usestateref'
 import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert } from 'react-native';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
-import { COLORS, FONTS, SIZES } from '../../constants/Index';
+import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 import "firebase/storage";
 import 'firebase/firestore';
-import Firebase from '../../firebaseConfig';
-import { AuthenticatedUserContext } from '../../AuthProvider/AuthProvider';
+import Firebase from '../../../firebaseConfig';
+import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 import PickerCheckBox from 'react-native-picker-checkbox';
 
 export default class Products extends Component {
@@ -29,16 +29,21 @@ static contextType = AuthenticatedUserContext;
       submitting:false,
       selectedValue: '',
       isLoading:false,
+      prodVisible:false,
+      storeName:'',
+      categoryname:'',
     }
   }
   componentDidMount() {
     this.getStoreData();
     this.getCatData();
+    this.getProductsData();
    
   }
   componentWillUnmount() {
     this.getStoreData();
     this.getCatData();
+    this.getProductsData();
   }
   componentDidUpdate() {
     const {params} = this.props.route;
@@ -102,6 +107,36 @@ static contextType = AuthenticatedUserContext;
       console.log(e);
     }
   }
+ getProductsData = async () => {
+    try{
+      const dataArr = [];
+    
+        const response=Firebase.firestore().collection('Products');
+        const data=await response.get();
+        data.docs.forEach(item=>{
+          const {prodname, proddetails,prodprice, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
+          dataArr.push({
+           key: item.id,
+            prodname,
+            proddetails,
+            prodprice,
+            imageUrls,
+            proddiscount,
+            prodStoreid,
+            prodcatid,
+            prodId,
+            productUnit
+          });
+          let {setProducts} = this.context;
+            setProducts(dataArr)
+                      
+            
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
 
  handleSubmit = async() => {
    this.setState({submitting: true})
@@ -119,6 +154,8 @@ static contextType = AuthenticatedUserContext;
           prodcatid:  this.state.category,
           prodprice:productPrice,
           productUnit: this.state.selectedValue,
+          storeName:this.state.storeName,
+          storeCat:this.state.categoryname,
           proddiscount:productDiscount,
           createdAt: Date.now()
         }).then(async() => {
@@ -131,7 +168,8 @@ static contextType = AuthenticatedUserContext;
     CItems.map((d) =>{
       console.log(d.key);
       this.setState({
-        category:d.key
+        category:d.key,
+        categoryname:d.catname
       })
     })
   }
@@ -139,7 +177,8 @@ static contextType = AuthenticatedUserContext;
     SItems.map((d) =>{
       console.log(d.key);
       this.setState({
-        store:d.key
+        store:d.key,
+        storeName:d.storeName
       })
     })    
   }
@@ -352,6 +391,52 @@ static contextType = AuthenticatedUserContext;
 
   )
 }
+renderProdsEdit(){
+  const { Products} = this.context;
+  const renderItem = ({item}) =>(
+          <View style={{
+            flexDirection:'row',
+            justifyContent:'space-around',
+            alignItems:'center'}}>
+           
+            <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.prodname}</Text>
+            {item?.imageUrls && (
+              <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
+            )}
+            
+            <TouchableOpacity
+              onPress={() => navigation.navigate('editStore')}
+            >
+            <Text style={[styles.btnUpdateprod,{paddingLeft:18}]}>Edit</Text>
+            </TouchableOpacity>
+            
+          </View>
+      )
+      return(
+        <>
+                
+        <View style={{
+            flexDirection:'row',
+            justifyContent:'space-around',
+            alignItems:'center'}}>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>ProductName</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>StoreLocation</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>Actions</Text>
+        </View>
+       
+        <FlatList
+            data={Products}
+            keyExtractor={item => `${item.key}`}
+            renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom:25,
+              backgroundColor:COLORS.white
+            }}
+        />
+        </>
+      )
+      }
 
   render() {
     const {storeData, catData} = this.context;
@@ -366,22 +451,41 @@ static contextType = AuthenticatedUserContext;
     }
     return (
         <View style={styles.screen}>
-        {this.renderHeader()} 
-  
-      
-        <ScrollView>        
-        {this.renderCatImage()}
-            {this.renderAddCategories(storeData, catData)}
-            <TouchableOpacity style ={styles.centered}
-            onPress={() => this.handleSubmit()}
-            >{this.state.submitting ?
-              <ActivityIndicator color={COLORS.white} size='large'/>
-              :
-              <Text style={styles.btnUpdate}>Submit</Text>
-                    }
-            
-            </TouchableOpacity>
-        </ScrollView>    
+{this.state.prodVisible == true?
+      <ScrollView>        
+      {this.renderCatImage()}
+          {this.renderAddCategories(storeData, catData)}
+          <View style={{flexDirection:'row', justifyContent:'space-around'}}>
+          <TouchableOpacity style ={styles.centered}
+          onPress={() => this.handleSubmit()}
+          >{this.state.submitting ?
+            <ActivityIndicator color={COLORS.white} size='large'/>
+            :
+            <Text style={styles.btnUpdate}>Submit</Text>
+                  }
+          
+          </TouchableOpacity>
+          <TouchableOpacity
+          style={{alignItems:'center'}}
+            onPress={() => this.setState({prodVisible:!this.state.prodVisible})}
+          >
+          <Text style={{color:COLORS.white,...FONTS.body3}}>Edit Products Data</Text> 
+            <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.white} />
+          </TouchableOpacity>
+          </View>
+      </ScrollView>
+    :
+    <>
+     <TouchableOpacity
+        style={{alignItems:'center'}}
+        onPress={() => this.setState({prodVisible:!this.state.prodVisible})}>
+          <Text style={{color:COLORS.white,...FONTS.body3}}>Add Products Data</Text> 
+          <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.white} />
+    </TouchableOpacity>
+    {this.renderProdsEdit()}
+    </>
+}
+           
        
       </View>
     )
@@ -911,6 +1015,24 @@ storeTitle: {
     borderColor:COLORS.darkgrey4,
     borderRadius:10,
     marginVertical:10
-  }
-  
+  },
+  storeName:{
+    ...FONTS.body4,color:COLORS.darkgrey3,paddingVertical:SIZES.padding2,
+    paddingHorizontal:SIZES.padding,
+    width:SIZES.width*0.3
+  },
+  btnUpdateprod:{
+    paddingHorizontal:SIZES.padding2,
+    paddingVertical:SIZES.padding2,
+    marginVertical:5,
+    color:'#fff',
+    ...FONTS.h5,
+    backgroundColor:'skyblue',
+    borderRadius:SIZES.radius*0.3
+  },
+  bodyphoto: {
+    width:SIZES.width*0.23,
+    height:75,
+
+}
 })

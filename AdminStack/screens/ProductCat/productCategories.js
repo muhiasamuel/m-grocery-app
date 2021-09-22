@@ -1,50 +1,67 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
-import { COLORS, FONTS, SIZES } from '../../constants/Index';
+import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 import "firebase/storage";
 import 'firebase/firestore';
-import Firebase from '../../firebaseConfig';
-import { AuthenticatedUserContext } from '../../AuthProvider/AuthProvider';
+import Firebase from '../../../firebaseConfig';
+import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
+import { FlatList } from 'react-native-gesture-handler';
 
-const Store =  ({route, navigation}) => {
-    
+const ProductCategories = ({route, navigation}) => {
+  const {catData, setCatData} = React.useContext(AuthenticatedUserContext);
+
   const [pickedImagePath, setPickedImagePath] = useState('');
-  const [storeName, setstoreName] = useState('');
-  const [storeDetails, setstoreDetails] = useState('');
-  const [location, setStoreLocation] = useState('');
+  const [catName, setCatName] = useState('');
+  const [catDetails, setCatDetails] = useState('');
   const [transferred, setTransferred] = useState(0);
+  const [catProdDataVisible,setcatProdDataVisible] = useState(false);
   const [uploading, setUploading] =useState(null);
   const [submitting, setIsSubmitting] =useState(false);
 
-  const [isLoading, setIsLoading] =React.useState(true);
+  React.useEffect(() => {
+    getCatData();
+  }, [])
 
-  
-
-
+  const getCatData = async () => {
+    try{
+      const catArr = [];
+        const response=Firebase.firestore().collection('ProductCategories');
+        const data=await response.get();
+        data.docs.forEach(item=>{
+          const {catdetails, catname,catId, catimage} = item.data();
+          catArr.push({
+            key: item.id,
+            catdetails,
+            catname,
+            catimage,
+          });
+          setCatData(catArr)
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
   const handleSubmit = async() => {
     setIsSubmitting(true)
-    const Storename = storeName
-    const StoreDetails = storeDetails
-    const StoreLocation = location
+    const CategoryName = catName
+    const CategoryDetails = catDetails
 
     let imgUrl = await uploadImage();
       const dbh = Firebase.firestore();
-      dbh.collection("Stores").add({
-        storeId: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        storeName: Storename,
-        storeDetails : StoreDetails,
-        storeLocation:StoreLocation,
-        storeimage: imgUrl,
+      dbh.collection("ProductCategories").add({
+        catId: Date.now().toString(36) + Math.random().toString(36).substr(2),
+        catname: CategoryName,
+        catdetails : CategoryDetails,
+        catimage: imgUrl,
         createdAt: Date.now()
       }).then(() => {
         setIsSubmitting(false)
-        setstoreDetails('');
-        setstoreName('');
-        setStoreLocation('');
-        setPickedImagePath('');
-        Alert.alert('data updated');
+        setCatDetails('')
+        setCatName('')
+        console.log('data updated');
       }) 
 
   }
@@ -123,7 +140,6 @@ const Store =  ({route, navigation}) => {
   const uploadImage = async () => {
     let blob;
     
-    
       setUploading(true);
       blob = await getPictureBlob(pickedImagePath);
 
@@ -135,7 +151,7 @@ const Store =  ({route, navigation}) => {
       const name = filename.split('/').slice(0, -1).join('.');
       filename = name + Date.now() + '.' + extension;
   
-      const ref = await Firebase.storage().ref().child(`storeims/${filename}`);
+      const ref = await Firebase.storage().ref().child(`catImages/${filename}`);
       const task = await ref.put(blob);
 
       try {
@@ -163,51 +179,102 @@ const Store =  ({route, navigation}) => {
             </TouchableOpacity>
             <View style={styles.storeMainview}>
               <View style={styles.storeSubview}>
-                  <Text style={styles.storeTitle}>Add Stores</Text>
+                  <Text style={styles.storeTitle}>AddProductCategories</Text>
               </View>
           </View>
-          <TouchableOpacity>                
-                <MaterialCommunityIcons name= 'menu-swap-outline' size={27} color={COLORS.white}/>
-          </TouchableOpacity>
+         
         </View>
     )
 }
 
 //add category Data
-function renderAddStore(){
+function renderAddCategories(){
   return(
     <SafeAreaView style={styles.container}>       
          <TextInput
           style={styles.input}
-          value={storeName}
-          placeholderTextColor="#fff"
-          placeholder={"Store Name"}
-          onChangeText={(text) => setstoreName(text)}
+          value={catName}
+          placeholderTextColor={COLORS.white}
+          placeholder={"Category Name"}
+          onChangeText={(text) => setCatName(text)}
           autoCapitalize={"none"}
       />
           <TextInput
           multiline={true}
-          numberOfLines={8}
-          style={[styles.input,{borderRadius:5}]}
-          value={storeDetails}
-          placeholderTextColor="#fff"
-          placeholder={"StoreDetails"}
-          onChangeText={(text) => setstoreDetails(text)}
-          autoCapitalize={"none"}
-      />
-                <TextInput
+          numberOfLines={6}
           style={styles.input}
-          value={location}
-          placeholderTextColor="#fff"
-          placeholder={"Location"}
-          onChangeText={(text) => setStoreLocation(text)}
+          value={catDetails}
+          placeholderTextColor={COLORS.white}
+          placeholder={"CategoryDetails"}
+          onChangeText={(text) => setCatDetails(text)}
           autoCapitalize={"none"}
       />
+              <View  style ={[styles.centered,{justifyContent:'space-around'}]}>
+            <TouchableOpacity
+            onPress={() => handleSubmit()}
+            >{submitting ?
+              <ActivityIndicator color={COLORS.white} size='large'/>
+              :
+              <Text style={styles.btnUpdate}>Submit</Text>
+                    }
+            
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{alignItems:'center'}}
+              onPress={() => setcatProdDataVisible(!catProdDataVisible)}
+            >
+              <Text style={{color:COLORS.white,...FONTS.body3}}>Edit ProdCats Data</Text> 
+              <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.white} />
+            </TouchableOpacity> 
+            </View>
     </SafeAreaView>
   )
 }
+function renderprodCatEdit(){
+  const renderItem = ({item}) =>(
+          <View style={{
+            flexDirection:'row',
+            justifyContent:'space-around',
+            alignItems:'center'}}>
+           
+            <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.catname}</Text>
+            <Image style={styles.bodyphoto} source={{uri: item?.catimage}} />
+            <TouchableOpacity
+              onPress={() => navigation.navigate('editCats')}
+            >
+            <Text style={[styles.btnUpdateprod,{paddingLeft:18}]}>Edit</Text>
+            </TouchableOpacity>
+            
+          </View>
+      )
+      return(
+        <>
+                
+        <View style={{
+            flexDirection:'row',
+            justifyContent:'space-around',
+            alignItems:'center'}}>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>CatName</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>CatImage</Text>
+         
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>Actions</Text>
+        </View>
+       
+        <FlatList
+            data={catData}
+            keyExtractor={item => `${item.key}`}
+            renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom:25,
+              backgroundColor:COLORS.white
+            }}
+        />
+        </>
+      )
+      }
 //Pick Category image
-function renderstoreim(){
+function renderCatImage(){
   return(
     <View>
       <View style={styles.buttonContainer}>
@@ -250,26 +317,29 @@ function renderstoreim(){
 
     return (
       <View style={styles.screen}>
-      {renderHeader()} 
-      <ScrollView>
-        {renderstoreim()}
-        {renderAddStore()}
-        <TouchableOpacity style ={styles.centered}
-        onPress={() => handleSubmit()}
-        >{submitting ?
-          <ActivityIndicator color={COLORS.white} size='large'/>
+        {catProdDataVisible == true?
+          <ScrollView>
+          {renderCatImage()}
+          {renderAddCategories()}
+         
+        </ScrollView> 
           :
-          <Text style={styles.btnUpdate}>Submit</Text>
-                }
-        
-        </TouchableOpacity> 
-       </ScrollView>    
-    
+          <>
+          <TouchableOpacity
+            style={{alignItems:'center'}}
+            onPress={() => setcatProdDataVisible(!catProdDataVisible)}
+          >
+            <Text style={{color:COLORS.white,...FONTS.body3}}>Add store Data</Text> 
+            <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.white} />
+          </TouchableOpacity>
+         {renderprodCatEdit()}
+         </>    
+      }
     </View>
     )
 }
 
-export default Store
+export default ProductCategories
 
 const styles = StyleSheet.create({
   screen: {
@@ -308,7 +378,7 @@ storeSubview: {
 },
 storeTitle: {
     ...FONTS.h4, 
-    color:COLORS.black, 
+    color:COLORS.blackSecondary, 
     fontStyle:'normal'
 },
   buttonContainer: {
@@ -338,13 +408,14 @@ storeTitle: {
   },
   input: {
     width:SIZES.width*0.95,
-    borderColor:COLORS.darkgrey,
-    borderWidth:0.5,
+    borderColor:COLORS.darkgrey4,
+    borderWidth:0.4,
     paddingHorizontal:SIZES.padding2,
     paddingVertical:10,
     borderRadius:10,
     marginBottom: 12,    
     color:COLORS.white,
+    fontSize:18,
     backgroundColor: COLORS.transparent,
   },
   label: {
@@ -358,8 +429,8 @@ storeTitle: {
     paddingVertical:SIZES.padding2
   },
   btnUpdate:{
-    paddingHorizontal:SIZES.padding2*2.5,
-    paddingVertical:SIZES.padding2,
+    paddingHorizontal:SIZES.padding2*2,
+    paddingVertical:SIZES.padding,
     color:'#fff',
     ...FONTS.h3,
     backgroundColor:COLORS.primary,
@@ -370,6 +441,27 @@ storeTitle: {
     alignSelf:'center',
     justifyContent:'center',
     top:60
-  }
+  },
+  storeName:{
+    ...FONTS.body2,color:COLORS.darkgrey3,paddingVertical:SIZES.padding2,
+    paddingHorizontal:SIZES.padding,
+    width:SIZES.width*0.3
+  },
+  btnUpdateprod:{
+    paddingHorizontal:SIZES.padding2,
+    paddingVertical:SIZES.padding2,
+    marginVertical:5,
+    color:'#fff',
+    ...FONTS.h4,
+    backgroundColor:'skyblue',
+    borderRadius:SIZES.radius*0.3
+  },
+  bodyphoto: {
+    width:SIZES.width*0.23,
+    height:75,
+    borderRadius:25,
+    marginVertical:3
+
+}
   
 })
