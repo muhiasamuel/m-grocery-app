@@ -1,4 +1,4 @@
-//import liraries
+// @refresh reset
 import React, { Component, useState } from 'react';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 
@@ -9,29 +9,30 @@ import * as Linking from 'expo-linking';
 import Firebase from '../../../firebaseConfig';
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 
-
-
 // create a component
-const CustomersOrder = () => {
+const CustomersOrder = ({navigation}) => {
     const[order, setOrder] = useState('');
-    const[orderItems, setOrderItems] = useState('');
+    const [modalVisible,setModalVisible] = React.useState(false);
+    const[orderItem, setOrderItem] = useState('');
 
     React.useEffect(() =>{
         getOrdersData();
+        return () =>getOrdersData();
     }, [])
 
    const getOrdersData = async () => {
         try{
           const dataArr = [];
         
-            const response=Firebase.firestore().collection('CustomerOrder');
+            const response=Firebase.firestore().collection('CustomerOrder').orderBy('createdAt', 'desc');
             await response.onSnapshot((querySnapshot) =>{
                 querySnapshot.forEach((doc)=>{
-                    const {customerOrder,customer,customerEmail, geohash,lat, lng} = doc.data();
+                    const {customerOrder,customer,customerEmail,status, geohash,lat, lng} = doc.data();
                     dataArr.push({
                       key: doc.id,
                       geohash,
                       customerId:customer.uid,
+                      status,
                       customerName:customer.username,
                       customerEmail,
                       total:customerOrder.total,
@@ -40,7 +41,7 @@ const CustomersOrder = () => {
                       basketCount:customerOrder.BasketCount,
                       lat,
                       lng,
-                    });
+                    })
                      setOrder(dataArr)
                   })
             });
@@ -49,6 +50,38 @@ const CustomersOrder = () => {
         catch(e){
           console.log(e);
         }
+      }
+      console.log(order);
+      function viewOrder(item) {
+       navigation.navigate("viewOrder",{
+         item
+       })
+    }
+      function  renderOrderModal() {
+          return(
+                <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                setModalVisible(!modalVisible);
+                }}>
+                   <View style={styles.centeredView}>               
+                    <View style={styles.modalView}>
+
+                        <Text style={[styles.textStyle,{color:COLORS.white}]}> {orderItem?.name} </Text>
+                    <TouchableOpacity
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => setModalVisible(!modalVisible)}
+                  >
+                    <Text style={[styles.textStyle,{color:COLORS.white}]}> OK </Text>
+                  </TouchableOpacity>
+                    </View>
+                   </View>      
+
+              </Modal>
+          )
       }
 
       function renderCartItems() {    
@@ -73,6 +106,7 @@ const CustomersOrder = () => {
                     }
                     </View>
                     <View style={styles.ItemsView}>
+                    <Text style={styles.btnStatus}>{item?.status}</Text>
                         <Text style={[styles.btntext,{...FONTS.body2}]}>Customer Details</Text>
                         <Text style={styles.btntext}>Customer name: {item?.customerName}</Text>
                         <Text style={styles.btntext}>Phone No: {item?.customerPhoneNo}</Text>
@@ -81,18 +115,15 @@ const CustomersOrder = () => {
                   </View>
                
 
-                  <View style={{flexDirection:'row', justifyContent:'space-around'}}>
+                  <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
                 <TouchableOpacity
                  onPress={() => Linking.openURL(`google.navigation:q=${item.lat}, ${item.lng}`)}
                         style={[styles.btnContinue,{backgroundColor:'rgb(40,175,255)',}]}>
                         <Text style={styles.btntext}>Customer Location</Text>
                 </TouchableOpacity> 
+              
                 <TouchableOpacity
-                 onPress={() => Linking.openURL(`google.navigation:q=${item.lat}, ${item.lng}`)}
-                        style={[styles.btnContinue,{backgroundColor:'rgb(40,135,255)',width:SIZES.width*0.3}]}>
-                        <Text style={styles.btntext}>View Order in detail</Text>
-                </TouchableOpacity> 
-                <TouchableOpacity
+                        onPress={() => viewOrder(item)}  
                         style={[styles.btnContinue,{backgroundColor:'rgb(50,170,120)',}]}>
                         <Text style={[styles.btntext,{paddingHorizontal:1}]}>Actions on Order</Text>
                 </TouchableOpacity>
@@ -165,6 +196,7 @@ const CustomersOrder = () => {
 
     return (
         <View style={styles.container}>
+            {renderOrderModal()}
             {renderCartItems()}
         </View>
     );
@@ -189,7 +221,6 @@ const styles = StyleSheet.create({
         marginTop:3,
         backgroundColor:COLORS.blackSecondary,
         padding:SIZES.padding*0.5,
-        alignItems:'center',
         justifyContent:'space-between'
 
     },
@@ -247,6 +278,55 @@ const styles = StyleSheet.create({
         ...FONTS.h5,
 
     },
+    centeredView: {
+        flex:1,
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: 78,
+        },
+        modalView: {
+          margin: 20,
+          width:SIZES.width,        
+          backgroundColor:  COLORS.blackSecondary || 'rgb(20, 30, 38)',
+          borderRadius: 20,
+          padding: 35,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 5
+        },
+  
+        buttonClose: {
+          flexDirection:'row',
+          alignItems:'center',
+          paddingVertical:SIZES.padding2,
+          marginLeft:10,
+          color:COLORS.blackSecondary,
+        },
+       
+        textStyle: {
+          color:COLORS.white,
+          fontWeight: "bold",
+          textAlign: "center"
+        },
+        modalText: {
+          marginBottom: 15,
+          textAlign: "center",
+          color:COLORS.white,
+        },
+        btnStatus: {
+          borderColor:COLORS.white,
+          borderWidth:2,
+          borderRadius:100,
+          padding:SIZES.padding2,
+          backgroundColor:'rgb(255,12,13)',
+          color:COLORS.white,
+          alignSelf:'flex-end'
+        }
 });
 
 //make this component available to the app

@@ -4,7 +4,7 @@ import React from "react";
 import { createStackNavigator } from '@react-navigation/stack'
 import Adminhome from "../screens/adminhome";
 import Users from "../screens/users";
-import { CustomersOrder, EditCat, EditStore, ProductCategories, Products, Store } from "../screens";
+import { CustomersOrder, EditCat, EditStore, OrderDispatch, OrderView, ProductCategories, Products, Store } from "../screens";
 import { COLORS } from "../../constants/Index";
 import Ims from "../screens/ims";
 import MainScreen from "../screens/Mainscreen";
@@ -100,6 +100,12 @@ const OrdersStackNavigator = () => {
        <Stack.Screen name="Orders" component={CustomersOrder} options={{
         title: "Orders",
         headerShown:false,
+      }}/>
+         <Stack.Screen name="viewOrder" component={OrderView} options={{
+        title: "View Order",
+      }}/>
+        <Stack.Screen name="dispatchOrder" component={OrderDispatch} options={{
+        title: "Dispatch Order",
       }}/>
     </Stack.Navigator>
   );  

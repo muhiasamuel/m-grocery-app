@@ -6,6 +6,8 @@ import EditProducts from './Products/editProducts';
 import Store from './stores/addStore';
 import EditStore from './stores/EditStores';
 import CustomersOrder from './Orders/CustomersOrder';
+import OrderView from './Orders/viewOrder';
+import OrderDispatch from './Orders/orderDispatch';
 import Stocks from './Stocks/Stocks';
 export {
     Store,
@@ -15,5 +17,8 @@ export {
     EditStore,
     EditProducts,
     EditCat,
-    Stocks
+    Stocks,
+    OrderView,
+    OrderDispatch
+
 }

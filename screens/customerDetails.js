@@ -12,6 +12,7 @@ import * as geofire from 'geofire-common';
 import store from '../reducers/store';
 import Firebase from '../firebaseConfig';
 import * as Linking from 'expo-linking';
+import firebase from 'firebase/app';
 import "firebase/storage";
 import 'firebase/firestore';
 
@@ -100,7 +101,8 @@ export default class CutomerDetails extends React.Component {
         customer: this.state.User,
         lat: lat,
         lng: long,
-        customerOrder: order
+        customerOrder: order,
+        createdAt : firebase.firestore.FieldValue.serverTimestamp()
       }).then(() =>{
         this.setState({
           submitting:false

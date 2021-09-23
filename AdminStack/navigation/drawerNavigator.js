@@ -11,6 +11,7 @@ import { COLORS } from "../../constants/Index";
 import { StyleSheet, Text } from "react-native";
 import { EvilIcons, Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import Users from "../screens/users";
+import tabs from "./tabNavigator";
 
 const Drawer = createDrawerNavigator();
 
@@ -43,19 +44,8 @@ const DrawerNavigator = ({navigation}) => {
         ),
         }}
        name="home" 
-       component={BottomTabNavigator} />
-      <Drawer.Screen 
-         options={{
-            title: 'Contact',
-            drawerIcon: ({focused, size}) => (
-                <Ionicons
-                    name='phone-portrait'
-                    size={size}
-                    color={focused ? '#7cc' : 'skyblue'}
-                />
-            ),
-            }}
-      name="Contact" component={ContactStackNavigator} />
+       component={tabs} />
+     
       <Drawer.Screen
        options={{
         title: 'Products',
