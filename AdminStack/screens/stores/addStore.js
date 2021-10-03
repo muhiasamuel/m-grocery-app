@@ -6,7 +6,7 @@ import "firebase/storage";
 import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
-import { DataTable } from 'react-native-paper';
+import { Avatar, DataTable } from 'react-native-paper';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
 
 const Store =  ({route, navigation}) => {
@@ -15,6 +15,7 @@ const Store =  ({route, navigation}) => {
   const [pickedImagePath, setPickedImagePath] = useState('');
   const [storeName, setstoreName] = useState('');
   const [storeDetails, setstoreDetails] = useState('');
+  const [storeIdNo, setstoreIdNo] = useState('');
   const [location, setStoreLocation] = useState('');
   const [transferred, setTransferred] = useState(0);
   const [catDataVisible,setcatDataVisible] = useState(false);
@@ -48,6 +49,7 @@ const Store =  ({route, navigation}) => {
         storeName: Storename,
         storeDetails : StoreDetails,
         storeLocation:StoreLocation,
+        storeIdNo:storeIdNo,
         storeimage: imgUrl,
         createdAt: Date.now()
       }).then(() => {
@@ -230,14 +232,24 @@ function renderAddStore(){
           onChangeText={(text) => setstoreDetails(text)}
           autoCapitalize={"none"}
       />
+      <View style={{flexDirection:'row', justifyContent:'space-between'}}>
                 <TextInput
-          style={styles.input}
+          style={[styles.input, {width:SIZES.width*0.54}]}
           value={location}
           placeholderTextColor="#fff"
           placeholder={"Location"}
           onChangeText={(text) => setStoreLocation(text)}
           autoCapitalize={"none"}
       />
+            <TextInput
+          style={[styles.input,{width:SIZES.width*0.42 }]}
+          value={storeIdNo}
+          placeholderTextColor="#fff"
+          placeholder={"Store Id"}
+          onChangeText={(text) => setstoreIdNo(text)}
+          autoCapitalize={"none"}
+      />
+      </View>
         <View  style ={[styles.centered,{justifyContent:'space-around'}]}>
             <TouchableOpacity
             onPress={() => handleSubmit()}
@@ -271,7 +283,7 @@ function renderstoreim(){
   return(
     <View>
       <View style={styles.buttonContainer}>
-        <Text style={styles.label}>Category Image:</Text>
+        <Text style={styles.label}>Store Image:</Text>
         <TouchableOpacity
           onPress={showImagePicker}
         >
@@ -280,14 +292,15 @@ function renderstoreim(){
         
         <TouchableOpacity
           onPress={openCamera}>
-             <Feather name='camera' size={38} color={COLORS.white}/>
+             <FontAwesome5 name='camera' size={38} color={COLORS.white}/>
           </TouchableOpacity>
         </View>
       <View style={styles.imageContainer}>
         {
           pickedImagePath !== '' && (
             <>
-          <Image
+          <Avatar.Image
+          size={150}
             source={{ uri: pickedImagePath }}
             style={styles.image}
           />
@@ -317,7 +330,8 @@ function renderStoreEdit(){
             <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.storeName}</Text>
             <Image style={styles.bodyphoto} source={{uri: item?.storeimage}} />
             <TouchableOpacity
-              onPress={() => navigation.navigate('editStore')}
+              onPress={() => navigation.navigate('editStore',{
+              item})}
             >
             <Text style={[styles.btnUpdateStore,{paddingLeft:18}]}>Edit</Text>
             </TouchableOpacity>
@@ -429,9 +443,10 @@ storeTitle: {
   },
   btbbtn: {
     borderRadius:10,
-    backgroundColor:COLORS.darkblue,
+    backgroundColor:COLORS.white,
     padding:SIZES.padding,
-    color:COLORS.white,
+    ...FONTS.body3,
+    color:COLORS.darkblue,
     borderColor:COLORS.darkgrey,
     borderWidth:3
   },
@@ -440,9 +455,6 @@ storeTitle: {
   },
   image: {
     alignSelf:'center',
-    borderRadius:100,
-    width: 180,
-    height: 150,
     resizeMode: 'cover'
   },
   input: {

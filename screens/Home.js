@@ -17,6 +17,7 @@ const { user } = useContext(AuthenticatedUserContext);
 const {storeData,setStoreData} = useContext(AuthenticatedUserContext);
 const [restaurantdata,setrestaurantData] = useState(null);
 const [modalVisible,setModalVisible] = React.useState(false);
+
 const auth = Firebase.auth();
 
 React.useEffect(() => {

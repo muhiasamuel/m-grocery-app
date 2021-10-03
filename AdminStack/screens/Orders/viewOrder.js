@@ -134,27 +134,36 @@ const OrderView = ({route, navigation}) => {
                             }
                         </View>   
                     </View>
-                    <Text style={[styles.btntext,{...FONTS.body1}]}>Actions:</Text>
-                    <View style={[styles.centered,{paddingHorizontal:SIZES.padding2}]}> 
-                    <TouchableOpacity
-                    onPress={() => handledispatch(orderItem)}
-                     style={styles.btnContinue}
-                     
-                    >
-                      <Text style={[styles.btntext,{...FONTS.h4,color:COLORS.white}]}>Dispatch</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                    onPress={() => updateStatusDecline(orderItem?.key)}
-                     style={[styles.btnContinue,{backgroundColor:'rgb(255,15,20)'}]}
-                    >
-                       {submitting ?
-                       <ActivityIndicator color={COLORS.white} size='large'/>
-                       :
-                       <Text style={[styles.btntext,{...FONTS.h4,color:COLORS.white}]}>Decline Order</Text>
-                    } 
-                      
-                    </TouchableOpacity>
-                    </View>
+                   
+                    {
+                        orderItem?.status ==`New` ? 
+                        <>
+                        <Text style={[styles.btntext,{...FONTS.body1}]}>Actions:</Text>
+                        <View style={[styles.centered,{paddingHorizontal:SIZES.padding2}]}> 
+                        <TouchableOpacity
+                        onPress={() => handledispatch(orderItem)}
+                         style={styles.btnContinue}
+                         
+                        >
+                          <Text style={[styles.btntext,{...FONTS.h4,color:COLORS.white}]}>Dispatch</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                        onPress={() => updateStatusDecline(orderItem?.key)}
+                         style={[styles.btnContinue,{backgroundColor:'rgb(255,15,20)'}]}
+                        >
+                           {submitting ?
+                           <ActivityIndicator color={COLORS.white} size='large'/>
+                           :
+                           <Text style={[styles.btntext,{...FONTS.h4,color:COLORS.white}]}>Decline Order</Text>
+                        } 
+                          
+                        </TouchableOpacity>
+                        </View>
+                        </>
+                        :
+                        <View></View>
+                    }
+
                 </View>
             </View>
         )

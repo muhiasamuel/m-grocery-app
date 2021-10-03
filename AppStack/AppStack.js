@@ -6,14 +6,14 @@ import Appscreens from './appscreens/AppScreens';
 import AuthContainer from './authstackContainer';
 import Firebase from '../firebaseConfig';
 
-const auth = Firebase.auth();
+
 export default function RootNavigator() {
     const { user, setUser } = useContext(AuthenticatedUserContext);
     const [isLoading, setIsLoading] = useState(true);
   
     useEffect(() => {
       // onAuthStateChanged returns an unsubscriber
-      const unsubscribeAuth = auth.onAuthStateChanged(async authenticatedUser => {
+      const unsubscribeAuth = Firebase.auth().onAuthStateChanged(async authenticatedUser => {
         try {
           await (authenticatedUser ? setUser(authenticatedUser) : setUser(null));
           setIsLoading(false);

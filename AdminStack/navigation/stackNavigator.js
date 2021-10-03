@@ -24,22 +24,9 @@ const screenOptionStyle = {
 const MainStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      <Stack.Screen options={{title: 'Home',  headerShown:false}} name="adminHome" component={Adminhome} />
+      <Stack.Screen options={{title: 'Home',  headerShown:true}} name="adminHome" component={Adminhome} />
       <Stack.Screen options={{title: 'Users'}} name="users" component={Users} />
-      <Stack.Screen
-          name="editStore"
-          component={EditStore}
-          options={{
-            title: 'Edit Store ',
-          }}
-        />
-         <Stack.Screen
-          name='Main'
-          component={MainScreen}
-          options={{
-            title: 'Selected 0 files',
-          }}
-        />
+    
     </Stack.Navigator>
   );
 }
@@ -48,7 +35,7 @@ const ContactStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
       <Stack.Screen name="Contact" options={{
-        headerShown:false,
+        headerShown:true,
       }} component={Store} />
     </Stack.Navigator>
   );
@@ -59,7 +46,7 @@ const StoresStackNavigator = () => {
     <Stack.Navigator screenOptions={screenOptionStyle}>
        <Stack.Screen name="addStores" component={Store} options={{
         title: "Add Store",
-        headerShown:false,
+        headerShown:true,
       }}/>
       <Stack.Screen name="editStore" component={EditStore} options={{
         title: "Edit Store",
@@ -71,12 +58,19 @@ const ProductsStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
        <Stack.Screen name="addProducts" component={Products} options={{
-        title: "Add Store",
-        headerShown:false,
+        title: "Add Products",
+        headerShown:true,
       }}/>
       <Stack.Screen name="editProducts" component={EditProds} options={{
         title: "Edit Products",
       }}/>
+    <Stack.Screen
+          name="ImageBrowser"
+          component={Ims}
+          options={{
+            title: 'Selected 0 files',
+          }}
+        />
     </Stack.Navigator>
   );  
 }
@@ -86,7 +80,7 @@ const CategoryStackNavigator = () => {
     <Stack.Navigator screenOptions={screenOptionStyle}>
        <Stack.Screen name="addCats" component={ProductCategories} options={{
         title: "Add Categories",
-        headerShown:false,
+        headerShown:true,
       }}/>
       <Stack.Screen name="editCats" component={EditCat} options={{
         title: "Edit Categories",
@@ -99,7 +93,7 @@ const OrdersStackNavigator = () => {
     <Stack.Navigator screenOptions={screenOptionStyle}>
        <Stack.Screen name="Orders" component={CustomersOrder} options={{
         title: "Orders",
-        headerShown:false,
+        headerShown:true,
       }}/>
          <Stack.Screen name="viewOrder" component={OrderView} options={{
         title: "View Order",

@@ -8,10 +8,11 @@ import 'firebase/firestore';
 import * as Linking from 'expo-linking';
 import Firebase from '../../../firebaseConfig';
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
+import { Badge,Colors } from 'react-native-paper';
 
 // create a component
 const CustomersOrder = ({navigation}) => {
-    const[order, setOrder] = useState('');
+    const[order, setOrder] = React.useState(null);
     const [modalVisible,setModalVisible] = React.useState(false);
     const[orderItem, setOrderItem] = useState('');
 
@@ -22,8 +23,7 @@ const CustomersOrder = ({navigation}) => {
 
    const getOrdersData = async () => {
         try{
-          const dataArr = [];
-        
+          const dataArr = [];        
             const response=Firebase.firestore().collection('CustomerOrder').orderBy('createdAt', 'desc');
             await response.onSnapshot((querySnapshot) =>{
                 querySnapshot.forEach((doc)=>{
@@ -85,17 +85,19 @@ const CustomersOrder = ({navigation}) => {
       }
 
       function renderCartItems() {    
-        const renderItem = ({ item }) => (
+        const renderItem = ({ item, index }) => (
           <View underlayColor='rgb(122, 22, 65)'       
           >
               <View style={styles.bodycontainer}>
-                  <View style={{flexDirection:'row'}}>
-                    <View style={[styles.ItemsView,{width:SIZES.width*0.4}]}>
+                  <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                    <View style={[styles.ItemsView,{width:SIZES.width*0.4, marginVertical:45}]}>
+                    <Text style={styles.btntext}>Order Id:{item.key}</Text>
                     {
                         item?.orderItems.map((data, index)=>(
                             <View
-                            style={[styles.ItemsView,{flexDirection:'row', paddingVertical:10}]}
+                            style={[styles.ItemsView,{flexDirection:'row', paddingVertical:3,}]}
                             key={`orderItems-${index}`}>
+                            
                                 <Image
                                     source={{uri: data.image}}
                                     resizeMode='cover'
@@ -106,7 +108,28 @@ const CustomersOrder = ({navigation}) => {
                     }
                     </View>
                     <View style={styles.ItemsView}>
-                    <Text style={styles.btnStatus}>{item?.status}</Text>
+                      <View style={{flexDirection:'row',alignItems:'center'}}>
+                      <Text style={[styles.btntext,{paddingRight:5, ...FONTS.body3}]}>Order Status:</Text>
+                      
+                      {item?.status ==`New` ? 
+                       <Badge size={28} style={{backgroundColor:Colors.redA700}} >{item?.status}</Badge>
+                       :
+                       <Badge size={28} style={{backgroundColor:Colors.green700,paddingHorizontal:7}} >{item?.status}</Badge>
+                      }
+                      
+                      </View>
+                      <>
+                      {item?.status ==`Complete` ? 
+                      
+                      <View style={{flexDirection:'row',alignItems:'center'}}>
+                      <Text style={[styles.btntext,{paddingRight:5, ...FONTS.body3}]}>Order Status:</Text>
+                       <Badge size={28} style={{backgroundColor:Colors.green700,paddingHorizontal:7}} >{item?.status}</Badge>
+                      </View>
+                      :
+                      <View></View>
+                       }
+                      </>
+                      
                         <Text style={[styles.btntext,{...FONTS.body2}]}>Customer Details</Text>
                         <Text style={styles.btntext}>Customer name: {item?.customerName}</Text>
                         <Text style={styles.btntext}>Phone No: {item?.customerPhoneNo}</Text>
@@ -130,56 +153,7 @@ const CustomersOrder = ({navigation}) => {
                 
               </View> 
               </View>
-             
-             
-              
-               {/*<View style={styles.bodycontainer}>
-              <Image style={styles.bodyphoto} source={{uri: item?.image}} />
-              <View>
-                <Text style={[styles.bodytitle,{color: COLORS.darkgrey4, width:SIZES.width*0.35}]}>{item?.name}</Text>
-                
-                <Text style={[styles.bodycategory,
-                    {color:COLORS.white,padding:5, }]}>
-                        ksh {item?.price} / {item?.unit}
-                </Text>
-                <View style={styles.OrderIncrementView}>
-                    <TouchableOpacity
-                        style={[styles.OrderIncrement,{borderTopLeftRadius:25,
-                        borderBottomLeftRadius:25}]}
-                        onPress = {() =>  RemoveOrder(item?.productId,item?.price)} >
-                        <Text style={{...FONTS.body1}}>
-                            <FontAwesome name='minus-circle' size={20} color={COLORS.black}/>    
-                        </Text>
-                    </TouchableOpacity>
-                   
-                        <View 
-                        style={styles.OrderIncrement} >
-                        <Text style={{...FONTS.h2, fontWeight:'bold'}}>{item?.qty} </Text>
-                    </View>
-                   
-                    
-                    <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
-                            borderBottomRightRadius:25}]}
-                            onPress = {() =>  AddOrder(item?.productId,item?.price)} >
-                        <Text style={{...FONTS.body1}}>
-                            <FontAwesome name='plus-circle' size={20} color={COLORS.black}/>  
-                        </Text>                    
-                    </TouchableOpacity>
-                </View>
-              </View>
-              <View>
-              <Text style={[styles.btntext,]}> Total:</Text>
-              <Text style={[styles.btntext,]}> ksh {item.total} </Text>
-                <TouchableOpacity
-                        style={[styles.btnContinue,{backgroundColor:'rgb(250,170,20)'}]}
-                        onPress={() => removeAll(item?.key)}>
-                        <Text style={styles.btntext}>Reset</Text>
-                  </TouchableOpacity>              
-
-              </View>
-          
-            
-                    </View>*/}
+    
           </View>
         )
         return(
@@ -225,7 +199,7 @@ const styles = StyleSheet.create({
 
     },
     ItemsView:{
-        width:SIZES.width*0.5
+        width:SIZES.width*0.45
     },
     bodyphoto: {
         width:SIZES.width*0.16,
@@ -268,13 +242,14 @@ const styles = StyleSheet.create({
         borderWidth:2,
         borderColor:'#fff',
         paddingHorizontal:8,
+        marginHorizontal:10,
         alignItems:'center', 
         justifyContent:'center',
         borderRadius: 10 
     },
     btntext:{
         color:COLORS.white,
-        paddingVertical:12,
+        paddingVertical:8,
         ...FONTS.h5,
 
     },

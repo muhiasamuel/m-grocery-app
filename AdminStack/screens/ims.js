@@ -25,7 +25,8 @@ export default class Ims extends Component {
           type: 'image/jpg'
         })
       }
-      navigation.navigate('products', {photos: cPhotos});
+      navigation.navigate('addProducts', {photos: cPhotos});
+      console.log(cPhotos);
      
     })
     .catch((e) => console.log(e));

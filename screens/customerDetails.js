@@ -102,6 +102,7 @@ export default class CutomerDetails extends React.Component {
         lat: lat,
         lng: long,
         customerOrder: order,
+        status:"New",
         createdAt : firebase.firestore.FieldValue.serverTimestamp()
       }).then(() =>{
         this.setState({

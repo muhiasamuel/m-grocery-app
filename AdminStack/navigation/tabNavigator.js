@@ -66,14 +66,19 @@ const tabs = () => {
                 borderTopWidth: 0,
                 backgroundColor:COLORS.transparent,
                 elevation:0
-            }
+            },
+            headerTintColor: "white",
+            headerBackTitle: "Back",
         }}
        >
            <Tab.Screen
            name="Home"
            component={Adminhome}
            options={{
-            headerShown:false,
+            headerShown:true,
+            headerStyle: {
+                backgroundColor: COLORS.darkblue,
+              },
                tabBarIcon: ({focused}) =>(
                  <MaterialCommunityIcons name ="home-circle" size={28} color ={focused ?COLORS.primary: COLORS.darkgrey4 }/>
                ),
@@ -85,10 +90,13 @@ const tabs = () => {
            }}/>
      
                <Tab.Screen
-           name="heart"
+           name="Favorites"
            component={Adminhome}
            options={{
-            headerShown:false,
+            headerShown:true,
+            headerStyle: {
+                backgroundColor: COLORS.darkblue,
+              },
                tabBarIcon: ({focused}) =>(
                  <FontAwesome name = "heart" size={25} color ={focused ?COLORS.primary: COLORS.darkgrey4 }/>
                ),
@@ -102,7 +110,10 @@ const tabs = () => {
            name="user"
            component={Users}
            options={{
-               headerShown:false,
+               headerShown:true,
+               headerStyle: {
+                backgroundColor: COLORS.darkblue,
+              },
                tabBarIcon: ({focused}) =>(
                  <AntDesign name = "user" size={25} color ={focused ?COLORS.primary: COLORS.darkgrey4 }/>
                ),

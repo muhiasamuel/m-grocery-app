@@ -1,14 +1,12 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack'
+import 'expo-firestore-offline-persistence'
 import { LogBox,  StatusBar,  StyleSheet, Text, View } from 'react-native'
 import { AuthenticatedUserProvider } from './AuthProvider/AuthProvider';
 import RootNavigator from './AppStack/AppStack';
-import { getProductByStoreData } from './constants/DataApi';
+import "firebase/firestore";
 
 
-const Stack = createStackNavigator();
-const App = () => {
-     
+const App = () => {   
 LogBox.ignoreLogs(['Setting a timer']);
  return ( 
       <AuthenticatedUserProvider>
