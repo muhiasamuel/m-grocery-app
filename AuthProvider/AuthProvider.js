@@ -8,6 +8,7 @@ export const AuthenticatedUserProvider = ({ children }) => {
   const [catData, setCatData] =useState([]);
   const [storeData, setStoreData] = useState([]); 
   const [Products, setProducts] = useState([]); 
+  const [Orders, setOrders] = useState([]); 
 
 
   return (
@@ -16,7 +17,8 @@ export const AuthenticatedUserProvider = ({ children }) => {
        AuthUserRole, setAuthUserRole,
        storeData, setStoreData,
        catData, setCatData,
-       Products, setProducts
+       Products, setProducts,
+       Orders,setOrders
        }}>
       {children}
     </AuthenticatedUserContext.Provider>

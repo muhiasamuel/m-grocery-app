@@ -1,7 +1,7 @@
 import React, {  useContext, Component } from 'react';
 import useState from 'react-usestateref'
-import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert } from 'react-native';
-import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert, Modal } from 'react-native';
+import { Entypo, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 import "firebase/storage";
@@ -9,6 +9,7 @@ import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 import PickerCheckBox from 'react-native-picker-checkbox';
+import { Colors, Headline,} from 'react-native-paper';
 
 export default class Products extends Component {
 static contextType = AuthenticatedUserContext;
@@ -32,6 +33,9 @@ static contextType = AuthenticatedUserContext;
       prodVisible:false,
       storeName:'',
       categoryname:'',
+      modalVisible:false,
+      selectedStore:'',
+      prods:null
     }
   }
   componentDidMount() {
@@ -111,16 +115,18 @@ static contextType = AuthenticatedUserContext;
     try{
       const dataArr = [];
     
-        const response=Firebase.firestore().collection('Products');
+        const response=Firebase.firestore().collection("Products")
+        .orderBy("prodStoreid", "asc");
         const data=await response.get();
         data.docs.forEach(item=>{
-          const {prodname, proddetails,prodprice, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
+          const {prodname, proddetails,prodprice,storeName, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
           dataArr.push({
            key: item.id,
             prodname,
             proddetails,
             prodprice,
             imageUrls,
+            storeName,
             proddiscount,
             prodStoreid,
             prodcatid,
@@ -129,6 +135,9 @@ static contextType = AuthenticatedUserContext;
           });
           let {setProducts} = this.context;
             setProducts(dataArr)
+            this.setState({
+              prods:dataArr
+            })
                       
             
         })
@@ -137,6 +146,19 @@ static contextType = AuthenticatedUserContext;
       console.log(e);
     }
   }
+
+  handleSelectedStore =() =>{
+    let {setProducts} = this.context;
+    let prods = this.state.prods.filter(a =>a.prodStoreid == this.state.selectedStore.key)
+    if (prods.length > 0) {
+      console.log(prods);
+        setProducts(prods) 
+        this.setState({modalVisible:!this.state.modalVisible})
+
+    }
+    return ""
+  }
+
 
  handleSubmit = async() => {
    this.setState({submitting: true})
@@ -242,27 +264,79 @@ static contextType = AuthenticatedUserContext;
     })
 
   };
+  renderStoreNames(){
+    const { storeData} = this.context;
+    const renderItem = ({item}) =>(
+            <View>
+              <TouchableOpacity
+              onPress={() => this.setState({selectedStore:item})}
+              style={{flexDirection:'row',alignItems:'center'}}
+            >
+              {this.state.selectedStore.storeName == item?.storeName ?
+              <>
+              <MaterialCommunityIcons name="check-circle-outline" size={30} color={Colors.green500} />
+              </>
+              :
+              <>
+              <Entypo name="circle" size={28} color="black" />
+              
+              </>
+            }
+              
+              <Text style={{...FONTS.body4,paddingLeft:SIZES.padding2*2}} >{item?.storeName}</Text>
+              </TouchableOpacity>
+
+              
+              
+            </View>
+        )
+        return(
+          <FlatList
+              data={storeData}
+              keyExtractor={item => `${item.key}`}
+              renderItem={renderItem}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                paddingBottom:25,
+                backgroundColor:COLORS.white
+              }}
+          />
+        )
+        }
   
   
- renderHeader(){
+ renderModal(){
    
     return(
-        <View style={styles.headerView}>
-            <TouchableOpacity
-             style={styles.backArrow}
-             onPress = {()=> this.uploadImage()}
-             >
-                <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
-            </TouchableOpacity>
-            <View style={styles.storeMainview}>
-              <View style={styles.storeSubview}>
-                  <Text style={styles.storeTitle}>Add Products</Text>
+        <Modal 
+        animationType="fade"
+        transparent={true}
+        visible={this.state.modalVisible}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+             <Headline>Filter Products By Store Name</Headline>
+             {this.renderStoreNames()}
+
+             <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+                <TouchableOpacity
+                  
+                  onPress={() => this.setState({modalVisible:!this.state.modalVisible})}
+                >
+                  <Text style={{...FONTS.body2, color:Colors.red800}}>Close</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  
+                  onPress={() => this.handleSelectedStore()}
+                >
+                  <Text style={{...FONTS.body2, color:Colors.blue400}}>OK</Text>
+                </TouchableOpacity>
               </View>
-          </View>
-          <TouchableOpacity>                
-                <MaterialCommunityIcons name= 'menu-swap-outline' size={27} color={COLORS.white}/>
-          </TouchableOpacity>
-        </View>
+
+            </View>
+          </View>   
+
+        </Modal>
     )
 }
 
@@ -395,6 +469,7 @@ renderProdsEdit(){
   const { Products} = this.context;
   const renderItem = ({item}) =>(
           <View style={{
+            paddingVertical:2,
             flexDirection:'row',
             justifyContent:'space-around',
             alignItems:'center'}}>
@@ -403,11 +478,11 @@ renderProdsEdit(){
             {item?.imageUrls && (
               <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
             )}
-            
+            <Text style={[styles.storeName,{color:COLORS.darkblue, width:SIZES.width*0.3}]}>{item?.storeName}</Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('editStore')}
             >
-            <Text style={[styles.btnUpdateprod,{paddingLeft:18}]}>Edit</Text>
+            <Text style={[styles.btnUpdateprod,{padding:8}]}>Edit</Text>
             </TouchableOpacity>
             
           </View>
@@ -416,12 +491,15 @@ renderProdsEdit(){
         <>
                 
         <View style={{
+          paddingHorizontal:9,
             flexDirection:'row',
-            justifyContent:'space-around',
-            alignItems:'center'}}>
+            justifyContent:'center',
+            alignItems:'center'
+            }}>
           <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>ProductName</Text>
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>StoreLocation</Text>
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>Actions</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>ProdImage</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white, width:SIZES.width*0.3}]}>StoreName</Text>          
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white,padding:8}]}>Actions</Text>
         </View>
        
         <FlatList
@@ -476,13 +554,28 @@ renderProdsEdit(){
       </ScrollView>
     :
     <>
+    <View style = {{flexDirection:'row',justifyContent:'space-around'}}>
+      
+        
+        <TouchableOpacity
+          onPress={() => this.setState({modalVisible:!this.state.modalVisible})}
+        >
+          <Text style={{color:COLORS.white,...FONTS.body3}}>Filter Products by store </Text>
+          <View style={{alignItems:'center'}}>
+            <Ionicons name="ios-filter-outline" size={30} color={COLORS.white} />
+
+          </View>
+        </TouchableOpacity>
+   
      <TouchableOpacity
         style={{alignItems:'center'}}
         onPress={() => this.setState({prodVisible:!this.state.prodVisible})}>
-          <Text style={{color:COLORS.white,...FONTS.body3}}>Add Products Data</Text> 
-          <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.white} />
+          <Text style={{color:COLORS.white,...FONTS.body2}}>Add Products Data</Text> 
+          <Ionicons name="md-chevron-up-circle-outline" size={30} color={COLORS.white} />
     </TouchableOpacity>
+    </View>
     {this.renderProdsEdit()}
+    {this.renderModal()}
     </>
 }
            
@@ -1019,7 +1112,8 @@ storeTitle: {
   storeName:{
     ...FONTS.body4,color:COLORS.darkgrey3,paddingVertical:SIZES.padding2,
     paddingHorizontal:SIZES.padding,
-    width:SIZES.width*0.3
+    
+    width:SIZES.width*0.22
   },
   btnUpdateprod:{
     paddingHorizontal:SIZES.padding2,
@@ -1031,8 +1125,51 @@ storeTitle: {
     borderRadius:SIZES.radius*0.3
   },
   bodyphoto: {
-    width:SIZES.width*0.23,
-    height:75,
+    width:SIZES.width*0.20,
+    height:SIZES.height*0.09,
+    borderRadius:10
 
-}
+
+},
+centeredView: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+modalView: {
+  marginTop:SIZES.height*0.17,
+  width:SIZES.width*0.95,        
+  backgroundColor:'rgb(255, 255, 255)',
+  padding: 35,
+  shadowColor: "#000",
+  borderRadius:5,
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5
+},
+button: {
+  width:SIZES.width*0.2,
+  position:'absolute',
+  bottom:-2,
+  left:0,
+  borderBottomLeftRadius:20,
+  borderRadius: 10,
+  borderColor:COLORS.blackSecondary,
+  borderWidth:1,
+  padding: 10,
+},
+btn: {
+  width:SIZES.width*0.2,
+  position:'absolute',
+  bottom:-2,
+  right:0,
+  borderBottomRightRadius:20,
+  borderRadius: 10,
+  borderColor:COLORS.blackSecondary,
+  borderWidth:1,
+  padding: 10,
+},
 })

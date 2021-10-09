@@ -136,7 +136,7 @@ const OrderView = ({route, navigation}) => {
                     </View>
                    
                     {
-                        orderItem?.status ==`New` ? 
+                       ( orderItem?.status == `New`|| orderItem?.status == `Declined`) ? 
                         <>
                         <Text style={[styles.btntext,{...FONTS.body1}]}>Actions:</Text>
                         <View style={[styles.centered,{paddingHorizontal:SIZES.padding2}]}> 

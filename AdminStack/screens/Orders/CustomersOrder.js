@@ -23,8 +23,9 @@ const CustomersOrder = ({navigation}) => {
 
    const getOrdersData = async () => {
         try{
-          const dataArr = [];        
-            const response=Firebase.firestore().collection('CustomerOrder').orderBy('createdAt', 'desc');
+          const dataArr = []; 
+          let response;       
+             response=Firebase.firestore().collection('CustomerOrder').orderBy('createdAt', 'desc');
             await response.onSnapshot((querySnapshot) =>{
                 querySnapshot.forEach((doc)=>{
                     const {customerOrder,customer,customerEmail,status, geohash,lat, lng} = doc.data();
@@ -45,6 +46,7 @@ const CustomersOrder = ({navigation}) => {
                      setOrder(dataArr)
                   })
             });
+            response(); 
 
         }
         catch(e){
