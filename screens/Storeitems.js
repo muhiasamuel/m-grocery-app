@@ -20,12 +20,11 @@ const Storeitems = ({route, navigation}) => {
     const [selectedCategory, setSelectedCategory ] = React.useState(null)
     React.useEffect(() =>{
         let {item} = route.params;
-        SetStore(item); 
-            
-        getProductsData();
-        getStoreData(); 
+        SetStore(item);             
+        getProductsData();         
         getCatData();
-        getProductByStoreData(item.key);
+        getProductByStoreData(item?.key);
+        getStoreData();
                
     },[])
     const getProductsData = async () => {
@@ -174,7 +173,7 @@ const Storeitems = ({route, navigation}) => {
         })}
         >
           <View style={styles.bodycontainer}>
-            <Image style={styles.bodyphoto} source = {{uri: item?.imageUrls[0].url}} />
+            <Image style={styles.bodyphoto} source = {{uri: item?.imageUrls[1].url}} />
             <Text style={[styles.bodytitle,{color: COLORS.darkgrey4}]}>{item?.prodname}</Text>
            
             <Text style={[styles.bodycategory,

@@ -13,15 +13,19 @@ import CustomersOrder from './CustomersOrder';
 
 // create a component
 const OrderDispatch = ({route, navigation}) => {
+  const {AuthUserRole} = useContext(AuthenticatedUserContext);
+
     const [order, setorder] = useState()
     const [deliverlyPesrson, setdeliverlyPesrson] = useState()
     const [isSubmitting, setIsSubmitting] = useState(false)
+
+    const PUSH_ENDPOINT = `http://localhost:3000/token`;
     useEffect(() => {
         let{item} = route.params
         setorder(item)
         getAuthUserRole()
     }, [])
-    
+
       const getAuthUserRole = async () => {
          
         try{
@@ -74,6 +78,18 @@ const OrderDispatch = ({route, navigation}) => {
         }catch(e){
           console.log(e);
         }
+        return fetch(PUSH_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: {
+              value: AuthUserRole?.ExpoToken,
+            }
+          }),
+        });
       }
       console.log(order);
       function renderdeliverlyPersons() {    
