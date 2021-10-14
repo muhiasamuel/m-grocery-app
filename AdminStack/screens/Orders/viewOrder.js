@@ -7,6 +7,7 @@ import "firebase/storage";
 import 'firebase/firestore';
 import * as Linking from 'expo-linking';
 import Firebase from '../../../firebaseConfig';
+import { Badge } from 'react-native-paper';
 
 // create a component
 const OrderView = ({route, navigation}) => {
@@ -78,7 +79,7 @@ const OrderView = ({route, navigation}) => {
                                         source={{uri: data.image}}
                                         resizeMode='cover'
                                         style={styles.bodyphoto}/>
-                                        <Text style={styles.qty}>{data?.qty}</Text>
+                                        <Badge style={styles.qty}>{data?.qty}</Badge>
                                     </View>    
                                         <Text style={[styles.btntext,{...FONTS.h4,width:SIZES.width*0.22}]}>{data.name}</Text>
                                         <Text style={[styles.btntext,{...FONTS.h4,width:SIZES.width*0.28}]}>{data.unit} * {data?.qty}</Text>
@@ -225,14 +226,12 @@ const styles = StyleSheet.create({
     }, 
     qty: {
         backgroundColor:"rgb(200,35,150)",
-        borderRadius:100,
         paddingHorizontal:10,
         color:COLORS.white,
         ...FONTS.body3,
-        paddingVertical:5,
         position:'absolute',
-        top:-10,
-        left:50
+        top:-5,
+        left:40
     },
     orderStatus:{
         flexDirection:'column',

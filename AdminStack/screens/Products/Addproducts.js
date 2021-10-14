@@ -1,8 +1,6 @@
 import React, {  useContext, Component } from 'react';
-import useState from 'react-usestateref'
 import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert, Modal } from 'react-native';
 import { Entypo, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
-import * as ImagePicker from 'expo-image-picker';
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 import "firebase/storage";
 import 'firebase/firestore';

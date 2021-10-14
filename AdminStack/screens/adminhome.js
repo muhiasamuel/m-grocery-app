@@ -2,7 +2,7 @@ import React from 'react'
 import { StyleSheet, ScrollView, View,TouchableOpacity, Text, ActivityIndicator, SafeAreaView, KeyboardAvoidingView, ImageBackground, Image } from "react-native";
 import firebase from 'firebase/app'
 import "firebase/firestore";
-import { COLORS, FONTS, images, SIZES } from "../../constants/Index";
+import { COLORS, FONTS,  SIZES } from "../../constants/Index";
 import { Feather, FontAwesome, FontAwesome5, Fontisto, Foundation, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import Firebase from "../../firebaseConfig";
 import { AuthenticatedUserContext } from "../../AuthProvider/AuthProvider";

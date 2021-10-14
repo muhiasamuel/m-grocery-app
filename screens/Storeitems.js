@@ -1,11 +1,9 @@
-import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import React from 'react'
-import { Animated, FlatList, Image, Modal, SafeAreaView, ScrollView, StyleSheet, Text,TouchableHighlight, TouchableOpacity, View, Pressable,Alert } from 'react-native'
+import { Animated, FlatList, Image, SafeAreaView,  StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { RecipeCard } from '../constants/AppStyles'
-import { getProductbyCategory,getCategoryById, getproductsByIds, getProductsbyStore, getStoreCategories } from '../constants/DataApi'
 import store from '../reducers/store';
-import { COLORS, FONTS, images, SIZES } from '../constants/Index'
-import { items, categoryData } from '../constants/mydata'
+import { COLORS, FONTS,  SIZES } from '../constants/Index'
 import Firebase from '../firebaseConfig';
 import "firebase/storage";
 import 'firebase/firestore';
@@ -23,10 +21,11 @@ const Storeitems = ({route, navigation}) => {
     React.useEffect(() =>{
         let {item} = route.params;
         SetStore(item); 
-        getProductByStoreData(item.key);       
+            
         getProductsData();
-        getStoreData();
+        getStoreData(); 
         getCatData();
+        getProductByStoreData(item.key);
                
     },[])
     const getProductsData = async () => {
@@ -179,8 +178,8 @@ const Storeitems = ({route, navigation}) => {
             <Text style={[styles.bodytitle,{color: COLORS.darkgrey4}]}>{item?.prodname}</Text>
            
             <Text style={[styles.bodycategory,
-                {color:COLORS.white,padding:5, backgroundColor:COLORS.darkgrey}]}>
-                    {item?.prodprice} ksh / {item?.productUnit}
+                {color:COLORS.darkblue,padding:5,fontSize:17, fontWeight:'bold'}]}>
+                    KSh {item?.prodprice}/ {item?.productUnit}
             </Text>
           </View>
         </TouchableOpacity>
@@ -293,7 +292,7 @@ export default Storeitems
 const styles = StyleSheet.create({
     Container: {
         flex: 1,
-        backgroundColor: COLORS.backgroundColor,
+        backgroundColor: COLORS.darkgrey4,
     },
     headerView: {
         flexDirection:"row", 

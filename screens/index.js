@@ -1,5 +1,4 @@
 import Home from './Home';
-import Restaurant from './Restaurant';
 import OrderDeliverly from './OrderDeliverly'
 import Storeitems from './Storeitems'
 import productDetails from './productDetails'
@@ -8,7 +7,6 @@ import customerDetails from './customerDetails'
 
 export {
     Home,
-    Restaurant,
      OrderDeliverly,
      Storeitems,
      productDetails,

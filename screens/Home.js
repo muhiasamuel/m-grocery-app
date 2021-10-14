@@ -3,10 +3,6 @@ import React, { useContext, useState } from 'react'
 import { Alert, FlatList, Image, Modal, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider'
 import { COLORS, FONTS, images, SIZES } from '../constants/Index'
-import {restaurantData,
-    categoryData,
-    initialCurrentLocation}
-     from '../constants/mydata'
 import Firebase from '../firebaseConfig'
 import "firebase/auth"
 import 'firebase/firestore';
@@ -15,13 +11,11 @@ const Home = ({navigation}) => {
 
 const { user } = useContext(AuthenticatedUserContext);
 const {storeData,setStoreData} = useContext(AuthenticatedUserContext);
-const [restaurantdata,setrestaurantData] = useState(null);
 const [modalVisible,setModalVisible] = React.useState(false);
 
 const auth = Firebase.auth();
 
 React.useEffect(() => {
-    setrestaurantData(restaurantData)
   getStoreData();
   
 }, [])
@@ -29,7 +23,7 @@ const getStoreData = async () => {
     try{
       const dataArr = [];
         const response=Firebase.firestore().collection('Stores');
-        const data=await response.orderBy("storeName", "desc").get()
+        const data=await response.get()
         data.docs.forEach(item=>{
           const {storeName, storeDetails,storeLocation, storeimage} = item.data();
           dataArr.push({

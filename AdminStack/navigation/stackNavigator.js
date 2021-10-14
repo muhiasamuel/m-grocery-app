@@ -7,7 +7,6 @@ import Users from "../screens/users";
 import { CustomersOrder, EditCat, EditStore, OrderDispatch, OrderView, ProductCategories, Products, Store } from "../screens";
 import { COLORS } from "../../constants/Index";
 import Ims from "../screens/ims";
-import MainScreen from "../screens/Mainscreen";
 import EditProds from "../screens/Products/editProducts";
 
 const Stack = createStackNavigator();

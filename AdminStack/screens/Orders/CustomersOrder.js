@@ -92,7 +92,7 @@ const CustomersOrder = ({navigation}) => {
           >
               <View style={styles.bodycontainer}>
                   <View style={{flexDirection:'row',justifyContent:'space-between'}}>
-                    <View style={[styles.ItemsView,{width:SIZES.width*0.4, marginVertical:45}]}>
+                    <View style={[styles.ItemsView,{width:SIZES.width*0.4,paddingHorizontal:5, marginVertical:25}]}>
                     <Text style={styles.btntext}>Order Id:{item.key}</Text>
                     {
                         item?.orderItems.map((data, index)=>(
@@ -110,7 +110,7 @@ const CustomersOrder = ({navigation}) => {
                     }
                     </View>
                     <View style={styles.ItemsView}>
-                      <View style={{flexDirection:'row',alignItems:'center'}}>
+                      <View style={{flexDirection:'row',alignItems:'center', marginVertical:25}}>
                       <Text style={[styles.btntext,{paddingRight:5, ...FONTS.body3}]}>Order Status:</Text>
                       
                       {item?.status ==`New` ? 

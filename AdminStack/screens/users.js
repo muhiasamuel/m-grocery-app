@@ -3,7 +3,7 @@ import { Alert, Button, StyleSheet, TextInput, View,TouchableOpacity, Text, Acti
 import firebase from 'firebase/app'
 import "firebase/auth";
 import "firebase/firestore";
-import { COLORS, FONTS, images, SIZES } from "../../constants/Index";
+import { COLORS, FONTS,  SIZES } from "../../constants/Index";
 import { Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons } from "@expo/vector-icons";
 import * as Animatable from 'react-native-animatable'
 import PickerCheckBox from 'react-native-picker-checkbox';

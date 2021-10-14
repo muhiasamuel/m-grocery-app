@@ -6,7 +6,6 @@ import "firebase/storage";
 import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
-import { DataTable } from 'react-native-paper';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
 
 const EditStore =  ({route, navigation}) => {

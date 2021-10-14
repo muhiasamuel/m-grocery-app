@@ -6,9 +6,9 @@ import "firebase/firestore";
 import { COLORS, FONTS, images, SIZES } from "../constants/Index";
 import { Feather, FontAwesome5, Fontisto, Ionicons } from "@expo/vector-icons";
 import * as Animatable from 'react-native-animatable'
-import { color } from "react-native-reanimated";
 import { ScrollView } from "react-native-gesture-handler";
 import Firebase from "../firebaseConfig";
+import { Colors } from "react-native-paper";
 
 export const SignUpScreen =  ({navigation})  => {
   const [username, setUsername] = useState("");
@@ -26,9 +26,6 @@ export const SignUpScreen =  ({navigation})  => {
 const Auth = Firebase.auth();
 
   const doUserRegistration = async function () {
-
-     
-
     const usernameValue = username;
     const passwordValue = password;
     const Customerrole = "customer";
@@ -50,6 +47,10 @@ const Auth = Firebase.auth();
           setIsSubmitting(false)         
           return true;
         })
+      }else{
+        const error = "Ensure you fill out all fields"
+        setIsSubmitting(false)
+        setErrorMessage(error || error.statusText)
       }
     } catch (error) {
       setIsSubmitting(false)
@@ -57,7 +58,7 @@ const Auth = Firebase.auth();
     // signin can fail if any parameter is blank or failed an uniqueness check on the server
       setTimeout(() => {
         setErrorMessage(null)
-      }, 3600);
+      }, 5000);
     return false;
     }
   };
@@ -73,7 +74,8 @@ const Auth = Firebase.auth();
       </View>:
       <View></View>
       }  
-     <View>   
+     <View> 
+        
 
         {/*<Text style={styles.label}>UserName:</Text>*/}
         <TextInput
@@ -113,7 +115,7 @@ const Auth = Firebase.auth();
      {/*<Text style={styles.label}>Password:</Text>*/}
      <View style={styles.centredView}>
         <TextInput
-            style={styles.input}
+        style={[styles.input,{width:SIZES.width*0.77, borderBottomRightRadius:0,borderTopRightRadius:0,borderRightWidth:0.3,}]}
             value={password}
             placeholderTextColor="#fff"
             placeholder={"Password"}
@@ -121,19 +123,18 @@ const Auth = Firebase.auth();
             onChangeText={(text) => setPassword(text)}
         /> 
             <TouchableOpacity
+            style={styles.passeye}
                 onPress={updateSecureTextEntry}
             >
                 {secureTextEntry?
             <Feather
-            style={styles.eyeIcon}
             name= "eye-off"
             color={COLORS.darkgrey4}
-            size={24}/> :
+            size={21}/> :
             <Feather
-            style={styles.eyeIcon}
             name= "eye"
             color={COLORS.darkgrey4}
-            size={24}/> }
+            size={21}/> }
             
             </TouchableOpacity>
 
@@ -251,29 +252,37 @@ const styles = StyleSheet.create({
       fontSize:20,
       fontWeight:"bold"
     },
-  input: {
-    
-    width:SIZES.width*0.84,
-    borderColor:COLORS.darkgrey,
-    borderWidth:0.5,
-    paddingHorizontal:SIZES.padding2*1.5,
-    paddingVertical:10,
-    borderRadius:15,
-    marginBottom: 12,
-  
-    color:COLORS.white,
-    backgroundColor: COLORS.transparent,
-  },
+    input: {
+      
+      width:SIZES.width*0.90,
+      borderColor:COLORS.darkgrey2,
+      borderWidth:0.5,
+      paddingHorizontal:SIZES.padding2*1.5,
+      paddingVertical:10,
+      borderRadius:15,
+      marginBottom: 12,    
+      color:COLORS.white,
+      backgroundColor: COLORS.transparent,
+    },
   centredView:{
       flexDirection:"row",
       alignItems:"center",
       justifyContent:'space-between'
   },
-  eyeIcon: {
-      right:12,
-      alignSelf:"center",
-      bottom:4,
-  },
+  passeye: {
+    width:SIZES.width*0.13,
+    borderLeftWidth:0.2,
+    borderColor:COLORS.darkgrey2,
+    borderWidth:0.5,
+    borderTopLeftRadius:0,
+    borderBottomLeftRadius:0,
+    paddingHorizontal:SIZES.padding2,
+    paddingVertical:13,
+    borderRadius:15,
+    marginBottom: 12,
+    color:COLORS.white,
+    backgroundColor: COLORS.transparent,
+   },
   btn: {
        alignSelf:"center",
        justifyContent:"center",

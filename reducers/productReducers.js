@@ -1,4 +1,4 @@
-import { products } from '../constants/mydata';
+
 import * as Action from './actionTypes';
 
 initialState = {
