@@ -12,7 +12,7 @@ import EditProds from "../screens/Products/editProducts";
 const Stack = createStackNavigator();
 
 const screenOptionStyle = {
-        headerShown:true,
+        headerShown:false,
   headerStyle: {
     backgroundColor: COLORS.darkblue,
   },
@@ -23,7 +23,7 @@ const screenOptionStyle = {
 const MainStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      <Stack.Screen options={{title: 'Home',  headerShown:true}} name="adminHome" component={Adminhome} />
+      <Stack.Screen options={{title: 'Home',  headerShown:false}} name="adminHome" component={Adminhome} />
       <Stack.Screen options={{title: 'Users'}} name="users" component={Users} />
     
     </Stack.Navigator>

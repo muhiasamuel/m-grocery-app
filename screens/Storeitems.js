@@ -1,9 +1,10 @@
-import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { AntDesign, FontAwesome, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import React from 'react'
-import { Animated, FlatList, Image, SafeAreaView,  StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Animated, FlatList, Image, SafeAreaView,  StyleSheet, Text, TouchableOpacity, View,Modal } from 'react-native'
 import { RecipeCard } from '../constants/AppStyles'
 import store from '../reducers/store';
 import { COLORS, FONTS,  SIZES } from '../constants/Index'
+import { AddProduct, BasketCount, filtredOrderPrds, ProductQty, RemoveAllItem, RemoveProduct, TotalOrder } from '../reducers/Actions';
 import Firebase from '../firebaseConfig';
 import "firebase/storage";
 import 'firebase/firestore';
@@ -16,15 +17,22 @@ const Storeitems = ({route, navigation}) => {
     const [StoreProducts,SetStoreProducts] = React.useState(null)
     const [storecategories,SetStoreCategories] = React.useState([]);
     const [storeItems,SetstoreItems] = React.useState();
-    const [basketState,setBasketState] = React.useState([]);
     const [selectedCategory, setSelectedCategory ] = React.useState(null)
+    const [basketCount,setBasketCount] = React.useState(store.getState().BasketCount);
+    const [CurrentBasketState, SetCurrentBasketState ] = React.useState(store.getState());
+    const [productCount,setProductCount] = React.useState();
+    const [modalVisible, setModalVisible] = React.useState(false)
+    const [basketItem,setBasketItem] = React.useState();
+    const [currentCartItem, setcurrentCartItem] = React.useState(null)
+    const [PriceTotal,SetPriceTotal] = React.useState();
     React.useEffect(() =>{
         let {item} = route.params;
-        SetStore(item);             
-        getProductsData();         
+        SetStore(item); 
+            
+        getProductsData();
+        getStoreData(); 
         getCatData();
         getProductByStoreData(item?.key);
-        getStoreData();
                
     },[])
     const getProductsData = async () => {
@@ -103,7 +111,8 @@ const Storeitems = ({route, navigation}) => {
       function getProductByStoreData(id){
           let storeProducts = Products.filter(a => a.prodStoreid == id)
           if (storeProducts.length > 0) {
-            SetStoreProducts(storeProducts);
+              const uniqProd = [...new Set(storeProducts)]
+            SetStoreProducts(uniqProd);
           const cats = storeProducts.map(d =>{
                return getCategoryByIds(`${d.prodcatid}`)[0] 
             }) 
@@ -137,6 +146,72 @@ const Storeitems = ({route, navigation}) => {
         SetstoreItems(catsProdsids);
         setSelectedCategory(category)
     }
+
+    function AddOrder(id, price, name,image,unit) {
+        store.dispatch(AddProduct(id, price,name,image,unit))
+        store.dispatch(filtredOrderPrds(id))      
+        store.dispatch(ProductQty(id))
+        store.dispatch(TotalOrder())
+        store.dispatch(BasketCount())
+        setBasketItem(store.getState().filteredOrder)
+        setBasketCount(store.getState().BasketCount)
+        SetPriceTotal(store.getState().total)
+        setProductCount(store.getState().itemCount)
+        console.log(store.getState());
+        console.log(basketItem);
+  
+      }
+      function RemoveOrder(id, price) {
+        store.dispatch(RemoveProduct(id, price))
+        store.dispatch(filtredOrderPrds(id)) 
+        store.dispatch(ProductQty(id))
+        store.dispatch(BasketCount())
+        store.dispatch(TotalOrder())
+        setBasketItem(store.getState().filteredOrder)
+        setBasketCount(store.getState().BasketCount)
+        SetPriceTotal(store.getState().total)
+        setProductCount(store.getState().itemCount)
+        console.log(store.getState());
+        console.log(basketItem);
+      
+      }
+      function removeAll(id){
+        store.dispatch(RemoveAllItem(id))
+        store.dispatch(filtredOrderPrds(id)) 
+        store.dispatch(ProductQty(id))
+        store.dispatch(BasketCount())
+        store.dispatch(TotalOrder())
+        setBasketItem(store.getState().filteredOrder)
+        SetPriceTotal(store.getState().total)
+        setBasketCount(store.getState().BasketCount)
+        setProductCount(0)
+        console.log(store.getState());
+        console.log(basketItem);
+  
+  
+      }
+      function renderContinue () {
+        if (basketCount > 0) {
+            navigation.navigate("myOrderList"
+             )
+        } else {
+            Alert.alert(
+                "Alert!",
+                "First Add Items In The Cart To Continue",
+            [
+                {text: "Cancel",
+                 onPress:()=> console.log('ok'),
+                 style:"cancel"
+                },
+                {text: "Ok",
+                 onPress:() => setModalVisible(true)}
+            ]) 
+        }
+    }
+    const AddtoCart = (item) => {
+        setcurrentCartItem(item)
+        setModalVisible(!modalVisible)
+    }
  
     function renderHeader(){
         return(
@@ -153,35 +228,127 @@ const Storeitems = ({route, navigation}) => {
               </View>
               <TouchableOpacity
                 style={styles.cartCount}
-                onPress = {() => ShowOrderItems()}> 
-                {basketState.BasketCount > 0 ? 
+                onPress = {() => renderContinue()}> 
+                  {basketCount > 0 ? 
                      <Text style={styles.getBasketCount}>
-                          {basketState.BasketCount}
-                      </Text>:
-                     <Text></Text>   
-                }                 
+                     {basketCount}
+                 </Text>:
+                <Text></Text>   
+           }                  
                     <MaterialCommunityIcons name= 'cart-outline' size={27} color={COLORS.white}/>
               </TouchableOpacity>
             </View>
         )
     }
+    function renderModal() {
+        return(
+            <View style={styles.centeredView}>
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                setModalVisible(!modalVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                <Text style={[styles.Titles,{marginBottom:10,alignSelf:'center'}]}>Cart Details:</Text>
+                  <Text style={styles.modalText}>Quantity Variation: {currentCartItem?.prodprice}</Text>
+                  <View style={styles.centered} >                    
+                       <Text style={styles.textStyle}>Unit Price: ksh {basketItem?.price}</Text>
+                      <Text style={styles.textStyle}style={styles.textStyle}>Total Price: Ksh {basketItem?.total}</Text>
+                      <Text style={styles.textStyle}>Items: {basketItem?.qty}</Text>
+                  </View>
+                  <Text style={[styles.SmallText,{margin:15,marginLeft:-8, color:COLORS.darkgrey4}]}>Total Price For All Items In Cart: ksh {PriceTotal}</Text>
+                      {/**Quantity */}
+                      <View style={styles.OrderIncrementView}>
+                            <TouchableOpacity
+                                style={[styles.OrderIncrement,{borderTopLeftRadius:25,
+                                  borderBottomLeftRadius:25}]}
+                                onPress = {() =>  RemoveOrder(currentCartItem?.key,currentCartItem?.prodprice)}
+                            >
+                                <Text style={{...FONTS.body1}}>
+                                <FontAwesome name='minus-circle' size={20} color={COLORS.black}/>    
+                                </Text>
+                            </TouchableOpacity>
+                            <View 
+                                style={styles.OrderIncrement} >
+                                <Text style={{...FONTS.h2, fontWeight:'bold'}}> {productCount}</Text>
+                            </View>
+                            <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
+                                    borderBottomRightRadius:25}]}
+                                onPress = {() =>  AddOrder(currentCartItem?.key,currentCartItem?.prodprice,currentCartItem?.prodname, currentCartItem?.imageUrls[0].url,currentCartItem?.productUnit)}
+                            >
+                                <Text style={{...FONTS.body1}}>
+                                  <FontAwesome name='plus-circle' size={20} color={COLORS.black}/>  
+                                </Text>
+                           
+                             </TouchableOpacity>
+                        </View>
+                  <TouchableOpacity
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => setModalVisible(!modalVisible)}
+                  >
+                    <Text style={[styles.textStyle,{color:COLORS.blackSecondary}]}> OK </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.btn, styles.buttonReset]}
+                    onPress={() => removeAll(currentCartItem?.key)}
+                  >
+                    <Text style={styles.textStyle}>Reset</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </Modal>
+          </View>
+        )
+    }
     function renderCats() {    
       const renderCategories = ({ item }) => (
+
+          <View style={[styles.bodycontainer,{marginBottom:20}]}>
         <TouchableOpacity onPress = {() => navigation.navigate("ProductDetails", {
             item,
             storeItems
         })}
         >
-          <View style={styles.bodycontainer}>
-            <Image style={styles.bodyphoto} source = {{uri: item?.imageUrls[1].url}} />
-            <Text style={[styles.bodytitle,{color: COLORS.darkgrey4}]}>{item?.prodname}</Text>
+            <Image style={[styles.bodyphoto,{marginTop:-45}]} source = {{uri: item?.imageUrls[0].url}} />
+            <Text style={[{color: COLORS.darkgrey4, alignSelf:'center',...FONTS.h3,fontWeight:'bold',top:5}]}>{item?.prodname}</Text>
+           </TouchableOpacity>
            
             <Text style={[styles.bodycategory,
                 {color:COLORS.darkblue,padding:5,fontSize:17, fontWeight:'bold'}]}>
                     KSh {item?.prodprice}/ {item?.productUnit}
             </Text>
+            <View style={styles.OrderIncrementView}>
+                            <TouchableOpacity
+                                style={[styles.OrderIncrement,{borderRadius:15,borderTopRightRadius:0,width:SIZES.width*0.23}]}
+                                onPress={() => removeAll(product?.key)}
+                            >
+                                <View style={{flexDirection:'row',alignItems:'center'}}>
+                                <AntDesign name="minuscircleo" size={20} color="black" />
+                                <Text style={{...FONTS.body5}}> Remove</Text>   
+                               
+                                </View>
+                               
+                            </TouchableOpacity>
+                           
+                            <TouchableOpacity  style={[styles.OrderIncrement,{borderRadius:15,borderTopLeftRadius:0,width:SIZES.width*0.2}]}
+                                onPress = {() =>  AddtoCart(item)}
+                            >
+                                 <View style={{flexDirection:'row',alignItems:'center'}}>
+                                 <AntDesign name="plus" size={16} color="black" />
+                                <Text style={{...FONTS.body5}}> cart</Text>   
+                               
+                                </View>
+                           
+                             </TouchableOpacity>
+                        </View>
           </View>
-        </TouchableOpacity>
+       
       )
       return(
         <FlatList
@@ -211,7 +378,7 @@ const Storeitems = ({route, navigation}) => {
                         {item?.catname}
                     </Text>
                     <Text style={[styles.bodytitle,{color: COLORS.darkgrey4,bottom:5}]}>
-                        {item?.catdetails}
+                        {item?.catdetails.substring(0, 25)}....
                     </Text>
                     </View>
                 </TouchableOpacity>         
@@ -263,14 +430,34 @@ const Storeitems = ({route, navigation}) => {
             </View>
         )
     }
-   
+    function renderTotals(){
+        return(
+            <View style={styles.totals}>
+                <View style={styles.totalCentered}>
+                    <View>
+                        <Text style={styles.btntext}>Items in Your Cart: {CurrentBasketState?.BasketCount} </Text>
+                        <Text style={styles.btntext}>Total Payable Amount: ksh {CurrentBasketState?.total}</Text>
+                    </View> 
+                    <TouchableOpacity
+                        style={styles.btnContinue }
+                        onPress={() =>navigation.navigate('myOrderList')}
+                    >
+                        <Text style={styles.btntext}>CheckOut</Text>
+                    </TouchableOpacity>                       
+                </View>   
+            </View>
+        )
+    }
     return (
         <SafeAreaView style={styles.Container}>      
             {selectedCategory !== null ?
                 <View>
                     {renderHeader()}
+                     
                     {renderMainCategories()}
-                    {renderCats()}          
+                    {renderCats()}
+                    {renderModal()} 
+                           
                    
                 </View>
                 :
@@ -278,6 +465,7 @@ const Storeitems = ({route, navigation}) => {
                    {renderHeader()}
                    {renderMainCategories()}
                    {renderCatsvertically()}
+                 
                 </View>
             }         
        
@@ -304,6 +492,19 @@ const styles = StyleSheet.create({
         paddingLeft: SIZES.padding *2,
         justifyContent: 'center'
     },
+    OrderIncrement: {
+        paddingHorizontal:SIZES.padding2*1.5,
+        paddingVertical:SIZES.padding*0.8,
+        backgroundColor: COLORS.white,
+        alignItems:'center',
+        justifyContent:'center',
+      },
+      OrderIncrementView: {
+        position:'absolute',
+        bottom:-15,
+        justifyContent:'center',
+        flexDirection:'row'
+      },
     storeMainview: {
         flex: 1,
         alignItems:'center',
@@ -391,6 +592,96 @@ const styles = StyleSheet.create({
     bodycategory: RecipeCard.category,
     catBody: {
         marginBottom:80,
-    }
+    },
+    totals: {
+        marginTop:70,
+        position:'absolute',
+        padding:SIZES.padding*1.2,
+        bottom:0,
+        width:SIZES.width,
+        borderTopLeftRadius:10,
+        borderTopRightRadius:10,
+        backgroundColor:COLORS.blackSecondary,
+    },
+    totalCentered:{
+        flexDirection:'row',
+        alignItems:'center',
+        justifyContent:'space-between'
+    },
+    btnContinue:{
+        backgroundColor:COLORS.primary,
+        borderWidth:2,
+        borderColor:'#fff',
+        padding:10,
+        alignItems:'center', 
+        justifyContent:'center',
+        borderRadius: 10 
+    },
+    btntext:{
+        color:COLORS.white,
+        ...FONTS.h5,
+
+    },
+    centeredView: {
+        flex:1,
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: 78,
+        },
+        modalView: {
+          margin: 20,
+          width:SIZES.width,        
+          backgroundColor:  COLORS.blackSecondary || 'rgb(20, 30, 38)',
+          borderRadius: 20,
+          padding: 35,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 5
+        },
+        button: {
+          width:SIZES.width*0.2,
+          position:'absolute',
+          bottom:-2,
+          left:0,
+          borderBottomLeftRadius:20,
+          borderRadius: 10,
+          borderColor:COLORS.blackSecondary,
+          borderWidth:1,
+          padding: 10,
+        },
+        btn: {
+          width:SIZES.width*0.2,
+          position:'absolute',
+          bottom:-2,
+          right:0,
+          borderBottomRightRadius:20,
+          borderRadius: 10,
+          borderColor:COLORS.blackSecondary,
+          borderWidth:1,
+          padding: 10,
+        },
+        buttonClose: {
+          backgroundColor: COLORS.darkgrey4,
+          color:COLORS.blackSecondary,
+        },
+        buttonReset: {
+          backgroundColor: COLORS.primary,
+          color:COLORS.white,
+        },
+        textStyle: {
+          color:COLORS.white,
+          fontWeight: "bold",
+          textAlign: "center"
+        },
+        modalText: {
+          marginBottom: 15,
+          textAlign: "center",
+          color:COLORS.white,
+        },
 
 })

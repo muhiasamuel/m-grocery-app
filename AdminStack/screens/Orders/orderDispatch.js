@@ -13,7 +13,7 @@ import CustomersOrder from './CustomersOrder';
 
 // create a component
 const OrderDispatch = ({route, navigation}) => {
-  const {AuthUserRole} = useContext(AuthenticatedUserContext);
+  const {AuthUserRole} = React.useContext(AuthenticatedUserContext);
 
     const [order, setorder] = useState()
     const [deliverlyPesrson, setdeliverlyPesrson] = useState()

@@ -75,7 +75,7 @@ const tabs = () => {
            name="Home"
            component={Adminhome}
            options={{
-            headerShown:true,
+            headerShown:false,
             headerStyle: {
                 backgroundColor: COLORS.darkblue,
               },

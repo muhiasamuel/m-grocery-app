@@ -9,11 +9,38 @@ import { AuthenticatedUserContext } from "../../AuthProvider/AuthProvider";
 import { Avatar, Colors, Title,Badge } from "react-native-paper";
 
 const Adminhome = ({navigation}) => {
+  const auth = Firebase.auth();
+  const LogOutUser = async function() {
+    try {
+        await auth.signOut();
+      } catch (error) {
+        console.log(error);
+      }
+}
+
+  function renderHeader(){
+    return(
+        <View style={styles.headerView}>
+            <View style={styles.storeMainview}>
+              <View style={styles.storeSubview}>
+                  <Text style={styles.storeTitle}>Home</Text>
+              </View>
+          </View>
+          <TouchableOpacity
+          onPress={() =>LogOutUser()}
+            style={{paddingRight:SIZES.padding}}
+
+          >                 
+          <FontAwesome5 name="sign-out-alt" size={24} color="white" /> 
+         </TouchableOpacity>
+        </View>
+    )
+}
 
   function renderCards(){
     return(
       <View style={styles.cardView}>
-        <Title style={[styles.titleText,{...FONTS.h2,color: COLORS.white}]}>Admin Home</Title>
+        
         <View style={styles.cardrow}>
           <TouchableOpacity style ={styles.pannels}
             onPress={()=> navigation.navigate("store")}
@@ -131,16 +158,21 @@ const Adminhome = ({navigation}) => {
     )
 
   }
+
     return (
-        <ScrollView style={styles.center}>
+      <View  style={styles.center}>
+        {renderHeader()}
+        <ScrollView>
+          
           {renderCards()}
-        <Text>This is the home screen</Text>
         <TouchableOpacity
           onPress={() => navigation.navigate('users')}
         >
             <Text>press me</Text>
         </TouchableOpacity>
       </ScrollView>
+      </View>
+      
     )
 }
 
@@ -151,6 +183,29 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor:COLORS.backgroundColor
       },
+      headerView: {
+        padding:SIZES.padding*0.5,
+        flexDirection:"row", 
+        backgroundColor:COLORS.darkblue,
+        marginBottom:2
+    },
+    storeMainview: {
+        flex: 1,
+        alignItems:'center',
+        justifyContent:'center'
+    },
+    storeSubview: {
+        marginBottom:9,
+        alignItems:'center',
+        justifyContent:'center',
+        borderRadius: SIZES.radius
+    },
+    storeTitle: {
+        ...FONTS.h2, 
+        fontWeight:'bold',
+        color:COLORS.white, 
+        fontStyle:'normal'
+    },
       cardView:{
         paddingVertical:SIZES.padding*0.1,
         width:SIZES.width*0.99,
