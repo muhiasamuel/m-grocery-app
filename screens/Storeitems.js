@@ -1,6 +1,6 @@
-import { AntDesign, FontAwesome, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { AntDesign, Entypo, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import React from 'react'
-import { Animated, FlatList, Image, SafeAreaView,  StyleSheet, Text, TouchableOpacity, View,Modal } from 'react-native'
+import { Animated, FlatList, Image, SafeAreaView,  StyleSheet, Text, TouchableOpacity, View,Modal, TouchableNativeFeedback } from 'react-native'
 import { RecipeCard } from '../constants/AppStyles'
 import store from '../reducers/store';
 import { COLORS, FONTS,  SIZES } from '../constants/Index'
@@ -22,7 +22,7 @@ const Storeitems = ({route, navigation}) => {
     const [CurrentBasketState, SetCurrentBasketState ] = React.useState(store.getState());
     const [productCount,setProductCount] = React.useState();
     const [modalVisible, setModalVisible] = React.useState(false)
-    const [basketItem,setBasketItem] = React.useState();
+    const [basketItem,setBasketItem] = React.useState(null);
     const [currentCartItem, setcurrentCartItem] = React.useState(null)
     const [PriceTotal,SetPriceTotal] = React.useState();
     React.useEffect(() =>{
@@ -209,8 +209,17 @@ const Storeitems = ({route, navigation}) => {
         }
     }
     const AddtoCart = (item) => {
+      
         setcurrentCartItem(item)
+        store.dispatch(filtredOrderPrds(item?.key)) 
         setModalVisible(!modalVisible)
+        
+    }
+
+    const modalClose = () =>{
+      setBasketItem();
+      setModalVisible(!modalVisible)     
+      console.log(basketItem);
     }
  
     function renderHeader(){
@@ -240,11 +249,13 @@ const Storeitems = ({route, navigation}) => {
             </View>
         )
     }
+
     function renderModal() {
         return(
             <View style={styles.centeredView}>
+               <TouchableNativeFeedback onPress={() => setModalVisible(!modalVisible)}>
             <Modal
-              animationType="fade"
+              animationType="slide"
               transparent={true}
               visible={modalVisible}
               onRequestClose={() => {
@@ -252,47 +263,65 @@ const Storeitems = ({route, navigation}) => {
                 setModalVisible(!modalVisible);
               }}
             >
+              
               <View style={styles.centeredView}>
+                
                 <View style={styles.modalView}>
-                <Text style={[styles.Titles,{marginBottom:10,alignSelf:'center'}]}>Cart Details:</Text>
-                  <Text style={styles.modalText}>Quantity Variation: {currentCartItem?.prodprice}</Text>
-                  <View style={styles.centered} >                    
-                       <Text style={styles.textStyle}>Unit Price: ksh {basketItem?.price}</Text>
-                      <Text style={styles.textStyle}style={styles.textStyle}>Total Price: Ksh {basketItem?.total}</Text>
-                      <Text style={styles.textStyle}>Items: {basketItem?.qty}</Text>
+                <TouchableOpacity
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => modalClose()}
+                  >
+                    <Entypo name="cross" size={24} color="white" />
+                  </TouchableOpacity>
+                  
+                
+                <Text style={[styles.Titles,{marginVertical:15,color:COLORS.white,...FONTS.body2, alignSelf:'center'}]}>Add {currentCartItem?.prodname} My to  Cart</Text>
+                  
+                  <View style={[styles.centered,{marginHorizontal:SIZES.padding2, marginVertical:SIZES.padding2}]} > 
+                    <Image style={[{width:SIZES.width*0.24,height:SIZES.height*0.10,borderRadius:25}]} source = {{uri: currentCartItem?.imageUrls[0].url}} />
+                    <View style={{width:SIZES.width*0.3,left:-10}}>
+                        <Text style={styles.textStyle}>Price: ksh {basketItem?.price}/ {basketItem?.unit} </Text>
+                        <Text style={styles.textStyle}style={styles.textStyle}>Total Price: Ksh {basketItem?.total}</Text>
+                        <Text style={styles.textStyle}>Items: {basketItem?.qty}</Text>
+                    </View>
+                    <Text style={[styles.SmallText,{margin:15,marginLeft:-8, color:COLORS.darkgrey4, width:SIZES.width*0.25 }]}>Total Price For All Items In Cart:  
+                    <Text style={{...FONTS.body3,color:COLORS.white}}>ksh {PriceTotal}</Text> </Text>  
                   </View>
-                  <Text style={[styles.SmallText,{margin:15,marginLeft:-8, color:COLORS.darkgrey4}]}>Total Price For All Items In Cart: ksh {PriceTotal}</Text>
-                      {/**Quantity */}
-                      <View style={styles.OrderIncrementView}>
+                  <View style={{flexDirection:'row', alignItems:'center',justifyContent:'space-between',marginBottom:SIZES.padding,marginHorizontal:SIZES.padding2}}>
+                  <View style={styles.OrderIncrementView}>
                             <TouchableOpacity
                                 style={[styles.OrderIncrement,{borderTopLeftRadius:25,
                                   borderBottomLeftRadius:25}]}
                                 onPress = {() =>  RemoveOrder(currentCartItem?.key,currentCartItem?.prodprice)}
                             >
                                 <Text style={{...FONTS.body1}}>
-                                <FontAwesome name='minus-circle' size={20} color={COLORS.black}/>    
+                                <AntDesign name="minuscircleo" size={27} color={COLORS.white} />
                                 </Text>
                             </TouchableOpacity>
                             <View 
                                 style={styles.OrderIncrement} >
-                                <Text style={{...FONTS.h2, fontWeight:'bold'}}> {productCount}</Text>
+                                  {basketItem ? 
+                                  <Text style={{...FONTS.h2,color:COLORS.white, fontWeight:'bold'}}> {basketItem?.qty}</Text>
+                                  :
+                                  <Text style={{...FONTS.h2,color:COLORS.white, fontWeight:'bold'}}> 0 </Text>
+                                }
+                               
+                                   
+                                
                             </View>
                             <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
                                     borderBottomRightRadius:25}]}
                                 onPress = {() =>  AddOrder(currentCartItem?.key,currentCartItem?.prodprice,currentCartItem?.prodname, currentCartItem?.imageUrls[0].url,currentCartItem?.productUnit)}
                             >
                                 <Text style={{...FONTS.body1}}>
-                                  <FontAwesome name='plus-circle' size={20} color={COLORS.black}/>  
+                                <AntDesign name="pluscircleo" size={27} color={COLORS.white} />
                                 </Text>
                            
                              </TouchableOpacity>
                         </View>
-                  <TouchableOpacity
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => setModalVisible(!modalVisible)}
-                  >
-                    <Text style={[styles.textStyle,{color:COLORS.blackSecondary}]}> OK </Text>
-                  </TouchableOpacity>
+                 
+                      {/**Quantity */}
+                     
 
                   <TouchableOpacity
                     style={[styles.btn, styles.buttonReset]}
@@ -300,10 +329,14 @@ const Storeitems = ({route, navigation}) => {
                   >
                     <Text style={styles.textStyle}>Reset</Text>
                   </TouchableOpacity>
+                  </View>
+                 
                 </View>
               </View>
             </Modal>
+            </TouchableNativeFeedback>
           </View>
+         
         )
     }
     function renderCats() {    
@@ -323,30 +356,19 @@ const Storeitems = ({route, navigation}) => {
                 {color:COLORS.darkblue,padding:5,fontSize:17, fontWeight:'bold'}]}>
                     KSh {item?.prodprice}/ {item?.productUnit}
             </Text>
-            <View style={styles.OrderIncrementView}>
-                            <TouchableOpacity
-                                style={[styles.OrderIncrement,{borderRadius:15,borderTopRightRadius:0,width:SIZES.width*0.23}]}
-                                onPress={() => removeAll(product?.key)}
-                            >
-                                <View style={{flexDirection:'row',alignItems:'center'}}>
-                                <AntDesign name="minuscircleo" size={20} color="black" />
-                                <Text style={{...FONTS.body5}}> Remove</Text>   
-                               
-                                </View>
-                               
-                            </TouchableOpacity>
-                           
-                            <TouchableOpacity  style={[styles.OrderIncrement,{borderRadius:15,borderTopLeftRadius:0,width:SIZES.width*0.2}]}
-                                onPress = {() =>  AddtoCart(item)}
-                            >
-                                 <View style={{flexDirection:'row',alignItems:'center'}}>
-                                 <AntDesign name="plus" size={16} color="black" />
-                                <Text style={{...FONTS.body5}}> cart</Text>   
-                               
-                                </View>
-                           
-                             </TouchableOpacity>
-                        </View>
+            <View style={styles.OrderIncrementView1}>
+        
+                <TouchableOpacity  style={[styles.OrderIncrement1,{borderRadius:15,borderTopLeftRadius:0,width:SIZES.width*0.2}]}
+                    onPress = {() =>  AddtoCart(item)}
+                >
+                      <View style={{flexDirection:'row',alignItems:'center'}}>
+                      <AntDesign name="plus" size={16} color="black" />
+                    <Text style={{...FONTS.body5}}> to Cart</Text>   
+                    
+                    </View>
+                
+                  </TouchableOpacity>
+            </View>
           </View>
        
       )
@@ -389,7 +411,7 @@ const Storeitems = ({route, navigation}) => {
                    vertical
                    showsVerticalScrollIndicator={false}
                    numColumns={2}
-                   keyExtractor={item => `${item.id}`}
+                   keyExtractor={item => `${item.key}`}
                    renderItem={renderItem}
                    contentContainerStyle={{
                     marginBottom:30,
@@ -430,35 +452,16 @@ const Storeitems = ({route, navigation}) => {
             </View>
         )
     }
-    function renderTotals(){
-        return(
-            <View style={styles.totals}>
-                <View style={styles.totalCentered}>
-                    <View>
-                        <Text style={styles.btntext}>Items in Your Cart: {CurrentBasketState?.BasketCount} </Text>
-                        <Text style={styles.btntext}>Total Payable Amount: ksh {CurrentBasketState?.total}</Text>
-                    </View> 
-                    <TouchableOpacity
-                        style={styles.btnContinue }
-                        onPress={() =>navigation.navigate('myOrderList')}
-                    >
-                        <Text style={styles.btntext}>CheckOut</Text>
-                    </TouchableOpacity>                       
-                </View>   
-            </View>
-        )
-    }
+ 
     return (
         <SafeAreaView style={styles.Container}>      
             {selectedCategory !== null ?
-                <View>
-                    {renderHeader()}
-                     
-                    {renderMainCategories()}
-                    {renderCats()}
-                    {renderModal()} 
+            <View>
+                {renderHeader()}   
+                {renderMainCategories()}
+                {renderCats()}
+                {renderModal()} 
                            
-                   
                 </View>
                 :
                 <View>
@@ -493,15 +496,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     OrderIncrement: {
-        paddingHorizontal:SIZES.padding2*1.5,
-        paddingVertical:SIZES.padding*0.8,
-        backgroundColor: COLORS.white,
+        paddingHorizontal:SIZES.padding2*1,
         alignItems:'center',
         justifyContent:'center',
       },
       OrderIncrementView: {
-        position:'absolute',
-        bottom:-15,
+        bottom:0,
         justifyContent:'center',
         flexDirection:'row'
       },
@@ -624,16 +624,16 @@ const styles = StyleSheet.create({
     },
     centeredView: {
         flex:1,
-          justifyContent: "center",
           alignItems: "center",
-          marginTop: 78,
+          justifyContent:'flex-end'
         },
         modalView: {
-          margin: 20,
           width:SIZES.width,        
           backgroundColor:  COLORS.blackSecondary || 'rgb(20, 30, 38)',
-          borderRadius: 20,
-          padding: 35,
+          borderRadius: 10,
+          borderBottomRightRadius:0,
+          borderBottomLeftRadius:0,
+          padding: 3,
           shadowColor: "#000",
           shadowOffset: {
             width: 0,
@@ -644,10 +644,9 @@ const styles = StyleSheet.create({
           elevation: 5
         },
         button: {
-          width:SIZES.width*0.2,
           position:'absolute',
-          bottom:-2,
-          left:0,
+          top:-14,
+          right:-1,
           borderBottomLeftRadius:20,
           borderRadius: 10,
           borderColor:COLORS.blackSecondary,
@@ -655,18 +654,16 @@ const styles = StyleSheet.create({
           padding: 10,
         },
         btn: {
-          width:SIZES.width*0.2,
-          position:'absolute',
           bottom:-2,
           right:0,
-          borderBottomRightRadius:20,
+          paddingHorizontal:SIZES.padding2,
           borderRadius: 10,
-          borderColor:COLORS.blackSecondary,
+          borderColor:COLORS.white,
           borderWidth:1,
           padding: 10,
         },
         buttonClose: {
-          backgroundColor: COLORS.darkgrey4,
+          backgroundColor: COLORS.blackSecondary,
           color:COLORS.blackSecondary,
         },
         buttonReset: {
@@ -682,6 +679,24 @@ const styles = StyleSheet.create({
           marginBottom: 15,
           textAlign: "center",
           color:COLORS.white,
+        },
+        centered:{
+          flexDirection:'row',
+          alignItems:'center',
+          justifyContent:'space-between'
+        },     
+         OrderIncrement1: {
+           padding:SIZES.padding2,
+          backgroundColor: COLORS.white,
+          alignItems:'center',
+          justifyContent:'center',
+        },
+        OrderIncrementView1: {
+          position:'absolute',
+          bottom:-12,
+          width: SIZES.width,
+          justifyContent:'center',
+          flexDirection:'row'
         },
 
 })

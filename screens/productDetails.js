@@ -236,7 +236,7 @@ const productDetails =  ({route, navigation}) => {
                     </View>
                     <Text style={[styles.Titles,{marginTop:15,}]}>Product Specifications</Text>
                     <View style={styles.prodDescriptionView}>                  
-                        <Text style={styles.SmallText}> {product?.proddatails} </Text>   
+                        <Text style={[styles.SmallText,{...FONTS.body4,fontWeight:'normal'}]}> {product?.proddetails} </Text>   
                     </View>
                 </View>
                

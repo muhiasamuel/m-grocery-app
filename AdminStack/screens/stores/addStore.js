@@ -6,7 +6,7 @@ import "firebase/storage";
 import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
-import { Avatar, DataTable } from 'react-native-paper';
+import { Avatar, Colors, DataTable } from 'react-native-paper';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
 
 const Store =  ({route, navigation}) => {
@@ -217,7 +217,7 @@ function renderAddStore(){
          <TextInput
           style={styles.input}
           value={storeName}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey800}
           placeholder={"Store Name"}
           onChangeText={(text) => setstoreName(text)}
           autoCapitalize={"none"}
@@ -227,7 +227,7 @@ function renderAddStore(){
           numberOfLines={8}
           style={[styles.input,{borderRadius:5}]}
           value={storeDetails}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey800}
           placeholder={"StoreDetails"}
           onChangeText={(text) => setstoreDetails(text)}
           autoCapitalize={"none"}
@@ -236,7 +236,7 @@ function renderAddStore(){
                 <TextInput
           style={[styles.input, {width:SIZES.width*0.54}]}
           value={location}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey800}
           placeholder={"Location"}
           onChangeText={(text) => setStoreLocation(text)}
           autoCapitalize={"none"}
@@ -244,7 +244,7 @@ function renderAddStore(){
             <TextInput
           style={[styles.input,{width:SIZES.width*0.42 }]}
           value={storeIdNo}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey800}
           placeholder={"Store Id"}
           onChangeText={(text) => setstoreIdNo(text)}
           autoCapitalize={"none"}
@@ -264,17 +264,11 @@ function renderAddStore(){
               style={{alignItems:'center'}}
               onPress={() => setcatDataVisible(!catDataVisible)}
             >
-              <Text style={{color:COLORS.white,...FONTS.body3}}>Edit store Data</Text> 
-              <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.white} />
+              <Text style={{color:COLORS.blackSecondary,...FONTS.body3}}>Edit store Data</Text> 
+              <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.blackSecondary} />
             </TouchableOpacity> 
             </View>
-            <TouchableOpacity
-              style={{alignItems:'center'}}
-              onPress={() => LogOutUser()}
-            >
-              <Text style={{color:COLORS.white,...FONTS.body3}}>logout</Text> 
-              <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.white} />
-            </TouchableOpacity>
+           
     </SafeAreaView>
   )
 }
@@ -282,8 +276,8 @@ function renderAddStore(){
 function renderstoreim(){
   return(
     <View>
-      <View style={styles.buttonContainer}>
-        <Text style={styles.label}>Store Image:</Text>
+      <View style={[styles.buttonContainer,{backgroundColor:Colors.grey50}]}>
+        <Text style={[styles.label,{color:Colors.grey800}]}>Store Image:</Text>
         <TouchableOpacity
           onPress={showImagePicker}
         >
@@ -292,7 +286,7 @@ function renderstoreim(){
         
         <TouchableOpacity
           onPress={openCamera}>
-             <FontAwesome5 name='camera' size={38} color={COLORS.white}/>
+             <FontAwesome5 name='camera' size={38} color={Colors.teal900}/>
           </TouchableOpacity>
         </View>
       <View style={styles.imageContainer}>
@@ -327,7 +321,7 @@ function renderStoreEdit(){
             justifyContent:'space-around',
             alignItems:'center'}}>
            
-            <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.storeName}</Text>
+            <Text style={[styles.storeName,{color:Colors.grey600}]}>{item?.storeName}</Text>
             <Image style={styles.bodyphoto} source={{uri: item?.storeimage}} />
             <TouchableOpacity
               onPress={() => navigation.navigate('editStore',{
@@ -345,10 +339,10 @@ function renderStoreEdit(){
             flexDirection:'row',
             justifyContent:'space-around',
             alignItems:'center'}}>
-          <Text style={[styles.storeName,{...FONTS.h4, color:COLORS.white}]}>StoreName</Text>
-          <Text style={[styles.storeName,{...FONTS.h4, color:COLORS.white}]}>Cat Image</Text>
+          <Text style={[styles.storeName,{...FONTS.h4, color:Colors.grey600}]}>StoreName</Text>
+          <Text style={[styles.storeName,{...FONTS.h4, color:Colors.grey600}]}>Cat Image</Text>
           
-          <Text style={[styles.storeName,{...FONTS.h4, color:COLORS.white}]}>Actions</Text>
+          <Text style={[styles.storeName,{...FONTS.h4, color:Colors.grey600}]}>Actions</Text>
         </View>
        
         <FlatList
@@ -358,7 +352,7 @@ function renderStoreEdit(){
               showsVerticalScrollIndicator={false}
             contentContainerStyle={{
               paddingBottom:25,
-              backgroundColor:COLORS.white
+              backgroundColor:'#fff'
             }}
         />
         </>
@@ -377,11 +371,11 @@ function renderStoreEdit(){
            :
            <>
             <TouchableOpacity
-              style={{alignItems:'center'}}
+              style={{alignItems:'center',backgroundColor:Colors.grey50}}
               onPress={() => setcatDataVisible(!catDataVisible)}
             >
-              <Text style={{color:COLORS.white,...FONTS.body3}}>Add store Data</Text> 
-              <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.white} />
+              <Text style={{color:COLORS.darkblue,...FONTS.body2,}}>Add store Data</Text> 
+              <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.darkblue} />
             </TouchableOpacity>
            {renderStoreEdit()}
            </>
@@ -398,7 +392,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor:COLORS.backgroundColor,
+    backgroundColor:Colors.grey100,
   },
   container: {
     marginVertical:SIZES.padding,
@@ -443,11 +437,10 @@ storeTitle: {
   },
   btbbtn: {
     borderRadius:10,
-    backgroundColor:COLORS.white,
-    padding:SIZES.padding,
-    ...FONTS.body3,
-    color:COLORS.darkblue,
-    borderColor:COLORS.darkgrey,
+    backgroundColor:Colors.lightGreen400,
+    padding:SIZES.padding*0.9,
+    color:COLORS.white,
+    borderColor:Colors.teal400,
     borderWidth:3
   },
   imageContainer: {
@@ -459,14 +452,14 @@ storeTitle: {
   },
   input: {
     width:SIZES.width*0.95,
-    borderColor:COLORS.darkgrey4,
-    borderWidth:0.5,
+    borderColor:Colors.tealA400,
+    borderWidth:0.6,
     paddingHorizontal:SIZES.padding2,
     paddingVertical:10,
     borderRadius:10,
     marginBottom: 12,    
-    color:COLORS.white,
-    backgroundColor: COLORS.transparent,
+    color:COLORS.blackSecondary,
+    backgroundColor: COLORS.white,
   },
   label: {
     color:COLORS.white,
@@ -483,7 +476,9 @@ storeTitle: {
     paddingVertical:SIZES.padding2,
     color:'#fff',
     ...FONTS.h3,
-    backgroundColor:COLORS.primary,
+    borderWidth:2,
+    borderColor:Colors.teal300,
+    backgroundColor:Colors.indigoA200,
     borderRadius:SIZES.radius*0.3
   },
   btnUpdateStore:{
@@ -507,10 +502,10 @@ storeTitle: {
     width:SIZES.width*0.3
   },
   bodyphoto: {
-    width:SIZES.width*0.25,
-    height:75,
+    width:SIZES.width*0.23,
+    height:65,
     borderRadius:25,
-    marginVertical:3
+    marginVertical:10
 
 }
   

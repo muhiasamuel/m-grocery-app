@@ -43,7 +43,6 @@ export default function Users() {
   const doUserRegistration = async function () {
     setIsSubmitting(true)
     const usernameValue = username;
-    const passwordValue = password;
     const Customerrole = "Deliverly Person";
     const EmailValue = userEmail;
     const PhoneNoValue = Number(UserPhoneNo);
@@ -56,7 +55,6 @@ export default function Users() {
           const docId =await Firebase.firestore().collection("Deliverly Persons").doc().id
           Firebase.firestore().collection('Deliverly Persons').doc(docId).set({
             key:docId,
-            uid: user.user.uid,
             Email:EmailValue,
             storeId:storeId,
             storeName:StoreName,
@@ -194,7 +192,7 @@ function renderdelivPersim(){
   return(
     <View>
       <View style={{flexDirection:"row"}}>
-       <Title style={{alignSelf:"center", width:SIZES.width*0.35, color:Colors.grey300}}>Deliverly Persons Image</Title>
+       <Title style={{alignSelf:"center", width:SIZES.width*0.35, color:Colors.grey600}}>Deliverly Persons Image</Title>
         
       <View style={styles.imageContainer}>
         
@@ -257,7 +255,7 @@ function renderBody() {
       <TextInput
           style={styles.input}
           value={username}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"Deliverly person Name"}
           onChangeText={(text) => setUsername(text)}
           autoCapitalize={"none"}
@@ -269,7 +267,7 @@ function renderBody() {
           style={styles.input}
           value={userEmail}            
           keyboardType="email-address"
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"Email"}
           onChangeText={(text) => setUserEmail(text)}
           autoCapitalize={"none"}
@@ -283,7 +281,7 @@ function renderBody() {
           value={UserPhoneNo}
           keyboardType='phone-pad'
           keyboardAppearance='light'            
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"phone Number"}
           onChangeText={(text) => setUserPhoneNo(text)}
           autoCapitalize={"none"}
@@ -293,7 +291,7 @@ function renderBody() {
           value={UserIdNo}
           keyboardType='phone-pad'
           keyboardAppearance='light'            
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"ID Number"}
           onChangeText={(text) => setUserIdNo(text)}
           autoCapitalize={"none"}
@@ -319,42 +317,14 @@ function renderBody() {
       <TextInput
           style={styles.input}
           value={VehRegNo}            
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"Vehicle/Bike reg No."}
           onChangeText={(text) => setVehRegNo(text)}
           autoCapitalize={"none"}
       /> 
      
    </View>
-   {/*<Text style={styles.label}>Password:</Text>*/}
-   <View style={styles.centredView}>
-      <TextInput
-          style={[styles.input,{width:SIZES.width*0.8}]}
-          value={password}
-          placeholderTextColor="#fff"
-          placeholder={"Password"}
-          secureTextEntry={secureTextEntry? true: false}
-          onChangeText={(text) => setPassword(text)}
-      /> 
-          <TouchableOpacity
-          style={styles.passeye}
-              onPress={updateSecureTextEntry}
-          >
-              {secureTextEntry?
-          <Feather
-          style={styles.eyeIcon}
-          name= "eye-off"
-          color={COLORS.darkgrey4}
-          size={24}/> :
-          <Feather
-          style={styles.eyeIcon}
-          name= "eye"
-          color={COLORS.darkgrey4}
-          size={24}/> }
-          
-          </TouchableOpacity>
-
-   </View>  
+  
      <View>
           {errorMessage && (
           <Text style={{color:'red',fontWeight:'bold',justifyContent:'center',textAlign:'center'}}>{errorMessage}</Text>
@@ -363,9 +333,9 @@ function renderBody() {
    <TouchableOpacity style={styles.btn}
       onPress={() => doUserRegistration()}>
           {isSubmitting == true ?
-          <ActivityIndicator color={COLORS.white} size='large'/> 
+          <ActivityIndicator color={COLORS.darkblue} size='large'/> 
           :  
-          <Text style={styles.btntext}>Submit</Text>   
+          <Text style={styles.btntext}>Create</Text>   
       }
       
    </TouchableOpacity>
@@ -377,8 +347,8 @@ function renderBody() {
     return (
       <View style={styles.container}>
         <ScrollView >
-          <View style={{marginVertical:20}}>
-            <Title style={{ paddingHorizontal:12,color:COLORS.white}}>Create Deliverly Persons:</Title>
+          <View style={{paddingVertical:10,backgroundColor:Colors.grey50}}>
+            <Title style={{ paddingHorizontal:12,...FONTS.body1, fontWeight:'bold', color:Colors.greenA700}}>Create Deliverly Persons:</Title>
           </View>
          {renderBody()}
         </ScrollView>
@@ -390,7 +360,7 @@ function renderBody() {
 const styles = StyleSheet.create({
   container:{
     flex: 1,
-    backgroundColor:'rgba(0,0,0,0.6)',
+    backgroundColor:Colors.grey100,
     
     
   },
@@ -406,7 +376,7 @@ const styles = StyleSheet.create({
   },
   label: {
     paddingLeft:10,
-    color:COLORS.white,
+    color:Colors.grey900,
     padding:2,
     fontSize:20,
     fontWeight:"bold"
@@ -414,15 +384,15 @@ const styles = StyleSheet.create({
 input: {
   
   width:SIZES.width*0.96,
-  borderColor:COLORS.darkgrey,
+  borderColor:Colors.teal500,
   borderWidth:1,
+  ...FONTS.h3,
+  color:Colors.greenA700,
+  backgroundColor:Colors.grey50,
   paddingHorizontal:SIZES.padding2*1.5,
   paddingVertical:10,
   borderRadius:15,
   marginBottom: 12,
-
-  color:COLORS.white,
-  backgroundColor: COLORS.transparent,
 },
 centredView:{
     flexDirection:"row",
@@ -436,9 +406,9 @@ btn: {
      justifyContent:"center",
      padding:SIZES.padding*0.7,
      width:SIZES.width*0.5,
-     backgroundColor:COLORS.primary,
+     backgroundColor:Colors.lightGreen600,
      borderRadius:10, 
-     borderColor:COLORS.white,
+     borderColor:Colors.teal500,
      borderWidth:1,
      marginTop:10
 

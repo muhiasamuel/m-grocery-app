@@ -17,7 +17,6 @@ const auth = Firebase.auth();
 
 React.useEffect(() => {
   getStoreData();
-  
 }, [])
 const getStoreData = async () => {
     try{

@@ -8,11 +8,12 @@ import { CustomersOrder, EditCat, EditStore, OrderDispatch, OrderView, ProductCa
 import { COLORS } from "../../constants/Index";
 import Ims from "../screens/ims";
 import EditProds from "../screens/Products/editProducts";
+import Ims2 from "../screens/ims2";
 
 const Stack = createStackNavigator();
 
 const screenOptionStyle = {
-        headerShown:false,
+        headerShown:true,
   headerStyle: {
     backgroundColor: COLORS.darkblue,
   },
@@ -70,7 +71,15 @@ const ProductsStackNavigator = () => {
             title: 'Selected 0 files',
           }}
         />
+         <Stack.Screen
+          name="ImageBrowser2"
+          component={Ims2}
+          options={{
+            title: 'Selected 0 files',
+          }}
+        />
     </Stack.Navigator>
+    
   );  
 }
 

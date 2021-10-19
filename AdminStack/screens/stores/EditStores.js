@@ -7,6 +7,7 @@ import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
+import { Colors } from 'react-native-paper';
 
 const EditStore =  ({route, navigation}) => {
   const {storeData} = useContext(AuthenticatedUserContext);
@@ -34,14 +35,6 @@ const EditStore =  ({route, navigation}) => {
     setstoreDetails(item.storeDetails)
     setPickedImagePath(item.storeimage)
   }
-
-  const LogOutUser = async function() {
-    try {
-        await auth.signOut();
-      } catch (error) {
-        console.log(error);
-      }
-}
 
   const handleSubmit = async(key) => {
     setIsSubmitting(true)
@@ -186,7 +179,7 @@ const EditStore =  ({route, navigation}) => {
             </TouchableOpacity>
             <View style={styles.storeMainview}>
               <View style={styles.storeSubview}>
-                  <Text style={styles.storeTitle}>Add Stores</Text>
+                  <Text style={[styles.storeTitle,{color:Colors.grey900}]}>Add Stores</Text>
               </View>
           </View>
           <TouchableOpacity>                
@@ -203,7 +196,7 @@ function renderAddStore(){
          <TextInput
           style={styles.input}
           value={storeName}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey400}
           placeholder={"Store Name"}
           onChangeText={(text) => setstoreName(text)}
           autoCapitalize={"none"}
@@ -211,9 +204,9 @@ function renderAddStore(){
           <TextInput
           multiline={true}
           numberOfLines={8}
-          style={[styles.input,{borderRadius:5}]}
+          style={styles.input}
           value={storeDetails}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey400}
           placeholder={"StoreDetails"}
           onChangeText={(text) => setstoreDetails(text)}
           autoCapitalize={"none"}
@@ -223,7 +216,7 @@ function renderAddStore(){
                 <TextInput
           style={[styles.input, {width:SIZES.width*0.5}]}
           value={location}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey400}
           placeholder={"Location"}
           onChangeText={(text) => setStoreLocation(text)}
           autoCapitalize={"none"}
@@ -231,8 +224,8 @@ function renderAddStore(){
             <TextInput
           style={[styles.input,{borderRadius:5,width:SIZES.width*0.42}]}
           value={storeIdNo}
-          placeholderTextColor="#fff"
-          placeholder={"Store Id"}
+          placeholderTextColor={Colors.grey400}
+          placeholder={"Store Id eg 1234"}
           onChangeText={(text) => setstoreIdNo(text)}
           autoCapitalize={"none"}
       />
@@ -249,13 +242,6 @@ function renderAddStore(){
             </TouchableOpacity>
            
             </View>
-            <TouchableOpacity
-              style={{alignItems:'center'}}
-              onPress={() => LogOutUser()}
-            >
-              <Text style={{color:COLORS.white,...FONTS.body3}}>logout</Text> 
-              <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.white} />
-            </TouchableOpacity>
     </SafeAreaView>
   )
 }
@@ -263,8 +249,8 @@ function renderAddStore(){
 function renderstoreim(){
   return(
     <View>
-      <View style={styles.buttonContainer}>
-        <Text style={styles.label}>Store Image:</Text>
+      <View style={[styles.buttonContainer,{backgroundColor:Colors.grey50}]}>
+        <Text style={[styles.label,{color:Colors.grey800}]}>Store Image:</Text>
         <TouchableOpacity
           onPress={showImagePicker}
         >
@@ -273,7 +259,7 @@ function renderstoreim(){
         
         <TouchableOpacity
           onPress={openCamera}>
-             <Feather name='camera' size={38} color={COLORS.white}/>
+             <FontAwesome name='camera' size={38} color={Colors.teal700}/>
           </TouchableOpacity>
         </View>
         <View style={styles.imageContainer}>
@@ -329,7 +315,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor:COLORS.backgroundColor,
+    backgroundColor:Colors.grey100,
   },
   container: {
     marginVertical:SIZES.padding,
@@ -374,10 +360,10 @@ storeTitle: {
   },
   btbbtn: {
     borderRadius:10,
-    backgroundColor:COLORS.darkblue,
-    padding:SIZES.padding,
+    backgroundColor:Colors.lightGreen700,
+    padding:SIZES.padding*0.9,
     color:COLORS.white,
-    borderColor:COLORS.darkgrey,
+    borderColor:Colors.teal300,
     borderWidth:3
   },
   imageContainer: {
@@ -392,14 +378,14 @@ storeTitle: {
   },
   input: {
     width:SIZES.width*0.95,
-    borderColor:COLORS.darkgrey4,
+    borderColor:Colors.tealA400,
     borderWidth:0.5,
     paddingHorizontal:SIZES.padding2,
     paddingVertical:10,
     borderRadius:10,
     marginBottom: 12,    
-    color:COLORS.white,
-    backgroundColor: COLORS.transparent,
+    color:COLORS.blackSecondary,
+    backgroundColor: COLORS.white,
   },
   label: {
     color:COLORS.white,
@@ -416,7 +402,7 @@ storeTitle: {
     paddingVertical:SIZES.padding2,
     color:'#fff',
     ...FONTS.h3,
-    backgroundColor:COLORS.primary,
+    backgroundColor:Colors.lightBlue300,
     borderRadius:SIZES.radius*0.3
   },
   btnUpdateStore:{
@@ -443,7 +429,7 @@ storeTitle: {
     width:SIZES.width*0.25,
     height:75,
     borderRadius:25,
-    marginVertical:3
+    marginVertical:8
 
 }
   

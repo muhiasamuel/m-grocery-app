@@ -20,10 +20,12 @@ const Appscreens = () => {
       registerForPushNotificationsAsync().then(token => setExpoPushToken(token));
       (async () => {
         try{
-         const doc = Firebase.firestore().collection('users')
-         await doc.doc(docId).update({
-           ExpoToken:expoPushToken
-         })
+          if(docId !== ''){
+            const doc = Firebase.firestore().collection('users')
+            await doc.doc(docId).update({
+              ExpoToken:expoPushToken
+            })
+          }       
         }catch(e){
           console.log(e);
         }

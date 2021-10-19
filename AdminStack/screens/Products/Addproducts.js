@@ -359,7 +359,7 @@ static contextType = AuthenticatedUserContext;
          <TextInput
           style={styles.input}
           value={this.state.prodname}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"Product Name"}
           onChangeText={(text) => this.setState({prodname:text})}
           autoCapitalize={"none"}
@@ -369,7 +369,7 @@ static contextType = AuthenticatedUserContext;
               numberOfLines={8}
           style={styles.input}
           value={this.state.prodDetails}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"Product Details"}
           onChangeText={(text) => this.setState({prodDetails:text})}
           autoCapitalize={"none"}
@@ -378,7 +378,7 @@ static contextType = AuthenticatedUserContext;
         <TextInput
           style={[styles.input,{width:SIZES.width*0.4}]}
           value={this.state.Price}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"product Price"}
           keyboardType={'number-pad'}
           onChangeText={(text) => this.setState({Price:text})}
@@ -388,7 +388,7 @@ static contextType = AuthenticatedUserContext;
       <TextInput
           style={[styles.input,{width:SIZES.width*0.4}]}
           value={this.state.selectedValue}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"Unit eg 200g, 1kg"}
           onChangeText={(text) => this.setState({selectedValue:text})}
           autoCapitalize={"none"}
@@ -398,7 +398,7 @@ static contextType = AuthenticatedUserContext;
                 <TextInput
           style={styles.input}
           value={this.state.discount}
-          placeholderTextColor="#fff"
+          placeholderTextColor={Colors.grey500}
           placeholder={"Add Discount"}
           keyboardType={'number-pad'}
           onChangeText={(text) => this.setState({discount:text})}
@@ -437,7 +437,7 @@ static contextType = AuthenticatedUserContext;
     <>
     
       <View style={{ flex:1}}>
-      <View style={styles.buttonContainer}>
+      <View style={[styles.buttonContainer,{backgroundColor:COLORS.white}]}>
          <Text style={[styles.label,{width: SIZES.width*0.35}]}>Add Product Image:</Text>
       <TouchableOpacity
            onPress={() =>navigation.navigate('ImageBrowser')}
@@ -465,6 +465,7 @@ static contextType = AuthenticatedUserContext;
 }
 renderProdsEdit(){
   const { Products} = this.context;
+  const { navigation } = this.props;
   const renderItem = ({item}) =>(
           <View style={{
             paddingVertical:2,
@@ -472,13 +473,15 @@ renderProdsEdit(){
             justifyContent:'space-around',
             alignItems:'center'}}>
            
-            <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.prodname}</Text>
+            <Text style={[styles.storeName,{color:Colors.grey500}]}>{item?.prodname}</Text>
             {item?.imageUrls && (
               <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
             )}
-            <Text style={[styles.storeName,{color:COLORS.darkblue, width:SIZES.width*0.3}]}>{item?.storeName}</Text>
+            <Text style={[styles.storeName,{color:Colors.grey500, width:SIZES.width*0.3}]}>{item?.prodcatid}</Text>
             <TouchableOpacity
-              onPress={() => navigation.navigate('editStore')}
+              onPress={() => navigation.navigate('editProducts',{
+                item
+              })}
             >
             <Text style={[styles.btnUpdateprod,{padding:8}]}>Edit</Text>
             </TouchableOpacity>
@@ -494,10 +497,10 @@ renderProdsEdit(){
             justifyContent:'center',
             alignItems:'center'
             }}>
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>ProductName</Text>
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>ProdImage</Text>
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white, width:SIZES.width*0.3}]}>StoreName</Text>          
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white,padding:8}]}>Actions</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:Colors.grey700}]}>ProductName</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:Colors.grey700}]}>ProdImage</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:Colors.grey700, width:SIZES.width*0.3}]}>StoreName</Text>          
+          <Text style={[styles.storeName,{...FONTS.h5, color:Colors.grey700,padding:8}]}>Actions</Text>
         </View>
        
         <FlatList
@@ -520,8 +523,8 @@ renderProdsEdit(){
     if (this.state.isLoading) {
       return (
         <View style={{ backgroundColor:COLORS.darkblue, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator color={COLORS.white} size='large'/>
-          <Text style={{color:COLORS.white}}>Loading Please Wait...</Text>
+          <ActivityIndicator color={COLORS.darkblue} size='large'/>
+          <Text style={{color:COLORS.darkblue}}>Loading Please Wait...</Text>
         </View>
       );
     }
@@ -545,22 +548,22 @@ renderProdsEdit(){
           style={{alignItems:'center'}}
             onPress={() => this.setState({prodVisible:!this.state.prodVisible})}
           >
-          <Text style={{color:COLORS.white,...FONTS.body3}}>Edit Products Data</Text> 
-            <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.white} />
+          <Text style={{color:COLORS.darkblue,...FONTS.body3}}>Edit Products Data</Text> 
+            <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.darkblue} />
           </TouchableOpacity>
           </View>
       </ScrollView>
     :
     <>
-    <View style = {{flexDirection:'row',justifyContent:'space-around'}}>
+    <View style = {{flexDirection:'row',justifyContent:'space-around',backgroundColor:COLORS.white}}>
       
         
         <TouchableOpacity
           onPress={() => this.setState({modalVisible:!this.state.modalVisible})}
         >
-          <Text style={{color:COLORS.white,...FONTS.body3}}>Filter Products by store </Text>
+          <Text style={{color:Colors.grey500,...FONTS.body3}}>Filter Products by store </Text>
           <View style={{alignItems:'center'}}>
-            <Ionicons name="ios-filter-outline" size={30} color={COLORS.white} />
+            <Ionicons name="ios-filter-outline" size={30} color={Colors.grey800} />
 
           </View>
         </TouchableOpacity>
@@ -568,8 +571,8 @@ renderProdsEdit(){
      <TouchableOpacity
         style={{alignItems:'center'}}
         onPress={() => this.setState({prodVisible:!this.state.prodVisible})}>
-          <Text style={{color:COLORS.white,...FONTS.body2}}>Add Products Data</Text> 
-          <Ionicons name="md-chevron-up-circle-outline" size={30} color={COLORS.white} />
+          <Text style={{color:Colors.grey500,...FONTS.body2}}>Add Products Data</Text> 
+          <Ionicons name="md-chevron-up-circle-outline" size={30} color={Colors.grey800} />
     </TouchableOpacity>
     </View>
     {this.renderProdsEdit()}
@@ -994,7 +997,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor:COLORS.backgroundColor,
+    backgroundColor:COLORS.darkgrey2,
   },
   container: {
     marginVertical:SIZES.padding,
@@ -1039,11 +1042,11 @@ storeTitle: {
   },
   btbbtn: {
     borderRadius:10,
-    backgroundColor:COLORS.darkblue,
+    backgroundColor:Colors.lightGreen400,
     padding:SIZES.padding,
     color:COLORS.white,
-    borderColor:COLORS.darkgrey,
-    borderWidth:3
+    borderColor:Colors.teal300,
+    borderWidth:2
   },
   imageContainer: {
     padding: 10
@@ -1060,17 +1063,17 @@ storeTitle: {
   },
   input: {
     width:SIZES.width*0.95,
-    borderColor:COLORS.darkgrey,
+    borderColor:Colors.teal300,
     borderWidth:0.5,
     paddingHorizontal:SIZES.padding2,
     paddingVertical:10,
     borderRadius:10,
     marginBottom: 12,    
-    color:COLORS.white,
-    backgroundColor: COLORS.transparent,
+    color:Colors.grey600,
+    backgroundColor: Colors.grey50,
   },
   label: {
-    color:COLORS.white,
+    color:COLORS.darkblue,
     ...FONTS.h3,
   },
   centered:{
@@ -1086,7 +1089,7 @@ storeTitle: {
     paddingVertical:SIZES.padding2,
     color:'#fff',
     ...FONTS.h3,
-    backgroundColor:COLORS.primary,
+    backgroundColor:Colors.lightBlue500,
     borderRadius:SIZES.radius*0.3
   },
   editPic: {
