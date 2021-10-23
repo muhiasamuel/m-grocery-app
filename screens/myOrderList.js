@@ -7,6 +7,7 @@ import store from '../reducers/store';
 import * as Location from 'expo-location';
 
 import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
+import { Colors } from 'react-native-paper';
 // create a component
 
 const myOrderList = ({route, navigation}) => {
@@ -123,7 +124,7 @@ const myOrderList = ({route, navigation}) => {
           <View underlayColor='rgb(122, 22, 65)'       
           >
             <View style={styles.bodycontainer}>
-              <Image style={styles.bodyphoto} source={{uri: item?.image}} />
+              <Image style={[styles.bodyphoto,{backgroundColor:Colors.grey700}]} source={{uri: item?.image}} />
               <View>
                 <Text style={[styles.bodytitle,{color: COLORS.darkgrey4, width:SIZES.width*0.35}]}>{item?.name}</Text>
                 
@@ -161,7 +162,7 @@ const myOrderList = ({route, navigation}) => {
               <Text style={[styles.btntext,]}> ksh {item.total} </Text>
                 <TouchableOpacity
                         style={[styles.btnContinue,{backgroundColor:'rgb(250,170,20)'}]}
-                        onPress={() => removeAll(item?.key)}>
+                        onPress={() => removeAll(item?.productId)}>
                         <Text style={styles.btntext}>Reset</Text>
                   </TouchableOpacity>
                
@@ -250,7 +251,7 @@ const styles = StyleSheet.create({
 
     },
     OrderIncrement: {
-        width:50,
+         paddingHorizontal:SIZES.padding2,
         backgroundColor: COLORS.white,
         alignItems:'center',
         justifyContent:'center',
@@ -258,15 +259,14 @@ const styles = StyleSheet.create({
      
 
     OrderIncrement: {
-        width:50,
+        paddingHorizontal:SIZES.padding,
         backgroundColor: COLORS.white,
         alignItems:'center',
         justifyContent:'center',
       },
       OrderIncrementView: {
-         
+         paddingHorizontal:SIZES.padding,
         bottom:0,
-        height: 45,
         justifyContent:'center',
         flexDirection:'row'
       },

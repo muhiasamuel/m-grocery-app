@@ -240,7 +240,9 @@ function renderprodCatEdit(){
             <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.catname}</Text>
             <Image style={styles.bodyphoto} source={{uri: item?.catimage}} />
             <TouchableOpacity
-              onPress={() => navigation.navigate('editCats')}
+              onPress={() => navigation.navigate('editCats',{
+                item
+              })}
             >
             <Text style={[styles.btnUpdateprod,{paddingLeft:18}]}>Edit</Text>
             </TouchableOpacity>

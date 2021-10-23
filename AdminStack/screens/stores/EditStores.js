@@ -22,7 +22,7 @@ const EditStore =  ({route, navigation}) => {
   const [uploading, setUploading] =useState(null);
   const [submitting, setIsSubmitting] =useState(false);
   const [storeimage, setStoreIma] = useState(null);
-  const [currentstore, setCurrentStore] =React.useState(true);
+  const [currentstore, setCurrentStore] =React.useState(null);
   const auth = Firebase.auth();
   React.useEffect(() => {
     let{item} =route.params 
@@ -168,26 +168,7 @@ const EditStore =  ({route, navigation}) => {
 
 
 
-  //header
-  function renderHeader(){
-    return(
-        <View style={styles.headerView}>
-            <TouchableOpacity
-            onPress = {()=> navigation.navigate('prodcats')}
-             style={styles.backArrow}>
-                <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
-            </TouchableOpacity>
-            <View style={styles.storeMainview}>
-              <View style={styles.storeSubview}>
-                  <Text style={[styles.storeTitle,{color:Colors.grey900}]}>Add Stores</Text>
-              </View>
-          </View>
-          <TouchableOpacity>                
-                <MaterialCommunityIcons name= 'menu-swap-outline' size={27} color={COLORS.white}/>
-          </TouchableOpacity>
-        </View>
-    )
-}
+ 
 
 //add category Data
 function renderAddStore(){
@@ -234,7 +215,7 @@ function renderAddStore(){
             <TouchableOpacity
             onPress={() => handleSubmit(currentstore.key)}
             >{submitting ?
-              <ActivityIndicator color={COLORS.white} size='large'/>
+              <ActivityIndicator color={COLORS.darkblue} size='large'/>
               :
               <Text style={styles.btnUpdate}>Update</Text>
                     }
@@ -275,21 +256,6 @@ function renderstoreim(){
           onPress={openCamera}>
              <FontAwesome name='camera' size={35} color={COLORS.white}/>
           </TouchableOpacity></>)}
-        {/*  :
-          <View style={styles.userImageView}>
-          <Image
-              source={{ uri: storeimage}}
-            style={styles.image}
-          />
-          <TouchableOpacity
-          style={styles.editPic }
-          onPress={openCamera}>
-            <Text>user Image</Text>
-             <FontAwesome name='camera' size={38} color={COLORS.black}/>
-          </TouchableOpacity>
-        </View>*/}
-          
-      {/*/////////////////////////////////////////////////*/}
         {uploading && (
         <View>
           <Text style={styles.label}>uploading...</Text>
@@ -388,7 +354,7 @@ storeTitle: {
     backgroundColor: COLORS.white,
   },
   label: {
-    color:COLORS.white,
+    color:COLORS.darkblue,
     ...FONTS.h3,
   },
   centered:{

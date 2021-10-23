@@ -9,6 +9,7 @@ import Firebase from '../firebaseConfig';
 import "firebase/storage";
 import 'firebase/firestore';
 import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
+import { Colors } from 'react-native-paper';
 const Storeitems = ({route, navigation}) => {
     const {Products, setProducts,catData, setCatData, storeData, setStoreData} = React.useContext(AuthenticatedUserContext);
 
@@ -278,7 +279,7 @@ const Storeitems = ({route, navigation}) => {
                 <Text style={[styles.Titles,{marginVertical:15,color:COLORS.white,...FONTS.body2, alignSelf:'center'}]}>Add {currentCartItem?.prodname} My to  Cart</Text>
                   
                   <View style={[styles.centered,{marginHorizontal:SIZES.padding2, marginVertical:SIZES.padding2}]} > 
-                    <Image style={[{width:SIZES.width*0.24,height:SIZES.height*0.10,borderRadius:25}]} source = {{uri: currentCartItem?.imageUrls[0].url}} />
+                    <Image style={[{width:SIZES.width*0.24,height:SIZES.height*0.10,borderRadius:25,backgroundColor:Colors.grey700}]} source = {{uri: currentCartItem?.imageUrls[0].url}} />
                     <View style={{width:SIZES.width*0.3,left:-10}}>
                         <Text style={styles.textStyle}>Price: ksh {basketItem?.price}/ {basketItem?.unit} </Text>
                         <Text style={styles.textStyle}style={styles.textStyle}>Total Price: Ksh {basketItem?.total}</Text>
@@ -349,11 +350,11 @@ const Storeitems = ({route, navigation}) => {
         })}
         >
             <Image style={[styles.bodyphoto,{marginTop:-45}]} source = {{uri: item?.imageUrls[0].url}} />
-            <Text style={[{color: COLORS.darkgrey4, alignSelf:'center',...FONTS.h3,fontWeight:'bold',top:5}]}>{item?.prodname}</Text>
+            <Text style={[{color: Colors.lightGreen300, alignSelf:'center',...FONTS.h3,fontWeight:'bold',top:5}]}>{item?.prodname}</Text>
            </TouchableOpacity>
            
             <Text style={[styles.bodycategory,
-                {color:COLORS.darkblue,padding:5,fontSize:17, fontWeight:'bold'}]}>
+                {color:Colors.lightGreen900,padding:5,fontSize:17, fontWeight:'bold'}]}>
                     KSh {item?.prodprice}/ {item?.productUnit}
             </Text>
             <View style={styles.OrderIncrementView1}>
@@ -396,12 +397,21 @@ const Storeitems = ({route, navigation}) => {
                            source = {{uri: item?.catimage}}
                            style={styles.bodyphoto}/>
                     
-                    <Text style={[styles.bodytitle,{color: COLORS.darkgrey4}]}>
+                    <Text style={[styles.bodytitle,{color: Colors.lightGreen700,...FONTS.h3}]}>
                         {item?.catname}
                     </Text>
-                    <Text style={[styles.bodytitle,{color: COLORS.darkgrey4,bottom:5}]}>
-                        {item?.catdetails.substring(0, 25)}....
+                    <View style={[styles.bodytitle,{backgroundColor:Colors.lightGreen800,width:'100%',paddingHorizontal:4}]}>
+                    {item?.catdetails.substring().length > 45 ?
+                      <Text style={[{color: Colors.grey300,bottom:-5,...FONTS.h6,alignSelf:'center'}]}>
+                        {item?.catdetails.substring(0, 49)}....   
+                      </Text>
+                      :
+                      <Text style={[{color: Colors.grey300,bottom:-5,...FONTS.h6,alignSelf:'center'}]}>
+                      {item?.catdetails}  
                     </Text>
+                    }
+                    </View>
+                   
                     </View>
                 </TouchableOpacity>         
             )}
@@ -426,7 +436,7 @@ const Storeitems = ({route, navigation}) => {
             return(
                 <TouchableOpacity
                    style={[styles.category,
-                   {backgroundColor:(selectedCategory?.catId !=item.catId ? 'rgb(245,240,255)': COLORS.primary),...styles.shandow }]}
+                   {backgroundColor:(selectedCategory?.catId !=item.catId ? 'rgb(245,240,255)':Colors.lightGreen300),...styles.shandow }]}
                    onPress = {() => onselectCategory(item)}>
                     <View style={styles.categoryView}>
                         <Image
@@ -482,7 +492,7 @@ export default Storeitems
 const styles = StyleSheet.create({
     Container: {
         flex: 1,
-        backgroundColor: COLORS.darkgrey4,
+        backgroundColor: Colors.grey200,
     },
     headerView: {
         flexDirection:"row", 

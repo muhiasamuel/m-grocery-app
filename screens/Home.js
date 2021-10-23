@@ -6,6 +6,7 @@ import { COLORS, FONTS, images, SIZES } from '../constants/Index'
 import Firebase from '../firebaseConfig'
 import "firebase/auth"
 import 'firebase/firestore';
+import { Colors } from 'react-native-paper'
 const Home = ({navigation}) => {
     //DUMMY DATA
 
@@ -184,7 +185,7 @@ function renderWidget(){
                 }}
                 onPress = {() => LogOutUser()}
               >
-                  <MaterialCommunityIcons name= 'dots-vertical' size={30} color={'white'}/>
+                  <FontAwesome name='sign-out' size={30} color={'white'}/>
 
               </TouchableOpacity>
               
@@ -206,6 +207,7 @@ function renderWidget(){
                      source={{uri:item.storeimage}}
                      resizeMode="cover"
                      style= {{
+                       backgroundColor:Colors.grey700,
                         width:SIZES.width * 0.97,
                         height: 200,
                          borderRadius: SIZES.radius*0.3,                        
@@ -259,9 +261,9 @@ function renderWidget(){
         <SafeAreaView style={styles.container}>
             {renderHeader()}
             {renderWidget()}
-            <View style={styles.title}>
+            <View style={[styles.title,{backgroundColor:COLORS.backgroundColor1,marginBottom:5}]}>
                 <Text style={styles.titletext}>Our Main Stores</Text>
-                <Text style={{color:COLORS.darkgrey2, fontWeight:'bold', fontSize:15, width:SIZES.width*0.5}}>Buy from a store near You to reduce freight charges</Text>
+                <Text style={{color:Colors.blueGrey400, fontWeight:'bold', fontSize:15, width:SIZES.width*0.5}}>Buy from a store near You to reduce freight charges</Text>
             </View>
             {renderestaurantList()}
         </SafeAreaView>

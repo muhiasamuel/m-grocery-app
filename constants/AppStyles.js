@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { Colors } from 'react-native-paper';
 import { COLORS } from './Index';
 
 // screen sizing
@@ -24,8 +25,8 @@ export const RecipeCard = StyleSheet.create({
     borderColor: COLORS.darkgrey,
     borderWidth: 0.3,
     borderRadius: 1,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10
   },
   catContainer: {
 
@@ -34,11 +35,12 @@ export const RecipeCard = StyleSheet.create({
 
   },
   photo: {
+    backgroundColor:Colors.grey900,
     width: (SCREEN_WIDTH - (recipeNumColums + 1) * (RECIPE_ITEM_MARGIN)) / recipeNumColums,
     height: RECIPE_ITEM_HEIGHT,
     borderRadius: 1,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   title: {
     flex:1,
