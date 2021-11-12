@@ -27,7 +27,7 @@ const OrderView = ({route, navigation}) => {
             await db.doc(key).update({
                 status:"Declined"
             }).then(() =>{
-                setisSubmitting(false)
+                setisSubmitting(false) 
                 alert('updated')
             })
         }catch(e){

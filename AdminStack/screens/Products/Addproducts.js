@@ -477,7 +477,7 @@ renderProdsEdit(){
             {item?.imageUrls && (
               <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
             )}
-            <Text style={[styles.storeName,{color:Colors.grey500, width:SIZES.width*0.3}]}>{item?.prodcatid}</Text>
+            <Text style={[styles.storeName,{color:Colors.grey500, width:SIZES.width*0.3}]}>{item?.storeName}</Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('editProducts',{
                 item

@@ -9,7 +9,8 @@ import Firebase from '../firebaseConfig';
 import "firebase/storage";
 import 'firebase/firestore';
 import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
-import { Colors } from 'react-native-paper';
+import { Colors, Searchbar } from 'react-native-paper';
+import { ScrollView } from 'react-native-gesture-handler';
 const Storeitems = ({route, navigation}) => {
     const {Products, setProducts,catData, setCatData, storeData, setStoreData} = React.useContext(AuthenticatedUserContext);
 
@@ -20,12 +21,13 @@ const Storeitems = ({route, navigation}) => {
     const [storeItems,SetstoreItems] = React.useState();
     const [selectedCategory, setSelectedCategory ] = React.useState(null)
     const [basketCount,setBasketCount] = React.useState(store.getState().BasketCount);
-    const [CurrentBasketState, SetCurrentBasketState ] = React.useState(store.getState());
+    const [filteredStoreProducts, setfilteredStoreProducts] = React.useState('');
     const [productCount,setProductCount] = React.useState();
     const [modalVisible, setModalVisible] = React.useState(false)
     const [basketItem,setBasketItem] = React.useState(null);
     const [currentCartItem, setcurrentCartItem] = React.useState(null)
     const [PriceTotal,SetPriceTotal] = React.useState();
+    const [query,setQuery] = React.useState('');
     React.useEffect(() =>{
         let {item} = route.params;
         SetStore(item); 
@@ -56,8 +58,7 @@ const Storeitems = ({route, navigation}) => {
                 prodId,
                 productUnit
               });
-                setProducts(dataArr)
-                          
+                setProducts(dataArr)      
                 
             })
         }
@@ -65,7 +66,8 @@ const Storeitems = ({route, navigation}) => {
           console.log(e);
         }
       }
-   const  getStoreData = async () => {
+   //fe   
+   const getStoreData = async () => {
         try{
           const dataArr = [];
             const response=Firebase.firestore().collection('Stores');
@@ -87,7 +89,7 @@ const Storeitems = ({route, navigation}) => {
           console.log(e);
         }
       }   
-    
+    //fetch category data from firebase backed  
      const getCatData = async () => {
         try{
           const catArr = [];
@@ -109,11 +111,13 @@ const Storeitems = ({route, navigation}) => {
           console.log(e);
         }
       }
+      //get products in a store using store id
       function getProductByStoreData(id){
           let storeProducts = Products.filter(a => a.prodStoreid == id)
           if (storeProducts.length > 0) {
               const uniqProd = [...new Set(storeProducts)]
             SetStoreProducts(uniqProd);
+           
           const cats = storeProducts.map(d =>{
                return getCategoryByIds(`${d.prodcatid}`)[0] 
             }) 
@@ -130,6 +134,7 @@ const Storeitems = ({route, navigation}) => {
         }
         return ""
     }
+    //filter products by category
      function getProductbyCategory(categoryId){
         const productsArray = []
         StoreProducts.map(data =>{
@@ -147,7 +152,11 @@ const Storeitems = ({route, navigation}) => {
         SetstoreItems(catsProdsids);
         setSelectedCategory(category)
     }
-
+    //search Productss
+    function searchProducts(query){
+      SetstoreItems(StoreProducts.filter(i=>i.prodname.toLowerCase().includes(query.toLowerCase())))
+    }
+    ///Add items to cart
     function AddOrder(id, price, name,image,unit) {
         store.dispatch(AddProduct(id, price,name,image,unit))
         store.dispatch(filtredOrderPrds(id))      
@@ -382,9 +391,8 @@ const Storeitems = ({route, navigation}) => {
           renderItem={renderCategories}
           keyExtractor={item => `${item.key}`}
           contentContainerStyle={{
-            marginBottom:30,
-            paddingBottom:185,
-        }}
+            paddingBottom:220,
+          }}
         />
       )}
     function renderCatsvertically() {
@@ -400,13 +408,13 @@ const Storeitems = ({route, navigation}) => {
                     <Text style={[styles.bodytitle,{color: Colors.lightGreen700,...FONTS.h3}]}>
                         {item?.catname}
                     </Text>
-                    <View style={[styles.bodytitle,{backgroundColor:Colors.lightGreen800,width:'100%',paddingHorizontal:4}]}>
+                    <View style={[styles.bodytitle,{backgroundColor:Colors.lightGreen50,width:'100%',paddingHorizontal:4}]}>
                     {item?.catdetails.substring().length > 45 ?
-                      <Text style={[{color: Colors.grey300,bottom:-5,...FONTS.h6,alignSelf:'center'}]}>
+                      <Text style={{color: Colors.green800,bottom:-5,...FONTS.h6,alignSelf:'center'}}>
                         {item?.catdetails.substring(0, 49)}....   
                       </Text>
                       :
-                      <Text style={[{color: Colors.grey300,bottom:-5,...FONTS.h6,alignSelf:'center'}]}>
+                      <Text style={[{color: Colors.green800,bottom:-5,...FONTS.h6,alignSelf:'center'}]}>
                       {item?.catdetails}  
                     </Text>
                     }
@@ -457,7 +465,13 @@ const Storeitems = ({route, navigation}) => {
                    showsHorizontalScrollIndicator={false}
                    keyExtractor={item => `${item.catId}`}
                    renderItem={renderItem}
-                   contentContainerStyle={{paddingVertical:SIZES.padding * 0.5}}
+                   contentContainerStyle={{paddingVertical:SIZES.padding * 0.78}}
+                />
+            
+                  <Searchbar
+                  style={{height:SIZES.height*0.05,backgroundColor:Colors.grey200, borderRadius:10}}
+                    placeholder="Search For Products"
+                    onChangeText={query => searchProducts(query)}
                 />
             </View>
         )
@@ -468,8 +482,8 @@ const Storeitems = ({route, navigation}) => {
             {selectedCategory !== null ?
             <View>
                 {renderHeader()}   
-                {renderMainCategories()}
-                {renderCats()}
+                {renderMainCategories()}             
+                {renderCats()}                
                 {renderModal()} 
                            
                 </View>
@@ -492,7 +506,7 @@ export default Storeitems
 const styles = StyleSheet.create({
     Container: {
         flex: 1,
-        backgroundColor: Colors.grey200,
+        backgroundColor: Colors.grey800,
     },
     headerView: {
         flexDirection:"row", 

@@ -8,6 +8,7 @@ import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 import { FlatList } from 'react-native-gesture-handler';
+import { Avatar, Colors } from 'react-native-paper';
 
 const ProductCategories = ({route, navigation}) => {
   const {catData, setCatData} = React.useContext(AuthenticatedUserContext);
@@ -223,8 +224,8 @@ function renderAddCategories(){
               style={{alignItems:'center'}}
               onPress={() => setcatProdDataVisible(!catProdDataVisible)}
             >
-              <Text style={{color:COLORS.white,...FONTS.body3}}>Edit ProdCats Data</Text> 
-              <Ionicons name="md-chevron-down-circle-outline" size={28} color={COLORS.white} />
+              <Text style={{color:COLORS.darkblue,...FONTS.body2}}>Edit ProdCats Data</Text> 
+              <Ionicons name="md-chevron-down-circle-outline" size={35} color={COLORS.darkblue} />
             </TouchableOpacity> 
             </View>
     </SafeAreaView>
@@ -256,10 +257,10 @@ function renderprodCatEdit(){
             flexDirection:'row',
             justifyContent:'space-around',
             alignItems:'center'}}>
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>CatName</Text>
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>CatImage</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.darkblue}]}>CatName</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.darkblue}]}>CatImage</Text>
          
-          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.white}]}>Actions</Text>
+          <Text style={[styles.storeName,{...FONTS.h5, color:COLORS.darkblue}]}>Actions</Text>
         </View>
        
         <FlatList
@@ -279,8 +280,8 @@ function renderprodCatEdit(){
 function renderCatImage(){
   return(
     <View>
-      <View style={styles.buttonContainer}>
-        <Text style={styles.label}>Category Image:</Text>
+      <View style={[styles.buttonContainer,{backgroundColor:Colors.grey50}]}>
+        <Text style={[styles.label,{color:Colors.grey800}]}>Category Image:</Text>
         <TouchableOpacity
           onPress={showImagePicker}
         >
@@ -289,14 +290,15 @@ function renderCatImage(){
         
         <TouchableOpacity
           onPress={openCamera}>
-             <Feather name='camera' size={38} color={COLORS.white}/>
+              <FontAwesome5 name='camera' size={38} color={Colors.teal900}/>
           </TouchableOpacity>
         </View>
-      <View style={styles.imageContainer}>
+        <View style={styles.imageContainer}>
         {
           pickedImagePath !== '' && (
             <>
-          <Image
+          <Avatar.Image
+          size={150}
             source={{ uri: pickedImagePath }}
             style={styles.image}
           />
@@ -328,11 +330,11 @@ function renderCatImage(){
           :
           <>
           <TouchableOpacity
-            style={{alignItems:'center'}}
+            style={{alignItems:'center', backgroundColor:Colors.grey50}}
             onPress={() => setcatProdDataVisible(!catProdDataVisible)}
           >
-            <Text style={{color:COLORS.white,...FONTS.body3}}>Add store Data</Text> 
-            <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.white} />
+            <Text style={{color:COLORS.darkblue,...FONTS.body3}}>Add store Data</Text> 
+            <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.darkblue} />
           </TouchableOpacity>
          {renderprodCatEdit()}
          </>    
@@ -347,8 +349,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor:COLORS.backgroundColor,
-  },
+    backgroundColor:Colors.grey100,
+    },
   container: {
     marginVertical:SIZES.padding,
     paddingHorizontal:5,
@@ -392,10 +394,10 @@ storeTitle: {
   },
   btbbtn: {
     borderRadius:10,
-    backgroundColor:COLORS.darkblue,
-    padding:SIZES.padding,
+    backgroundColor:Colors.lightGreen400,
+    padding:SIZES.padding*0.9,
     color:COLORS.white,
-    borderColor:COLORS.darkgrey,
+    borderColor:Colors.teal400,
     borderWidth:3
   },
   imageContainer: {
@@ -403,22 +405,18 @@ storeTitle: {
   },
   image: {
     alignSelf:'center',
-    borderRadius:100,
-    width: 180,
-    height: 150,
     resizeMode: 'cover'
   },
   input: {
     width:SIZES.width*0.95,
-    borderColor:COLORS.darkgrey4,
-    borderWidth:0.4,
+    borderColor:Colors.tealA400,
+    borderWidth:0.6,
     paddingHorizontal:SIZES.padding2,
     paddingVertical:10,
     borderRadius:10,
     marginBottom: 12,    
-    color:COLORS.white,
-    fontSize:18,
-    backgroundColor: COLORS.transparent,
+    color:COLORS.blackSecondary,
+    backgroundColor: COLORS.white,
   },
   label: {
     color:COLORS.white,
@@ -431,11 +429,13 @@ storeTitle: {
     paddingVertical:SIZES.padding2
   },
   btnUpdate:{
-    paddingHorizontal:SIZES.padding2*2,
-    paddingVertical:SIZES.padding,
+    paddingHorizontal:SIZES.padding2*2.5,
+    paddingVertical:SIZES.padding2,
     color:'#fff',
     ...FONTS.h3,
-    backgroundColor:COLORS.primary,
+    borderWidth:2,
+    borderColor:Colors.teal300,
+    backgroundColor:Colors.lightBlue500,
     borderRadius:SIZES.radius*0.3
   },
   editPic: {
@@ -458,11 +458,12 @@ storeTitle: {
     backgroundColor:'skyblue',
     borderRadius:SIZES.radius*0.3
   },
+  
   bodyphoto: {
     width:SIZES.width*0.23,
-    height:75,
+    height:65,
     borderRadius:25,
-    marginVertical:3
+    marginVertical:10
 
 }
   

@@ -6,13 +6,14 @@ import { COLORS, FONTS, images, SIZES } from '../constants/Index'
 import Firebase from '../firebaseConfig'
 import "firebase/auth"
 import 'firebase/firestore';
-import { Colors } from 'react-native-paper'
+import { Colors, Searchbar } from 'react-native-paper'
 const Home = ({navigation}) => {
     //DUMMY DATA
 
 const { user } = useContext(AuthenticatedUserContext);
 const {storeData,setStoreData} = useContext(AuthenticatedUserContext);
 const [modalVisible,setModalVisible] = React.useState(false);
+const [filteredStoreData, setfilteredStoreData] = React.useState('');
 
 const auth = Firebase.auth();
 
@@ -33,7 +34,8 @@ const getStoreData = async () => {
             storeLocation,
             storeimage
           });
-          setStoreData(dataArr)
+          setStoreData(dataArr);
+          setfilteredStoreData(dataArr);
         })
     }
     catch(e){
@@ -46,6 +48,20 @@ const getStoreData = async () => {
       } catch (error) {
         console.log(error);
       }
+}
+function searchStores(query){
+  setfilteredStoreData(
+    storeData.filter(i=>i.storeName
+      .toLowerCase()
+      .includes(query
+        .toLowerCase()
+        )
+        ));
+}
+
+function handleCheckOrder() {
+   navigation.navigate("orderstatus")
+   setModalVisible(!modalVisible); 
 }
 function renderWidget(){
     return(
@@ -80,7 +96,7 @@ function renderWidget(){
                  
                     <TouchableOpacity
                       style={[ styles.buttonClose]}
-                      onPress={() => setModalVisible(!modalVisible)}
+                      onPress = {() =>handleCheckOrder()}         
                     >
                       <Entypo name="eye" size={24} color="white" />
                       <Text style={styles.textModal}>ORDER TRACK</Text>
@@ -196,18 +212,18 @@ function renderWidget(){
      
      function renderestaurantList(){
         const renderItem = ({item}) =>(
-             <TouchableOpacity style={{marginBottom: SIZES.padding* 2}}
+             <TouchableOpacity style={{marginBottom: SIZES.padding* 2,backgroundColor:COLORS.backgroundColor1,}}
              onPress = {() => navigation.navigate("Storeitems", {
                  item
              })} 
              >
-                 <View style={{marginBottom:SIZES.padding, alignItems:'center'}}>
+                 <View style={{marginBottom:SIZES.padding, marginTop:10,alignItems:'center'}}>
                      <Image
                    // source ={item.photo}
                      source={{uri:item.storeimage}}
                      resizeMode="cover"
                      style= {{
-                       backgroundColor:Colors.grey700,
+                       backgroundColor:Colors.grey300,
                         width:SIZES.width * 0.97,
                         height: 200,
                          borderRadius: SIZES.radius*0.3,                        
@@ -233,12 +249,20 @@ function renderWidget(){
                  }>{item.storeLocation}</Text> 
                  </View> 
                  </View>
-               <Text style={{...FONTS.body2,color:COLORS.white}}> {item.storeName} </Text>
-                
-                  <View style={{marginTop:SIZES.padding2,width:SIZES.width, flexDirection:'row', backgroundColor:COLORS.backgroundColor1,padding:SIZES.padding2*2}}>
+                 <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:SIZES.padding2}}>
+                    <Text style={{...FONTS.body2,color:COLORS.white}}> {item.storeName} </Text>
+                    <View style={{flexDirection:'row'}}>
+                       <MaterialCommunityIcons name="star" size={20} color={COLORS.primary}/> 
+                       <MaterialCommunityIcons name="star" size={20} color={COLORS.primary}/>
+                       <MaterialCommunityIcons name="star" size={20} color={COLORS.primary}/>
+                       <MaterialCommunityIcons name="star" size={20} color={COLORS.darkgrey}/>
+                       <MaterialCommunityIcons name="star" size={20} color={COLORS.darkgrey}/>
+                    </View>
+               </View>
+                  <View style={{marginTop:SIZES.padding2*0.5,width:SIZES.width, flexDirection:'row', padding:SIZES.padding2*2}}>
                     {/*ratin*/}
-                    <MaterialCommunityIcons name="star" size={20} color={COLORS.primary}/> 
-                    <Text style= {{...FONTS.body3, marginLeft:8,color:COLORS.white}}>{item.storeDetails}</Text>
+                    
+                    <Text style= {{...FONTS.body3,color:Colors.grey400}}>{item.storeDetails}</Text>
                     {/*CATEGORIES */}
               
                   </View> 
@@ -246,7 +270,7 @@ function renderWidget(){
          )
         return(
             <FlatList
-                data={storeData}
+                data={filteredStoreData}
                 keyExtractor={item => `${item.key}`}
                  renderItem={renderItem}
                  showsVerticalScrollIndicator={false}
@@ -261,9 +285,12 @@ function renderWidget(){
         <SafeAreaView style={styles.container}>
             {renderHeader()}
             {renderWidget()}
-            <View style={[styles.title,{backgroundColor:COLORS.backgroundColor1,marginBottom:5}]}>
-                <Text style={styles.titletext}>Our Main Stores</Text>
-                <Text style={{color:Colors.blueGrey400, fontWeight:'bold', fontSize:15, width:SIZES.width*0.5}}>Buy from a store near You to reduce freight charges</Text>
+            <View style={[{backgroundColor:COLORS.backgroundColor1,marginBottom:5,padding:SIZES.padding}]}>
+            <Searchbar
+              style={{backgroundColor:Colors.grey300,height:SIZES.height*0.05,borderRadius:10}}
+              placeholder="Search For Store"
+              onChangeText={query => searchStores(query)}
+            />
             </View>
             {renderestaurantList()}
         </SafeAreaView>
@@ -276,7 +303,7 @@ export default Home
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#2c3e50',
+        backgroundColor: COLORS.backgroundColor,
         color:COLORS.white
     },
     shandow: {
