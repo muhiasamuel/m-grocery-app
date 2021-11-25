@@ -9,23 +9,29 @@ import * as Linking from 'expo-linking';
 import Firebase from '../../../firebaseConfig';
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 import { Badge,Colors } from 'react-native-paper';
+import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
+
 
 // create a component
-const CustomersOrder = ({navigation}) => {
+const CustomersOrder = ({navigation,route}) => {
     const[order, setOrder] = React.useState(null);
+    const { storeid} = React.useContext(AuthenticatedUserContext);
     const [modalVisible,setModalVisible] = React.useState(false);
     const[orderItem, setOrderItem] = useState('');
 
     React.useEffect(() =>{
-        getOrdersData();
-        return () =>getOrdersData();
+        getOrdersData(storeid);
     }, [])
 
-   const getOrdersData = async () => {
+    ///Store Data
+
+
+   const getOrdersData = async (item) => {
         try{
-          const dataArr = []; 
-          let response;       
-             response=Firebase.firestore().collection('CustomerOrder').orderBy('createdAt', 'desc');
+          const dataArr = [];        
+          let response=Firebase.firestore().collection('CustomerOrder')
+             .where('storeId', '==', item)
+             .orderBy('createdAt', 'desc');
             await response.onSnapshot((querySnapshot) =>{
                 querySnapshot.forEach((doc)=>{
                     const {customerOrder,customer,customerEmail,status, geohash,lat, lng} = doc.data();
@@ -46,7 +52,6 @@ const CustomersOrder = ({navigation}) => {
                      setOrder(dataArr)
                   })
             });
-            response(); 
 
         }
         catch(e){
@@ -54,11 +59,14 @@ const CustomersOrder = ({navigation}) => {
         }
       }
       console.log(order);
+      console.log(storeid);
       function viewOrder(item) {
        navigation.navigate("viewOrder",{
          item
        })
     }
+
+   
       function  renderOrderModal() {
           return(
                 <Modal

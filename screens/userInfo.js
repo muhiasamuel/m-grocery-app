@@ -4,7 +4,6 @@ import { StyleSheet, Text, View, Alert } from 'react-native'
 const userInfo = () => {
     const [userEmail, setUserEmail ] = React.useState('')
    
-  console.log(userData.getEmail());
     return (
         <View>
           <View>

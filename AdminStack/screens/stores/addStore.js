@@ -8,10 +8,13 @@ import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 import { Avatar, Colors, DataTable } from 'react-native-paper';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
-
+import * as geofire from 'geofire-common';
+import * as Location from 'expo-location';
+import MapView from 'react-native-maps';
 const Store =  ({route, navigation}) => {
-  const {storeData, setStoreData} = useContext(AuthenticatedUserContext);
-
+  const {storeData, setStoreData,storeid,AuthUserRole} = useContext(AuthenticatedUserContext);
+  const [region, setRegion] = useState({});
+  const [mapVisibility, setmapVisibility] = useState(false);
   const [pickedImagePath, setPickedImagePath] = useState('');
   const [storeName, setstoreName] = useState('');
   const [storeDetails, setstoreDetails] = useState('');
@@ -26,31 +29,45 @@ const Store =  ({route, navigation}) => {
   const auth = Firebase.auth();
   React.useEffect(() => {
     getStoreData();
-  }, [])
-
-  const LogOutUser = async function() {
+    (async () => {
     try {
-        await auth.signOut();
-      } catch (error) {
-        console.log(error);
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        return;
       }
+      let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true, timeout: 20000, maximumAge: 1000});
+      updateState(location);
+    } catch (error) {
+      console.log(error);
+    }})();
+  }, [])
+//set location
+function updateState(location) {
+  setRegion(location.coords)
 }
+console.log(region);
 
   const handleSubmit = async() => {
     setIsSubmitting(true)
     const Storename = storeName
     const StoreDetails = storeDetails
     const StoreLocation = location
-
+    const long = region.longitude;
+    const lat = region.latitude;
+    const hash = geofire.geohashForLocation([lat, long])
     let imgUrl = await uploadImage();
       const dbh = Firebase.firestore();
       dbh.collection("Stores").add({
-        storeId: Date.now().toString(36) + Math.random().toString(36).substr(2),
+        storeId: Date.now().toString(36) + Math.random().toString(36).substr(2),        
         storeName: Storename,
         storeDetails : StoreDetails,
         storeLocation:StoreLocation,
         storeIdNo:storeIdNo,
         storeimage: imgUrl,
+        geohash: hash,
+        lat: lat,
+        lng: long,
+        region:region,
         createdAt: Date.now()
       }).then(() => {
         setIsSubmitting(false)
@@ -58,7 +75,7 @@ const Store =  ({route, navigation}) => {
         setstoreName('');
         setStoreLocation('');
         setPickedImagePath('');
-        Alert.alert('data updated');
+        Alert.alert('store created successifully');
       }) 
 
   }
@@ -172,10 +189,11 @@ const Store =  ({route, navigation}) => {
         const response=Firebase.firestore().collection('Stores');
         const data= await response.get();
         data.docs.forEach(item=>{
-          const {storeName,storeId, storeDetails,storeLocation, storeimage} = item.data();
+          const {storeName,storeId, storeDetails,storeLocation,uniqie_code, storeimage} = item.data();
           dataArr.push({
             key: item.id,
             storeId,
+            uniqie_code,
             storeName,
             storeDetails,
             storeLocation,
@@ -237,7 +255,7 @@ function renderAddStore(){
           style={[styles.input, {width:SIZES.width*0.54}]}
           value={location}
           placeholderTextColor={Colors.grey800}
-          placeholder={"Location"}
+          placeholder={"Location Adress"}
           onChangeText={(text) => setStoreLocation(text)}
           autoCapitalize={"none"}
       />
@@ -245,21 +263,28 @@ function renderAddStore(){
           style={[styles.input,{width:SIZES.width*0.42 }]}
           value={storeIdNo}
           placeholderTextColor={Colors.grey800}
-          placeholder={"Store Id"}
+          placeholder={"Store Unique Code"}
           onChangeText={(text) => setstoreIdNo(text)}
           autoCapitalize={"none"}
       />
       </View>
         <View  style ={[styles.centered,{justifyContent:'space-around'}]}>
-            <TouchableOpacity
-            onPress={() => handleSubmit()}
-            >{submitting ?
-              <ActivityIndicator color={COLORS.white} size='large'/>
-              :
-              <Text style={styles.btnUpdate}>Submit</Text>
-                    }
-            
-            </TouchableOpacity>
+        {AuthUserRole?.role === `Admin` ?
+        
+        <TouchableOpacity
+        onPress={() => handleSubmit()}
+        >{submitting ?
+          <ActivityIndicator color={COLORS.white} size='large'/>
+          :
+
+          <Text style={styles.btnUpdate}>Add Store</Text>
+                }
+        
+        </TouchableOpacity>
+        :
+        <Text style={[styles.btnUpdate,{backgroundColor:Colors.red900,...FONTS.h6}]}>Forbidden</Text>
+      }
+
             <TouchableOpacity
               style={{alignItems:'center'}}
               onPress={() => setcatDataVisible(!catDataVisible)}
@@ -323,12 +348,19 @@ function renderStoreEdit(){
            
             <Text style={[styles.storeName,{color:Colors.grey600}]}>{item?.storeName}</Text>
             <Image style={styles.bodyphoto} source={{uri: item?.storeimage}} />
-            <TouchableOpacity
+
+            {
+              storeid ===item.key ?
+              <TouchableOpacity
               onPress={() => navigation.navigate('editStore',{
               item})}
-            >
-            <Text style={[styles.btnUpdateStore,{paddingLeft:18}]}>Edit</Text>
+            > 
+            <Text style={[styles.btnUpdateStore,{paddingHorizontal:28,...FONTS.h3}]}>Edit</Text>              
             </TouchableOpacity>
+            :
+            <Text style={[styles.btnUpdateStore,{paddingLeft:18,backgroundColor:Colors.red700}]}>Forbidden </Text> 
+            }  
+            
             
           </View>
       )
@@ -486,7 +518,7 @@ storeTitle: {
     paddingVertical:SIZES.padding2,
     marginVertical:5,
     color:'#fff',
-    ...FONTS.h3,
+    ...FONTS.h6,
     backgroundColor:'skyblue',
     borderRadius:SIZES.radius*0.3
   },

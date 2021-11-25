@@ -11,7 +11,7 @@ import { FlatList } from 'react-native-gesture-handler';
 import { Avatar, Colors } from 'react-native-paper';
 
 const ProductCategories = ({route, navigation}) => {
-  const {catData, setCatData} = React.useContext(AuthenticatedUserContext);
+  const {catData, setCatData, AuthUserRole} = React.useContext(AuthenticatedUserContext);
 
   const [pickedImagePath, setPickedImagePath] = useState('');
   const [catName, setCatName] = useState('');
@@ -211,15 +211,20 @@ function renderAddCategories(){
           autoCapitalize={"none"}
       />
               <View  style ={[styles.centered,{justifyContent:'space-around'}]}>
-            <TouchableOpacity
-            onPress={() => handleSubmit()}
-            >{submitting ?
-              <ActivityIndicator color={COLORS.white} size='large'/>
-              :
-              <Text style={styles.btnUpdate}>Submit</Text>
-                    }
-            
-            </TouchableOpacity>
+                {
+                  AuthUserRole?.role === `Admin`?
+                  <TouchableOpacity
+                  onPress={() => handleSubmit()}
+                  >{submitting ?
+                    <ActivityIndicator color={COLORS.white} size='large'/>
+                    :
+                    <Text style={styles.btnUpdate}>Submit</Text>
+                          }
+                  
+                  </TouchableOpacity>
+                  :
+                  <Text style={[styles.btnUpdate,{backgroundColor:Colors.red900,...FONTS.h6}]}>Forbidden</Text> 
+                }
             <TouchableOpacity
               style={{alignItems:'center'}}
               onPress={() => setcatProdDataVisible(!catProdDataVisible)}
@@ -240,13 +245,18 @@ function renderprodCatEdit(){
            
             <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.catname}</Text>
             <Image style={styles.bodyphoto} source={{uri: item?.catimage}} />
-            <TouchableOpacity
+            {AuthUserRole?.role === `Admin` ?
+              <TouchableOpacity
               onPress={() => navigation.navigate('editCats',{
                 item
               })}
             >
-            <Text style={[styles.btnUpdateprod,{paddingLeft:18}]}>Edit</Text>
+            <Text style={[styles.btnUpdateprod,{paddingLeft:18,}]}>Edit</Text>
             </TouchableOpacity>
+            :
+            <Text style={[styles.btnUpdateprod,{paddingLeft:18,backgroundColor:Colors.red900,...FONTS.h6}]}>Forbidden</Text>
+            }
+
             
           </View>
       )
@@ -333,7 +343,7 @@ function renderCatImage(){
             style={{alignItems:'center', backgroundColor:Colors.grey50}}
             onPress={() => setcatProdDataVisible(!catProdDataVisible)}
           >
-            <Text style={{color:COLORS.darkblue,...FONTS.body3}}>Add store Data</Text> 
+            <Text style={{color:COLORS.darkblue,...FONTS.body3}}>Add Category Data</Text> 
             <Ionicons name="md-chevron-up-circle-outline" size={28} color={COLORS.darkblue} />
           </TouchableOpacity>
          {renderprodCatEdit()}

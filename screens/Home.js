@@ -6,6 +6,9 @@ import { COLORS, FONTS, images, SIZES } from '../constants/Index'
 import Firebase from '../firebaseConfig'
 import "firebase/auth"
 import 'firebase/firestore';
+import * as Location from 'expo-location';
+import * as geofire from 'geofire-common';
+import * as Linking from 'expo-linking';
 import { Colors, Searchbar } from 'react-native-paper'
 const Home = ({navigation}) => {
     //DUMMY DATA
@@ -13,23 +16,49 @@ const Home = ({navigation}) => {
 const { user } = useContext(AuthenticatedUserContext);
 const {storeData,setStoreData} = useContext(AuthenticatedUserContext);
 const [modalVisible,setModalVisible] = React.useState(false);
+const [region, setRegion] = useState({});
+const [lat, setlat] = useState();
+const [long, setlong] = useState();
 const [filteredStoreData, setfilteredStoreData] = React.useState('');
 
 const auth = Firebase.auth();
 
 React.useEffect(() => {
+  (async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true, timeout: 20000, maximumAge: 1000});
+      updateState(location);
+    } catch (error) {
+      console.log(error);
+    }})();
   getStoreData();
+  const prevLat = storeData.lat;
+  const prevLong = storeData.lng;
+
 }, [])
+function updateState(location) {
+  setRegion(location.coords)
+}
+
 const getStoreData = async () => {
+ 
+  
     try{
       const dataArr = [];
-        const response=Firebase.firestore().collection('Stores');
+        const response=Firebase.firestore().collection('Stores')
+        .orderBy('geohash');
         const data=await response.get()
         data.docs.forEach(item=>{
-          const {storeName, storeDetails,storeLocation, storeimage} = item.data();
+          const {storeName,lat,lng, storeDetails,storeLocation, storeimage} = item.data();
           dataArr.push({
             key: item.id,
             storeName,
+            lat,
+            lng,
             storeDetails,
             storeLocation,
             storeimage
@@ -225,28 +254,52 @@ function renderWidget(){
                      style= {{
                        backgroundColor:Colors.grey300,
                         width:SIZES.width * 0.97,
-                        height: 200,
+                        height: 220,
                          borderRadius: SIZES.radius*0.3,                        
                      }}
                      />
-                 
                  <View style={{
-                     position: 'absolute',
-                     bottom: 0,
+                   flexDirection:'row',
+                   justifyContent:'space-between',
+                   position: 'absolute',
+                   width:SIZES.width*0.97,
+                   bottom: -1,
+                   }}>
+                 <View style={{
                      left:0,
-                     height: 50,
-                     width: SIZES.width * 0.3,
-                     backgroundColor: COLORS.darkgrey,
-                     borderTopRightRadius: SIZES.radius,
+                     padding:SIZES.padding*0.5,
+                     paddingVertical:SIZES.padding2*1.2,
+                     backgroundColor: COLORS.backgroundColor1,
+                     borderTopRightRadius: SIZES.radius*0.5,
                      borderBottomLeftRadius: SIZES.radius*0.3,
                      alignItems:'center',
                      justifyContent:'center',
                      ...styles.shandow
                      
                  }}>
+                   
                  <Text style={
                     { ...FONTS.h4, color:COLORS.white}
-                 }>{item.storeLocation}</Text> 
+                 }>{item.storeLocation}</Text>
+                
+                </View>
+                <TouchableOpacity style={{
+                     right:0,
+                     bottom:0,
+                     paddingHorizontal:SIZES.padding*1.5,
+                     paddingVertical:SIZES.padding2*1,
+                     backgroundColor: COLORS.backgroundColor1,
+                     borderTopLeftRadius: SIZES.radius*0.5,
+                     borderBottomRightRadius: SIZES.radius*0.3,
+                     alignItems:'center',
+                     justifyContent:'center',
+                     ...styles.shandow
+                     
+                 }}
+                  onPress={() => Linking.openURL(`google.navigation:q=${item.lat}, ${item.lng}`)}>
+                    <Octicons name="location" size={14} color={Colors.teal300}  />
+                    <Text style={{...FONTS.h6,color:Colors.teal100}}>View On Maps</Text>
+                </TouchableOpacity> 
                  </View> 
                  </View>
                  <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:SIZES.padding2}}>
@@ -285,9 +338,9 @@ function renderWidget(){
         <SafeAreaView style={styles.container}>
             {renderHeader()}
             {renderWidget()}
-            <View style={[{backgroundColor:COLORS.backgroundColor1,marginBottom:5,padding:SIZES.padding}]}>
+            <View style={[{backgroundColor:COLORS.backgroundColor1,marginBottom:5,padding:SIZES.padding*0.5}]}>
             <Searchbar
-              style={{backgroundColor:Colors.grey300,height:SIZES.height*0.05,borderRadius:10}}
+              style={{backgroundColor:Colors.grey50,height:SIZES.height*0.06,borderRadius:15}}
               placeholder="Search For Store"
               onChangeText={query => searchStores(query)}
             />

@@ -85,6 +85,7 @@ export default class CutomerDetails extends React.Component {
   };
 
   orderSubmit = async () => {
+    const { navigation } = this.props; 
     this.setState({
       submitting:true,
       mapVisibility:false
@@ -92,6 +93,7 @@ export default class CutomerDetails extends React.Component {
     const order = store.getState();
     const long = this.state.longitude;
     const lat = this.state.latitude;
+    const prodStoreid = order.filteredOrder.storeId;
     const hash = geofire.geohashForLocation([lat, long])
     const docId = Firebase.firestore().collection("CustomerOrder").doc().id
     try{
@@ -99,6 +101,7 @@ export default class CutomerDetails extends React.Component {
         geohash: hash,
         customerEmail: this.state.CustomerEmail,
         customer: this.state.User,
+        storeId:prodStoreid,
         lat: lat,
         lng: long,
         customerOrder: order,
@@ -108,7 +111,8 @@ export default class CutomerDetails extends React.Component {
         this.setState({
           submitting:false
         })
-        alert('order Sent!')
+        alert('order Sent!');
+        navigation.navigate("orderstatus")
       })
 
     }catch(e){
@@ -148,7 +152,7 @@ export default class CutomerDetails extends React.Component {
                  justifyContent: 'center'
              }}
              onPress={() => navigation.goBack()}>
-               <Fontisto name='arrow-return-left' size={24} color={COLORS.white}/>
+               <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
            </TouchableOpacity>
            <Text style={styles.PageTitle}>Customer Deliverly Info</Text>
        </View>
@@ -261,11 +265,7 @@ export default class CutomerDetails extends React.Component {
                   </>
                   )}
                </View> 
-               <TouchableOpacity
-                  onPress={() => Linking.openURL(`google.navigation:q=${this.state.latitude}, ${this.state.longitude}`)}
-                  style={styles.btnCheckout}>
-                  <Text style={[styles.textCheckout,{...FONTS.h4,fontWeight:'bold', color:'white'}]}>Open Maps</Text>
-                </TouchableOpacity> 
+         
                 </>
               }
                         

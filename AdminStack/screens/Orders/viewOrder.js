@@ -17,8 +17,7 @@ const OrderView = ({route, navigation}) => {
     useEffect(() => {
         let {item} = route.params;
         setOrderItem(item)
-        setProducts(item.orderItems);
-       
+        setProducts(item.orderItems);       
     }, [])
     const updateStatusDecline = async(key) => {
         try{

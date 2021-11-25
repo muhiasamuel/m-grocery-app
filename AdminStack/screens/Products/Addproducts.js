@@ -59,7 +59,8 @@ static contextType = AuthenticatedUserContext;
    getStoreData = async () => {
     try{
       const dataArr = [];
-        const response=Firebase.firestore().collection('Stores');
+        const response=Firebase.firestore().collection('Stores')
+        .where('uniqie_code', '==', storeCode);
         const data= await response.get();
         data.docs.forEach(item=>{
           const {storeName,storeId, storeDetails,storeLocation, storeimage} = item.data();
@@ -464,7 +465,7 @@ static contextType = AuthenticatedUserContext;
   )
 }
 renderProdsEdit(){
-  const { Products} = this.context;
+  const { Products, storeid} = this.context;
   const { navigation } = this.props;
   const renderItem = ({item}) =>(
           <View style={{
@@ -478,13 +479,19 @@ renderProdsEdit(){
               <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
             )}
             <Text style={[styles.storeName,{color:Colors.grey500, width:SIZES.width*0.3}]}>{item?.storeName}</Text>
-            <TouchableOpacity
+
+             {storeid === item?.prodStoreid ?
+              <TouchableOpacity
               onPress={() => navigation.navigate('editProducts',{
                 item
               })}
             >
-            <Text style={[styles.btnUpdateprod,{padding:8}]}>Edit</Text>
+              <Text style={[styles.btnUpdateprod,{padding:8}]}>Edit</Text>
             </TouchableOpacity>
+            :
+            <Text style={[styles.btnUpdateprod,{padding:8, backgroundColor:Colors.red800}]}>Forbidden</Text>  
+             } 
+            
             
           </View>
       )

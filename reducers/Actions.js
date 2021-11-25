@@ -1,6 +1,6 @@
 import * as Actions from "./actionTypes";
 
-export function AddProduct(productId, price,name,image,unit) {
+export function AddProduct(productId, price,name,image,unit,prodStoreid) {
     return{
         type:Actions.ADD_ITEM,
         payload:{
@@ -8,7 +8,8 @@ export function AddProduct(productId, price,name,image,unit) {
             price,
             name,
             image,
-            unit
+            unit,
+            prodStoreid
         }
     }
 }

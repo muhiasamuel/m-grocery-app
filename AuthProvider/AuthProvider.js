@@ -9,11 +9,12 @@ export const AuthenticatedUserProvider = ({ children }) => {
   const [storeData, setStoreData] = useState([]); 
   const [Products, setProducts] = useState([]); 
   const [Orders, setOrders] = useState([]); 
-
+  const [storeid, setstoreid] = useState(null);
 
   return (
     <AuthenticatedUserContext.Provider value={{
        user, setUser,
+       storeid, setstoreid,
        AuthUserRole, setAuthUserRole,
        storeData, setStoreData,
        catData, setCatData,

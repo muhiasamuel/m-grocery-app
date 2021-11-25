@@ -18,15 +18,7 @@ const myOrderList = ({route, navigation}) => {
     const [productCount,setProductCount] = React.useState();
     const [basketItem,setBasketItem] = React.useState();
     React.useEffect(() =>{ 
-        (async () => {
-            let { status } = await Location.requestForegroundPermissionsAsync();
-            if (status !== 'granted') {
-              setErrorMsg('Permission to access location was denied');
-              return;
-            }
-      
-            let location = await Location.getCurrentPositionAsync({});
-          })();
+
         const prods = CurrentBasketState?.orderItems.map(data=>{
            SetOrderDetails(CurrentBasketState?.orderItems)
             return getproductsByIds(data.productId)[0];
@@ -101,7 +93,7 @@ const myOrderList = ({route, navigation}) => {
             }}
             onPress={() => navigation.goBack()} 
             >
-                <Fontisto name='arrow-return-left' size={24} color={COLORS.white}/>
+                <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
 
             </TouchableOpacity>
             <TouchableOpacity

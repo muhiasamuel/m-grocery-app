@@ -157,8 +157,8 @@ const Storeitems = ({route, navigation}) => {
       SetstoreItems(StoreProducts.filter(i=>i.prodname.toLowerCase().includes(query.toLowerCase())))
     }
     ///Add items to cart
-    function AddOrder(id, price, name,image,unit) {
-        store.dispatch(AddProduct(id, price,name,image,unit))
+    function AddOrder(id, price, name,image,unit,prodStoreid) {
+        store.dispatch(AddProduct(id, price,name,image,unit,prodStoreid))
         store.dispatch(filtredOrderPrds(id))      
         store.dispatch(ProductQty(id))
         store.dispatch(TotalOrder())
@@ -321,7 +321,7 @@ const Storeitems = ({route, navigation}) => {
                             </View>
                             <TouchableOpacity  style={[styles.OrderIncrement,{borderTopRightRadius:25,
                                     borderBottomRightRadius:25}]}
-                                onPress = {() =>  AddOrder(currentCartItem?.key,currentCartItem?.prodprice,currentCartItem?.prodname, currentCartItem?.imageUrls[0].url,currentCartItem?.productUnit)}
+                                onPress = {() =>  AddOrder(currentCartItem?.key,currentCartItem?.prodprice,currentCartItem?.prodname, currentCartItem?.imageUrls[0].url,currentCartItem?.productUnit,currentCartItem?.prodStoreid)}
                             >
                                 <Text style={{...FONTS.body1}}>
                                 <AntDesign name="pluscircleo" size={27} color={COLORS.white} />
@@ -467,12 +467,16 @@ const Storeitems = ({route, navigation}) => {
                    renderItem={renderItem}
                    contentContainerStyle={{paddingVertical:SIZES.padding * 0.78}}
                 />
-            
+            {selectedCategory !== null ?
                   <Searchbar
                   style={{height:SIZES.height*0.05,backgroundColor:Colors.grey200, borderRadius:10}}
                     placeholder="Search For Products"
                     onChangeText={query => searchProducts(query)}
+            
                 />
+                :
+                <View></View>
+              }
             </View>
         )
     }

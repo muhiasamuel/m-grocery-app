@@ -5,13 +5,15 @@ import * as ImagePicker from 'expo-image-picker';
 import "firebase/storage";
 import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
+import * as geofire from 'geofire-common';
+import * as Location from 'expo-location';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
 import { Colors } from 'react-native-paper';
 
 const EditStore =  ({route, navigation}) => {
   const {storeData} = useContext(AuthenticatedUserContext);
-
+  const [region, setRegion] = useState({});
   const [pickedImagePath, setPickedImagePath] = useState('');
   const [storeName, setstoreName] = useState('');
   const [storeIdNo, setstoreIdNo] = useState('');
@@ -26,21 +28,39 @@ const EditStore =  ({route, navigation}) => {
   const auth = Firebase.auth();
   React.useEffect(() => {
     let{item} =route.params 
-    StoreData(item)
-    setCurrentStore(item)
+    StoreData(item);
+    setCurrentStore(item);
+    (async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          return;
+        }
+        let location = await Location.getCurrentPositionAsync({enableHighAccuracy: true, timeout: 20000, maximumAge: 1000});
+        updateState(location);
+      } catch (error) {
+        console.log(error);
+      }})();
   }, [])
   const StoreData = (item) =>{
     setstoreName(item.storeName);
     setStoreLocation(item.storeLocation);
     setstoreDetails(item.storeDetails)
     setPickedImagePath(item.storeimage)
+    setstoreIdNo(item.uniqie_code)
   }
-
+//set location
+function updateState(location) {
+  setRegion(location.coords)
+}
   const handleSubmit = async(key) => {
     setIsSubmitting(true)
     const Storename = storeName
     const StoreDetails = storeDetails
     const StoreLocation = location
+    const long = region.longitude;
+    const lat = region.latitude;
+    const hash = geofire.geohashForLocation([lat, long])
 
     let imgUrl = await uploadImage();
     const db = Firebase.firestore().collection("Stores")
@@ -50,8 +70,12 @@ const EditStore =  ({route, navigation}) => {
         storeDetails : StoreDetails,
         storeLocation:StoreLocation,
         storeimage: imgUrl,
-        storeIdNo:storeIdNo,
-        createdAt: Date.now()
+        uniqie_code:storeIdNo,
+        geohash: hash,
+        lat: lat,
+        lng: long,
+        region:region,
+        Updated_At: Date.now()
       }).then(() => {
         setIsSubmitting(false)
         setstoreDetails('');
@@ -217,7 +241,7 @@ function renderAddStore(){
             >{submitting ?
               <ActivityIndicator color={COLORS.darkblue} size='large'/>
               :
-              <Text style={styles.btnUpdate}>Update</Text>
+              <Text style={styles.btnUpdate}>Update Store</Text>
                     }
             
             </TouchableOpacity>

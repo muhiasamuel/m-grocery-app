@@ -1,13 +1,13 @@
 //import liraries
 import { AntDesign, Entypo, Ionicons } from '@expo/vector-icons';
 import React, { Component,useEffect,useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView,TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView,TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { COLORS, FONTS, images, SIZES } from '../constants/Index'
 import "firebase/storage";
 import 'firebase/firestore';
 import * as Linking from 'expo-linking';
 import Firebase from '../firebaseConfig';
-import { Badge } from 'react-native-paper';
+import { Badge, Card, Colors, Divider, Paragraph, Title } from 'react-native-paper';
 import { AuthenticatedUserContext } from '../AuthProvider/AuthProvider';
 
 // create a component
@@ -18,36 +18,132 @@ const OrderView = ({route, navigation}) => {
     const[submitting, setisSubmitting] = useState(false);
     useEffect(() => {
         getCustomerCurrentOrder();
-        setProducts(orderItem.orderItems);
+        setProducts(orderItem.customerOrder);
     },[])
     const getCustomerCurrentOrder = async() =>{
-        try{
-            await Firebase.firestore()
-            .collection('CustomerOrder')
-            .where('customerEmail', '==', user.email)
-            .orderBy("createdAt").limit(3)
-            .get()
-            .then((querySnapshot) => {
-              querySnapshot.forEach((doc) =>{
-                console.log(doc.data()); 
-                setOrderItem(doc.data());        
-              })
-            })
+        
+          try{
+            const dataArr = [];       
+             const response=Firebase.firestore()
+               .collection('CustomerOrder')
+               .where('customerEmail', '==', user.email)
+               .orderBy('createdAt', 'desc').limit(3);
+               const data=await response.get()
+               data.docs.forEach((doc)=>{
+                      const {customerOrder,customer,customerEmail,status, geohash,lat, lng} = doc.data();
+                      dataArr.push({
+                        key: doc.id,
+                        geohash,
+                        customerId:customer.uid,
+                        status,
+                        customerName:customer.username,
+                        customerEmail,
+                        total:customerOrder.total,
+                        customerPhoneNo:customer.phonenumber,
+                        orderItems: customerOrder.orderItems,
+                        basketCount:customerOrder.BasketCount,
+                        lat,
+                        lng,
+                      })
+                      setOrderItem(dataArr)
+                    })
           }
           catch(e){
             console.log(e);
-          }  
+          } 
         
     }
 
-    function renderOrdersView() {
    
-    }
+    function renderOrdersView() {    
+        const renderItem = ({ item, index }) => (
+            <View >
+                <Card style={styles.bodycontainer}>
+                    {
+                        index == 0 ?
+                        
+                        <Text style={{backgroundColor:Colors.teal400,color:Colors.lightBlue50, width:SIZES.width*0.35,borderRadius:10, padding:SIZES.padding,...FONTS.body3}}>Current Order</Text>
+                        :
+                        <Text></Text>
+                       
+                    }
+                    <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+                      <View style={[styles.ItemsView,{width:SIZES.width*0.4,paddingHorizontal:5, marginVertical:25}]}>
+                      <Text style={styles.btntext}>Order Id:{item.key}</Text>
+                      {
+                          item?.orderItems.map((data, index)=>(
+                              <View>
+                              <View
+                              style={[styles.ItemsView,{flexDirection:'row', paddingVertical:9,}]}
+                              key={`orderItems-${index}`}>
+                              
+                                  <Image
+                                      source={{uri: data.image}}
+                                      resizeMode='cover'
+                                      style={[styles.bodyphoto,{backgroundColor:Colors.grey600}]}/>
+                                      <Text style={[styles.btntext,{paddingHorizontal:5,width:SIZES.width*0.25}]}>{data?.name}</Text>
+                                      <Text style={[styles.btntext,{paddingHorizontal:5,width:SIZES.width*0.25}]}>{data?.unit } * {data?.qty}</Text>
+                                      <Text style={[styles.btntext,{...FONTS.h4,width:SIZES.width*0.32}]}>Ksh {data.total}.00</Text>
+                              </View> 
+                              <Divider style={{color:Colors.lime700}}/>
+                              </View>
+                               
+                          ))
+                      }
+                       <View style={[styles.centered,{paddingVertical:SIZES.padding2}]}>
+                        <Text style={[styles.btntext,{...FONTS.h3,width:SIZES.width*0.30}]}>All Items: {item?.basketCount}</Text>
+                        <Text style={[styles.btntext,{...FONTS.h3,width:SIZES.width*0.65}]}>Total Payable: Ksh {item?.total}.00</Text>
+                    </View>
+                      </View>
+                      <View style={[styles.ItemsView,{justifyContent:'space-between'}]}>
+                        <View style={{flexDirection:'row',alignItems:'center', marginVertical:25, }}>
+                        <Text style={[styles.btntext,{paddingRight:5, ...FONTS.body3}]}>Order Status:</Text>
+                        
+                        {item?.status ==`New` ? 
+                         <Badge size={28} style={{backgroundColor:Colors.redA700}} >{item?.status}</Badge>
+                         :
+                         <Badge size={28} style={{backgroundColor:Colors.green700,paddingHorizontal:7}} >{item?.status}</Badge>
+                        }
+                        
+                        </View>
+                        <>
+                        {item?.status ==`Complete` ? 
+                        
+                        <View style={{flexDirection:'row',alignItems:'center'}}>
+                        <Text style={[styles.btntext,{paddingRight:5, ...FONTS.body3,}]}>Order Status:</Text>
+                         <Badge size={28} style={{backgroundColor:Colors.green700,paddingHorizontal:17}} >{item?.status}</Badge>
+                        </View>
+                        :
+                        <View></View>
+                         }
+                        </>
+                        
+                      </View>
+                    </View>
+                 
+  
+                    <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center'}}>
+              
+                  
+                </View> 
+                </Card>
+      
+            </View>
+          )
+          return(
+            <View style={styles.catBody}>
+            <FlatList
+              vertical
+              showsVerticalScrollIndicator={false}
+              data={orderItem}
+              renderItem={renderItem}
+              keyExtractor={item => `${item?.key}`}
+            />
+          </View>
+          )}
     return (
         <View style={styles.container}>
-            <ScrollView>
               {renderOrdersView()}
-            </ScrollView>
         </View>
     );
 };
@@ -62,13 +158,12 @@ const styles = StyleSheet.create({
     bodycontainer: {
         width:SIZES.width,
         marginTop:3,
-        backgroundColor:COLORS.darkgrey4,
         padding:SIZES.padding*0.2,
         justifyContent:'space-between'
 
     },
     ItemsView:{
-        width:SIZES.width*0.6
+        width:SIZES.width*0.45
     },
     btnContinue:{
         backgroundColor:COLORS.primary,

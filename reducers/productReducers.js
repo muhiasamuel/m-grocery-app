@@ -26,6 +26,7 @@ function productReducers( state=initialState, action){
                           unit:action.payload.unit,
                           price: action.payload.price,
                           total: action.payload.price,
+                          storeId:action.payload.prodStoreid,
                       }
                       orderList.push(newItem)
                   } 
