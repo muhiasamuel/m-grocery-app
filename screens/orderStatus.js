@@ -1,5 +1,5 @@
 //import liraries
-import { AntDesign, Entypo, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Entypo, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import React, { Component,useEffect,useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView,TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
 import { COLORS, FONTS, images, SIZES } from '../constants/Index'
@@ -53,6 +53,38 @@ const OrderView = ({route, navigation}) => {
           } 
         
     }
+    function renderHeader()     
+    {
+       return ( <View style={styles.header}>
+            <TouchableOpacity
+            style={{
+                width:50,
+                paddingLeft: SIZES.padding *2,
+                justifyContent: 'center'
+            }}
+            onPress={() => navigation.navigate('home')} 
+            >
+                <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
+
+            </TouchableOpacity>
+            <Text 
+                style={{...FONTS.body2,fontSize:25, color:COLORS.white, fontWeight:'bold'}}>
+                 My Order Status
+             </Text>
+            <TouchableOpacity
+            style={{
+                width:50,
+                paddingLeft: SIZES.padding *2,
+                justifyContent: 'center'
+            }}
+            >
+                <MaterialCommunityIcons name='dots-vertical' size={24} color={COLORS.darkgrey2}/>
+
+            </TouchableOpacity>
+            
+            
+        </View>) 
+    }
 
    
     function renderOrdersView() {    
@@ -91,8 +123,13 @@ const OrderView = ({route, navigation}) => {
                           ))
                       }
                        <View style={[styles.centered,{paddingVertical:SIZES.padding2}]}>
-                        <Text style={[styles.btntext,{...FONTS.h3,width:SIZES.width*0.30}]}>All Items: {item?.basketCount}</Text>
-                        <Text style={[styles.btntext,{...FONTS.h3,width:SIZES.width*0.65}]}>Total Payable: Ksh {item?.total}.00</Text>
+                        <Text style={[styles.btntext,{...FONTS.h4,width:SIZES.width*0.30}]}>All Items: {item?.basketCount}</Text>
+                        <Text style={[styles.btntext,{...FONTS.h4,width:SIZES.width*0.65}]}>Total For Items: Ksh {item?.total}.00</Text>
+                    </View>
+                    <Divider/>
+                    <View style={[styles.centered,{paddingVertical:SIZES.padding2,justifyContent:'space-between'}]}>
+                        <Text style={[styles.btntext,{...FONTS.h5,width:SIZES.width*0.45}]}>Shipment Charges Ksh 150.00</Text>
+                        <Text style={[styles.btntext,{...FONTS.h4,width:SIZES.width*0.50,backgroundColor:Colors.yellow500, padding:SIZES.padding2}]}>Total + Shipment: Ksh {(item?.total + 150)}.00</Text>
                     </View>
                       </View>
                       <View style={[styles.ItemsView,{justifyContent:'space-between'}]}>
@@ -138,11 +175,15 @@ const OrderView = ({route, navigation}) => {
               data={orderItem}
               renderItem={renderItem}
               keyExtractor={item => `${item?.key}`}
+              contentContainerStyle={{
+                paddingBottom:40,
+              }}
             />
           </View>
           )}
     return (
         <View style={styles.container}>
+            {renderHeader()}
               {renderOrdersView()}
         </View>
     );
@@ -154,6 +195,15 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         backgroundColor: '#2c3e50',
+    },
+    header:{
+        top:0,
+        width:SIZES.width,
+        paddingVertical:SIZES.padding*1.5,
+        backgroundColor:'rgb(3,3,29)',
+        flexDirection: 'row',
+        alignItems:'center',
+        justifyContent:'space-between'
     },
     bodycontainer: {
         width:SIZES.width,

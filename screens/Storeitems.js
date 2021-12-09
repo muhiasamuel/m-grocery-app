@@ -469,7 +469,7 @@ const Storeitems = ({route, navigation}) => {
                 />
             {selectedCategory !== null ?
                   <Searchbar
-                  style={{height:SIZES.height*0.05,backgroundColor:Colors.grey200, borderRadius:10}}
+                  style={{height:SIZES.height*0.06,backgroundColor:Colors.grey50, borderRadius:5}}
                     placeholder="Search For Products"
                     onChangeText={query => searchProducts(query)}
             

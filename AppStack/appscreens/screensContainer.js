@@ -27,7 +27,7 @@ const ScreensContainer = () => {
           <Stack.Screen name = "Storeitems" component={Storeitems}/>
           <Stack.Screen name = "orderstatus" 
             options={{
-              headerShown:true,
+              headerShown:false,
               title: 'YOUR ORDER STATUS ',
             }}
           component={orderStatus}/>

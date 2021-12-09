@@ -15,7 +15,7 @@ import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 // create a component
 const CustomersOrder = ({navigation,route}) => {
     const[order, setOrder] = React.useState(null);
-    const { storeid} = React.useContext(AuthenticatedUserContext);
+    const { storeid, AuthUserRole} = React.useContext(AuthenticatedUserContext);
     const [modalVisible,setModalVisible] = React.useState(false);
     const[orderItem, setOrderItem] = useState('');
 
@@ -93,6 +93,39 @@ const CustomersOrder = ({navigation,route}) => {
               </Modal>
           )
       }
+      function renderHeader()     
+      {
+         return ( <View style={styles.header}>
+              <TouchableOpacity
+              style={{
+                  width:50,
+                  paddingLeft: SIZES.padding *2,
+                  justifyContent: 'center'
+              }}
+              onPress={() => navigation.goBack()} 
+              >
+                  <MaterialIcons name='arrow-back' size={24} color={COLORS.white}/>
+  
+              </TouchableOpacity>
+              <Text 
+                  style={{...FONTS.body2,fontSize:25, color:COLORS.white, fontWeight:'bold'}}>
+                   Orders
+               </Text>
+              <TouchableOpacity
+              style={{
+                  width:50,
+                  paddingLeft: SIZES.padding *2,
+                  justifyContent: 'center'
+              }}
+              >
+                  <MaterialCommunityIcons name='dots-vertical' size={24} color={COLORS.darkgrey2}/>
+  
+              </TouchableOpacity>
+              
+              
+          </View>) 
+      }
+  
 
       function renderCartItems() {    
         const renderItem = ({ item, index }) => (
@@ -180,6 +213,38 @@ const CustomersOrder = ({navigation,route}) => {
 
     return (
         <View style={styles.container}>
+          {renderHeader()}
+            <View style={styles.cardrow}>
+              <TouchableOpacity
+              style={[styles.storeswitchbtn,{backgroundColor:Colors.lightBlue200}]}
+                onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
+              >
+                <Text style={[styles.textStyle,{fontSize:18}]}>New</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+              style={styles.storeswitchbtn}
+                onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
+              >
+                <Text style={[styles.textStyle,{fontSize:18}]}>Dispatched</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+              style={[styles.storeswitchbtn,{backgroundColor:Colors.green300}]}
+                onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
+              >
+                <Text style={[styles.textStyle,{fontSize:18}]}>Complete</Text>
+              </TouchableOpacity>
+              {
+                      AuthUserRole?.role === `Admin`?
+                      <TouchableOpacity
+                      style={[styles.storeswitchbtn,{backgroundColor:Colors.red300}]}
+                        onPress = {() => viewStore()}
+                      >
+                        <Text style={[styles.textStyle,{fontSize:18}]}>Declined</Text>
+                      </TouchableOpacity>
+              :
+              <Text></Text>
+              }
+           </View>
             {renderOrderModal()}
             {renderCartItems()}
         </View>
@@ -190,10 +255,18 @@ const CustomersOrder = ({navigation,route}) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#2c3e50',
     },
+    header:{
+      top:0,
+      width:SIZES.width,
+      paddingVertical:SIZES.padding*1.5,
+      backgroundColor:'rgb(3,3,29)',
+      flexDirection: 'row',
+      alignItems:'center',
+      justifyContent:'space-between'
+  },
     OrderIncrement: {
         width:50,
         backgroundColor: COLORS.white,
@@ -292,6 +365,7 @@ const styles = StyleSheet.create({
           marginLeft:10,
           color:COLORS.blackSecondary,
         },
+
        
         textStyle: {
           color:COLORS.white,
@@ -311,7 +385,21 @@ const styles = StyleSheet.create({
           backgroundColor:'rgb(255,12,13)',
           color:COLORS.white,
           alignSelf:'flex-end'
-        }
+        },
+        cardrow:{
+          flexDirection:'row',
+          justifyContent:'space-between',
+          alignItems:'center',
+          padding:5
+        },
+        storeswitchbtn: {
+          backgroundColor:Colors.blue300,
+          paddingHorizontal:SIZES.padding2,
+          paddingVertical:7,
+          borderRadius:5,
+          borderColor:Colors.cyan600,
+          borderWidth:1
+        },
 });
 
 //make this component available to the app

@@ -101,7 +101,7 @@ const OrdersStackNavigator = () => {
     <Stack.Navigator screenOptions={screenOptionStyle}>
        <Stack.Screen name="Orders" component={CustomersOrder} options={{
         title: "Orders",
-        headerShown:true,
+        headerShown:false,
       }}/>
          <Stack.Screen name="viewOrder" component={OrderView} options={{
         title: "View Order",

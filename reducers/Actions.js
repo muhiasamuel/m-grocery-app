@@ -52,6 +52,14 @@ export function TotalOrder(){
     }
 
 }
+
+export function resetStore(){
+    return{
+        type:Actions.resetStore,
+    }
+
+}
+
 export function filtredOrderPrds(productId){
     return{
         type: Actions.OrderData,

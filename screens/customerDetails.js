@@ -15,6 +15,7 @@ import * as Linking from 'expo-linking';
 import firebase from 'firebase/app';
 import "firebase/storage";
 import 'firebase/firestore';
+import { resetStore } from '../reducers/actionTypes';
 
 export default class CutomerDetails extends React.Component {
    static contextType = AuthenticatedUserContext 
@@ -113,6 +114,7 @@ export default class CutomerDetails extends React.Component {
         })
         alert('order Sent!');
         navigation.navigate("orderstatus")
+        store.dispatch(resetStore())
       })
 
     }catch(e){

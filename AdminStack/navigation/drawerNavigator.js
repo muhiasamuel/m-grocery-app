@@ -8,28 +8,37 @@ import { CategoryStackNavigator, ContactStackNavigator, MainStackNavigator, Orde
 import BottomTabNavigator from "./tabNavigator";
 import { ProductCategories, Products, Store,CustomersOrder,Stocks } from "../screens";
 import { COLORS } from "../../constants/Index";
-import { StyleSheet, Text } from "react-native";
-import { EvilIcons, Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { StyleSheet, Text ,useWindowDimensions} from "react-native";
+import { EvilIcons, Feather, FontAwesome, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import Users from "../screens/users";
 import tabs from "./tabNavigator";
+import { View } from "react-native-animatable";
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigator = ({navigation}) => {
+    const dimensions = useWindowDimensions();
+
+    const isLargeScreen = dimensions.width >= 768;
   return (
-      <>   
+      <>  
     <Drawer.Navigator
         screenOptions={{
             headerShown:false,
+            drawerType: isLargeScreen ? 'permanent' : 'back',
+            drawerStyle: isLargeScreen ? null : { width: '65%' },
+            overlayColor: 'transparent',
             headerStyle: {
                 backgroundColor: COLORS.darkblue
               },
               headerTintColor: "white",
               headerBackTitle: "Back",
+              
               itemStyle: { alignItems:'flex-end' },            
         }}
         style={styles.drawer}
         drawerPosition='right'
+        
        
     >
       <Drawer.Screen
@@ -50,10 +59,10 @@ const DrawerNavigator = ({navigation}) => {
        options={{
         title: 'Products',
         drawerIcon: ({focused, size}) => (
-            <Ionicons
-                name="md-home"
-                size={size}
-                color={focused ? '#7cc' : 'skyblue'}
+            <FontAwesome
+             name="product-hunt" 
+            size={size} 
+            color={focused ? '#7cc' : 'skyblue'}
             />
         ),
         }}

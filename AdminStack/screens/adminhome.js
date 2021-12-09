@@ -1,19 +1,21 @@
 import React from 'react'
-import { StyleSheet, ScrollView, View,TouchableOpacity, Text, ActivityIndicator, SafeAreaView, KeyboardAvoidingView, ImageBackground, Image, TextInput, TouchableNativeFeedback,Modal } from "react-native";
+import { StyleSheet, ScrollView, View,TouchableOpacity, Text, ActivityIndicator, SafeAreaView, KeyboardAvoidingView, ImageBackground, Image, TextInput, TouchableNativeFeedback,Modal, FlatList } from "react-native";
 import firebase from 'firebase/app'
 import "firebase/firestore";
 import { COLORS, FONTS,  SIZES } from "../../constants/Index";
-import { Feather, FontAwesome, FontAwesome5, Fontisto, Foundation, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome, FontAwesome5, Fontisto, Foundation, Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import Firebase from "../../firebaseConfig";
 import { AuthenticatedUserContext } from "../../AuthProvider/AuthProvider";
 import { Avatar, Colors, Title,Badge,Headline,  } from "react-native-paper";
 
 const Adminhome = ({navigation}) => {
-  const {setstoreid} = React.useContext(AuthenticatedUserContext);
+  const {setstoreid,storeid, AuthUserRole,setStoreData, storeData} = React.useContext(AuthenticatedUserContext);
   const [storeCode, setStoreCode] = React.useState(null);
   const [isLoading, setIsLoading] =React.useState(false);
   const [item, setitem] = React.useState(null)
+  const [selectedStore ,setSelectedStore] = React.useState(null);
   const [modalVisible, setModalVisible] = React.useState(false);
+  const [storeModalVisible, setStoreModalVisible] = React.useState(false);
   const auth = Firebase.auth();
 
   const LogOutUser = async function() {
@@ -26,8 +28,37 @@ const Adminhome = ({navigation}) => {
 React.useEffect(() =>{
   setTimeout(()=>{
     setModalVisible(!modalVisible);
-  }, 3000)
+  }, 200)
+  getStoreData();
 },[])
+
+//fetching store data from firestore
+const getStoreData = async () => {
+  try{
+    const dataArr = [];
+      const response=Firebase.firestore().collection('Stores');
+      const data= await response.get();
+      data.docs.forEach(item=>{
+        const {storeName,uniqie_code } = item.data();
+        dataArr.push({
+          key: item.id,
+          uniqie_code,
+          storeName,
+        });
+        setStoreData(dataArr)
+      })
+  }
+  catch(e){
+    console.log(e);
+  }
+}
+
+//
+const handlestore =()=>{
+  setstoreid(selectedStore?.key);
+  setStoreCode(selectedStore?.uniqie_code);
+  setStoreModalVisible(!storeModalVisible)
+}
 
 const handleSelectedStore = async() =>{
   setIsLoading(true) 
@@ -41,16 +72,17 @@ const handleSelectedStore = async() =>{
       .where('uniqie_code', '==', storeCode)
       .get()
       .then((querySnapshot) => {
-        querySnapshot.forEach((doc) =>{ 
-          if (!doc.empty) {
+        querySnapshot.forEach(doc =>{ 
+          if (!doc.empty) {          
             setstoreid(doc.id);
             setIsLoading(false) 
             setModalVisible(!modalVisible)
         }else{
             // doc.data() will be undefined in this case           
             setstoreid(null);
+            setStoreCode(null);
             setIsLoading(false) 
-            alert("Your Code is Incorrect!!");
+            alert("Your Code is Incorrect!! Store does not exist");
         }
                   
         })
@@ -73,20 +105,34 @@ function handleClose() {
   if (storeCode === null) {
     alert(`Add storeCode to close this Modal`)
   } else {
-    setModalVisible(!modalVisible);
+    if (storeid == null) {
+      alert(`Add a correct store code first `)
+      setIsLoading(false)
+    } else {
+      setModalVisible(!modalVisible);
+    }
+    
   }
 }
 //store data
+//Store Code For User admin
+function viewStore() {
+  if (storeData === null) {
+    getStoreData()
+  } else { 
+    setStoreModalVisible(!storeModalVisible);
+  }
+}
 function renderModal(){
   return(
           <Modal 
-          animationType="fade"
+          animationType="slide"
           transparent={true}
           visible={modalVisible}
           >
             <View style={styles.centeredView}>
               <View style={styles.modalView}>
-               <Headline>Enter Store Unique Code To Continue!!</Headline>
+               <Headline style={{marginVertical:10,paddingHorizontal:15, textAlign:'center'}}>Enter Store Unique Code To Continue!!</Headline>
                <TextInput
                   style={styles.input}
                   value={storeCode}
@@ -123,6 +169,81 @@ function renderModal(){
       )
   }
   
+  //store modal
+  function renderStoreModal(){   
+    return(
+        <Modal 
+        animationType="fade"
+        transparent={true}
+        visible={storeModalVisible}
+        >
+          <View style={styles.centeredView}>
+            <View style={[styles.modalView, {height:SIZES.height*0.4}]}>
+             <Headline  style={{marginVertical:10,paddingHorizontal:15, textAlign:'center'}}>Check to Switch Store</Headline>
+             {renderStore()}
+
+             <View style={{flexDirection:'row', justifyContent:'space-between',
+               paddingHorizontal:30, alignItems:'center'}}>
+                <TouchableOpacity
+                  
+                  onPress={() => setStoreModalVisible(!storeModalVisible)}
+                >
+                  <Text style={{...FONTS.body2, color:Colors.red800}}>Close</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  
+                  onPress={() => handlestore()}
+                >
+                  <Text style={{...FONTS.body2, color:Colors.blue400}}>OK</Text>
+                </TouchableOpacity>
+              </View>
+
+            </View>
+          </View>   
+
+        </Modal>
+    )
+}
+//selected store
+function renderStore(){
+  const renderItem = ({item}) =>(
+          <View >
+            <TouchableOpacity
+            onPress={() => setSelectedStore(item)}
+            style={{flexDirection:'row',alignItems:'center', justifyContent:'space-evenly'}}
+          >
+            <View style={{width:SIZES.width*0.1}}>
+            {selectedStore?.storeName  == item?.storeName  ?
+            <>
+            <MaterialCommunityIcons name="check-circle-outline" size={30} color={Colors.green500} />
+            </>
+            :
+            <>
+            <Entypo name="circle" size={28} color="black" />
+            
+            </>
+          }
+          </View>
+            
+            <Text style={{...FONTS.body4,paddingLeft:SIZES.padding2*2, width:SIZES.width*0.5}} >{item?.storeName}</Text>
+            <Text style={{...FONTS.body4,paddingLeft:SIZES.padding2*2, width:SIZES.width*0.3}} >{item?.uniqie_code}</Text>
+            </TouchableOpacity>
+            
+          </View>
+      )
+      return(
+        <FlatList
+            data={storeData}
+            keyExtractor={item => `${item.key}`}
+            renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+              paddingBottom:25,
+              backgroundColor:COLORS.white
+            }}
+        />
+      )
+      }
 
   function renderHeader(){
     return(
@@ -146,9 +267,27 @@ function renderModal(){
   function renderCards(){
     return(
       <View style={styles.cardView}>
-        
         <View style={styles.cardrow}>
-          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.teal600}]}
+          <TouchableOpacity
+          style={styles.storeswitchbtn}
+            onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
+          >
+            <Text style={[styles.textStyle,{fontSize:18}]}>switch to another store</Text>
+          </TouchableOpacity>
+          {
+                  AuthUserRole?.role === `Admin`?
+                  <TouchableOpacity
+                  style={styles.storeswitchbtn}
+                    onPress = {() => viewStore()}
+                  >
+                    <Text style={[styles.textStyle,{fontSize:20}]}>Store Codes</Text>
+                  </TouchableOpacity>
+          :
+          <Text></Text>
+          }
+        </View>
+        <View style={styles.cardrow}>
+          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.teal200}]}
             onPress={()=> navigation.navigate("store")}
           >
             <Title style={styles.titleText}>  Stores</Title>
@@ -162,7 +301,7 @@ function renderModal(){
                 <Ionicons name='arrow-forward-circle' size={26} />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.blue900}]}
+          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.yellow800}]}
           onPress={()=> navigation.navigate("Categories")}
           >
             <Title style={styles.titleText}>Product Categories</Title>
@@ -178,7 +317,7 @@ function renderModal(){
           </TouchableOpacity>
         </View>
         <View style={styles.cardrow}>
-          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.lightBlue600}]}
+          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.lightBlue200}]}
           onPress={()=> navigation.navigate("products")}
           >
             <Title style={styles.titleText}>Products</Title>
@@ -192,7 +331,7 @@ function renderModal(){
                 <Ionicons name='arrow-forward-circle' size={26} />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.green700}]}
+          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.green200}]}
                     onPress={()=> navigation.navigate("users")}
 
           >
@@ -201,7 +340,7 @@ function renderModal(){
                <Text style={styles.text}>Delivery Persons</Text>
                <Badge>18</Badge>               
             </View>
-            <MaterialCommunityIcons name="truck-delivery" size={30} color={Colors.grey700} />
+            <MaterialCommunityIcons name="truck-delivery" size={30} color={Colors.grey900} />
             <View style={styles.card}>
                 <Text>see More Here</Text>
                 <Ionicons name='arrow-forward-circle' size={26} />
@@ -209,7 +348,7 @@ function renderModal(){
           </TouchableOpacity>
         </View>
         <View style={styles.cardrow}>
-          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.deepOrange300}]}
+          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.cyan500}]}
             onPress={() => navigateToOrders()}
 
           >
@@ -228,7 +367,7 @@ function renderModal(){
                 <Ionicons name='arrow-forward-circle' size={26} />
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.orange900}]}
+          <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.orange300}]}
             onPress={() => navigateToOrders()}
           >
             <Title style={styles.titleText}>Completed Orders</Title>
@@ -272,6 +411,7 @@ function renderModal(){
           {renderCards()}          
       </ScrollView>
       {renderModal()}
+      {renderStoreModal()}
 
       </View>
     )
@@ -315,11 +455,14 @@ const styles = StyleSheet.create({
       },
       titleText: {
         alignSelf:'center',
-        ...FONTS.h4,
-        color:Colors.grey100
+        ...FONTS.body3,
+        fontWeight:'bold',
+        fontSize:18,
+        color:Colors.grey50
       },
       text:{
-        color:Colors.grey300,
+        color:Colors.grey50,
+        fontWeight:'bold',
         ...FONTS.body4
       },
       pannels:{
@@ -352,9 +495,9 @@ const styles = StyleSheet.create({
 
         },
         modalView: {
-          bottom:SIZES.height*0.3,
-          width:SIZES.width*0.9,
-             height:SIZES.height*0.25,     
+          bottom:SIZES.height*0.1,
+          width:SIZES.width*0.99,
+             height:SIZES.height*0.30,     
           backgroundColor:  'rgb(250, 255, 255)',
           borderRadius: 0,
           padding: 3,
@@ -402,5 +545,14 @@ const styles = StyleSheet.create({
       modalText: {
         marginBottom: 15,
         textAlign: "center"
-      }
+      },
+      storeswitchbtn: {
+        backgroundColor:Colors.blue300,
+        paddingHorizontal:SIZES.padding2,
+        paddingVertical:7,
+        borderRadius:5,
+        borderColor:Colors.cyan600,
+        borderWidth:1
+      },
+
 })

@@ -209,20 +209,9 @@ function renderWidget(){
               </TouchableOpacity>
           }
             
-              <View style={{
-                  flex: 1, alignItems:'center',justifyContent:'center' 
-              }}>
-                  <View style={{
-                      padding:SIZES.padding2*0.7,
-                      paddingHorizontal: SIZES.padding2,
-                      backgroundColor: COLORS.white,
-                      alignItems:'center',
-                      justifyContent:'center',
-                      borderRadius: SIZES.radius
-                  }}>
-                      <Text style={{...FONTS.h2, color:COLORS.black, fontStyle:'normal'}}>Main Stores</Text>
-                  </View>
-              </View>
+             
+                      <Text style={{...FONTS.h2, color:COLORS.white, fontStyle:'normal'}}>Our Main Stores</Text>
+                  
               <TouchableOpacity
                 style={{                    
                     padding: SIZES.padding,
@@ -340,7 +329,7 @@ function renderWidget(){
             {renderWidget()}
             <View style={[{backgroundColor:COLORS.backgroundColor1,marginBottom:5,padding:SIZES.padding*0.5}]}>
             <Searchbar
-              style={{backgroundColor:Colors.grey50,height:SIZES.height*0.06,borderRadius:15}}
+              style={{backgroundColor:Colors.grey50,height:SIZES.height*0.06,borderRadius:5}}
               placeholder="Search For Store"
               onChangeText={query => searchStores(query)}
             />
@@ -370,7 +359,12 @@ const styles = StyleSheet.create({
         elevation: 1,
     },
     headerMainview: {
-      flexDirection:"row", padding:SIZES.padding2*0.1,backgroundColor:'rgb(3,3,29)'
+      flexDirection:"row",
+       padding:SIZES.padding2*0.1,
+       backgroundColor:'rgb(3,3,29)',
+       justifyContent:'space-between',
+       alignItems:'center',
+       width:SIZES.width
     },
 
     title:{
