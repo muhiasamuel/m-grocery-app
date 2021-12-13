@@ -50,6 +50,39 @@ function renderPlaces(){
             predefinedPlaces={[homePlace, workPlace]}
             debounce={300}
           />
+
+<View style={styles.cardrow}>
+              <TouchableOpacity
+              style={[styles.storeswitchbtn,{backgroundColor:Colors.lightBlue200}]}
+                onPress = {() =>setSelectedStatus('new')}
+              >
+                <Text style={[styles.textStyle,{fontSize:18}]}>New</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+              style={styles.storeswitchbtn}
+              onPress = {() =>setSelectedStatus('Dispatched')}
+              >
+                <Text style={[styles.textStyle,{fontSize:18}]}>Dispatched</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+              style={[styles.storeswitchbtn,{backgroundColor:Colors.green300}]}
+              onPress = {() =>setSelectedStatus('Complete')}
+              >
+                <Text style={[styles.textStyle,{fontSize:18}]}>Complete</Text>
+              </TouchableOpacity>
+              {
+                      AuthUserRole?.role === `Admin`?
+                      <TouchableOpacity
+                      style={[styles.storeswitchbtn,{backgroundColor:Colors.red300}]}
+                      onPress = {() =>setSelectedStatus('Declined')}
+                      >
+                        <Text style={[styles.textStyle,{fontSize:18}]}>Declined</Text>
+                      </TouchableOpacity>
+              :
+              <Text></Text>
+              }
+           </View>
         </View>
+        
     )
   }

@@ -8,30 +8,79 @@ import 'firebase/firestore';
 import * as Linking from 'expo-linking';
 import Firebase from '../../../firebaseConfig';
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
-import { Badge,Colors } from 'react-native-paper';
+import { ActivityIndicator, Badge,Colors } from 'react-native-paper';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
-
 
 // create a component
 const CustomersOrder = ({navigation,route}) => {
+    const[isloading, setIsLoading] = useState(false);
     const[order, setOrder] = React.useState(null);
     const { storeid, AuthUserRole} = React.useContext(AuthenticatedUserContext);
     const [modalVisible,setModalVisible] = React.useState(false);
+    const[selectedStatus, setSelectedStatus] = useState(null);
     const[orderItem, setOrderItem] = useState('');
+    const[data, setData] = useState(null);
 
     React.useEffect(() =>{
-        getOrdersData(storeid);
+        getOrdersData(storeid);        
     }, [])
 
     ///Store Data
+    //filter products by category
+    
+  function handleselectedStatus (status){
+    console.log(status);
+    setIsLoading(true)
+    if (data != null) {
+      let orders = data.filter(a =>a.status == status)
+      if (orders.length > 0) {
+        console.log(orders);
+          setOrder(orders) 
+          setIsLoading(false);
+      } else{
+        setOrder(null)
+        setTimeout(() => {
+          setIsLoading(false);
+          Alert.alert(
+            "No Data Alert",
+            `No ${status} Order Was Found`,
+            [
+              {
+                text: "Cancel",               
+              },
+            ],
+            {
+              cancelable: true,
+            }
+          );
+        }, 2000);
+      return ( 
+        <>   
+       <View style={{justifyContent:'center'}}>
+        <Text style={{textAlign:'center'}}>   No {status} Order Was Found</Text>
+       </View>
+      </>
+      )
+      }
+    } else {
+   
+      return (    
+        <View style={{justifyContent:'center'}}>
+          <Text style={{textAlign:'center'}}>   No Data Was Found</Text>
+        </View>
+      )
+    }
+
+  }
 
 
    const getOrdersData = async (item) => {
+     setIsLoading(true);
         try{
           const dataArr = [];        
           let response=Firebase.firestore().collection('CustomerOrder')
              .where('storeId', '==', item)
-             .orderBy('createdAt', 'desc');
+             .orderBy('status', 'asc');
             await response.onSnapshot((querySnapshot) =>{
                 querySnapshot.forEach((doc)=>{
                     const {customerOrder,customer,customerEmail,status, geohash,lat, lng} = doc.data();
@@ -50,6 +99,8 @@ const CustomersOrder = ({navigation,route}) => {
                       lng,
                     })
                      setOrder(dataArr)
+                     setData(dataArr)
+                     setIsLoading(false)
                   })
             });
 
@@ -58,15 +109,16 @@ const CustomersOrder = ({navigation,route}) => {
           console.log(e);
         }
       }
-      console.log(order);
-      console.log(storeid);
+      console.log(selectedStatus);
       function viewOrder(item) {
        navigation.navigate("viewOrder",{
          item
        })
     }
 
-   
+     
+
+
       function  renderOrderModal() {
           return(
                 <Modal
@@ -207,29 +259,35 @@ const CustomersOrder = ({navigation,route}) => {
             data={order}
             renderItem={renderItem}
             keyExtractor={item => `${item?.key}`}
+            contentContainerStyle={{
+              paddingBottom:100,
+            }}
           />
         </View>
         )}
 
+
+
     return (
         <View style={styles.container}>
           {renderHeader()}
+         
             <View style={styles.cardrow}>
               <TouchableOpacity
               style={[styles.storeswitchbtn,{backgroundColor:Colors.lightBlue200}]}
-                onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
+              onPress={() => handleselectedStatus('New')}
               >
                 <Text style={[styles.textStyle,{fontSize:18}]}>New</Text>
               </TouchableOpacity>
               <TouchableOpacity
               style={styles.storeswitchbtn}
-                onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
+              onPress={() => handleselectedStatus('Dispatched')}
               >
                 <Text style={[styles.textStyle,{fontSize:18}]}>Dispatched</Text>
               </TouchableOpacity>
               <TouchableOpacity
               style={[styles.storeswitchbtn,{backgroundColor:Colors.green300}]}
-                onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
+              onPress={() => handleselectedStatus('Complete')}
               >
                 <Text style={[styles.textStyle,{fontSize:18}]}>Complete</Text>
               </TouchableOpacity>
@@ -237,7 +295,7 @@ const CustomersOrder = ({navigation,route}) => {
                       AuthUserRole?.role === `Admin`?
                       <TouchableOpacity
                       style={[styles.storeswitchbtn,{backgroundColor:Colors.red300}]}
-                        onPress = {() => viewStore()}
+                      onPress={() => handleselectedStatus('Declined')}
                       >
                         <Text style={[styles.textStyle,{fontSize:18}]}>Declined</Text>
                       </TouchableOpacity>
@@ -245,6 +303,13 @@ const CustomersOrder = ({navigation,route}) => {
               <Text></Text>
               }
            </View>
+          
+        {isloading ?
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', top:40 }}>
+          <ActivityIndicator size='large' color={Colors.purple100} />
+        </View>:
+        <View></View>
+        }
             {renderOrderModal()}
             {renderCartItems()}
         </View>
