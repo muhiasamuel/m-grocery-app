@@ -97,8 +97,10 @@ function productReducers( state=initialState, action){
                 }
             }  
 
-            case Action.resetStore:
-                return state;
+            case Action.ResetStore:
+                return {
+                    state:null
+                }
 
 
             default:

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal } from 'react-native';
 import MapView from 'react-native-maps';
 import { point } from '@turf/helpers';
 import destination from '@turf/destination';
@@ -16,6 +16,8 @@ import firebase from 'firebase/app';
 import "firebase/storage";
 import 'firebase/firestore';
 import { resetStore } from '../reducers/actionTypes';
+import { Button, Colors, Divider, Headline, Title } from 'react-native-paper';
+import PaymentInstructions from './paymentInstructions';
 
 export default class CutomerDetails extends React.Component {
    static contextType = AuthenticatedUserContext 
@@ -34,6 +36,7 @@ export default class CutomerDetails extends React.Component {
       CustomerName:null,
       CustomerPhoneNo:null,
       User:null,
+      paymentvisibility:false,
       mapVisibility:false,
       customerOrder:[],
       submitting:false,  
@@ -202,6 +205,35 @@ export default class CutomerDetails extends React.Component {
         </View>
     )
       } 
+   renderpaymentModal(){
+        return(
+          <Modal
+          animationType="fade"
+          transparent={true}
+          visible={this.state.paymentvisibility}
+          onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+          this.setState({
+            paymentvisibility:!this.state.paymentvisibility
+          })
+          setModalVisible(!modalVisible);
+          }}>
+            <View style={styles.centeredView}>               
+              <View style={styles.modalView}>
+
+                  <PaymentInstructions/>
+              <TouchableOpacity
+              style={[ styles.buttonClose]}
+              onPress={() => this.setState({paymentvisibility:!this.state.paymentvisibility})}
+            >
+              <Text style={[styles.textStyle,{color:COLORS.white}]}> OK </Text>
+            </TouchableOpacity>
+              </View>
+            </View>      
+
+        </Modal>
+    )
+   }   
    renderMapview(){
     return (
       <View style={styles.mapcontainer}>
@@ -246,18 +278,39 @@ export default class CutomerDetails extends React.Component {
       return(
         <View style={styles.container}>
            {this.renderHeader()}
+           {this.renderpaymentModal()}
           <ScrollView >             
               {
                this.state.mapVisibility == true ?
                 <>               
                 {this.renderUserInfo()}
-                {this.renderPlaces()} 
+                {this.renderPlaces()}
+               
                 {this.renderMapview()}
                 
                 </>
                 :
                 <>
                 {this.renderUserInfo()}
+                <View style = {styles.userInfoView }>
+                 <Text style={{...FONTS.body2,color:Colors.grey200}}>Payment Details</Text>
+                 <Divider style={{color:Colors.grey200}}/>
+                 <View style={{flexDirection:'row', justifyContent:'space-around', alignItems:'center',borderColor:Colors.grey100,borderWidth:1, borderRadius:5,paddingVertical:15}}> 
+                 <View>
+                   <Headline style={{...FONTS.body3,color:Colors.grey400}}>Note Payment only on deliverly!!</Headline>
+                   <View style={{flexDirection:'row', justifyContent:'space-between', alignItems:'center',}}>
+                   <Text style={{color:Colors.grey100}}>Payment Instructions Via </Text> 
+                   <TouchableOpacity
+                      style={{backgroundColor:Colors.green400,alignItems:'center',flexDirection:'row', paddingHorizontal:10,paddingVertical:5, borderRadius:5}}
+                      onPress={() => this.setState({paymentvisibility:!this.state.paymentvisibility})}
+                   >
+                     <MaterialIcons name="smartphone" size={24} color="white" />
+                    <Title style={{color:Colors.grey50,fontWeight:'bold', fontSize:20}}> MPESA </Title>
+                   </TouchableOpacity>
+                   </View>
+                </View>
+                 </View>
+                </View> 
                 {this.renderPlaces()} 
                 <View>
                   {this.state.submitting && (
@@ -286,7 +339,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   mapcontainer: {
-    height:SIZES.height*0.59,
+    height:SIZES.height*0.56,
     width:SIZES.width*0.98,
     backgroundColor: '#fff',
     alignSelf: 'center',
@@ -360,12 +413,12 @@ btnCheckout: {
 flexDirection:'row',
 alignSelf:'center',
 justifyContent:'center',
-backgroundColor:'rgba(100,180,200,0.7)',
+backgroundColor:'rgba(100,180,250,0.7)',
 paddingHorizontal:SIZES.padding2*2,
 paddingVertical:SIZES.padding2,
 borderRadius:10,
-borderColor:COLORS.primary,
-borderWidth:2
+borderColor:COLORS.darkblue,
+borderWidth:3
 },
 textCheckout: {
 color:COLORS.white,
@@ -388,5 +441,46 @@ borderBottomRightRadius:7,
 borderTopRightRadius:7,
 borderWidth:0.5,
 borderColor:COLORS.white
-}
+},
+centeredView: {
+  flex:1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    margin: 20,
+    width:SIZES.width*0.98,        
+    backgroundColor:  Colors.grey300,
+    borderRadius: 0,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+
+  buttonClose: {
+    backgroundColor:Colors.greenA700,
+    alignSelf:'center',
+    paddingVertical:SIZES.padding2*0.7,
+    borderRadius:10,
+    paddingHorizontal:SIZES.padding2*3
+  },
+
+ 
+  textStyle: {
+    ...FONTS.h2,
+    color:COLORS.white,
+    fontWeight: "bold",
+    textAlign: "center"
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    color:COLORS.white,
+  },
 });

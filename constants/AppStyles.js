@@ -35,11 +35,14 @@ export const RecipeCard = StyleSheet.create({
 
   },
   photo: {
+    top:2,
     backgroundColor:Colors.grey900,
     width: (SCREEN_WIDTH - (recipeNumColums + 1) * (RECIPE_ITEM_MARGIN)) / recipeNumColums,
     height: RECIPE_ITEM_HEIGHT,
     borderRadius: 1,
     borderBottomLeftRadius: 10,
+    borderTopRightRadius:10,
+    borderTopLeftRadius:10,
     borderBottomRightRadius: 10,
   },
   title: {

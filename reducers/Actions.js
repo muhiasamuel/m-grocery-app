@@ -55,7 +55,7 @@ export function TotalOrder(){
 
 export function resetStore(){
     return{
-        type:Actions.resetStore,
+        type:Actions.ResetStore,
     }
 
 }

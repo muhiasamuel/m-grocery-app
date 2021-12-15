@@ -510,7 +510,7 @@ export default Storeitems
 const styles = StyleSheet.create({
     Container: {
         flex: 1,
-        backgroundColor: Colors.grey800,
+        backgroundColor: COLORS.backgroundColor1,
     },
     headerView: {
         flexDirection:"row", 

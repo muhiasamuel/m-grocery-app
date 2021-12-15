@@ -5,4 +5,4 @@ export const getBasketCount="getbasketCount";
 export const sumOrder = "getSumOrder";
 export const OrderQuantity = "getOrderQty";
 export const OrderData = "orderData";
-export const resetStore = "resetStore"
+export const ResetStore = "resetStore";

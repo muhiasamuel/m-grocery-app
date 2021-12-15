@@ -17,7 +17,6 @@ const CustomersOrder = ({navigation,route}) => {
     const[order, setOrder] = React.useState(null);
     const { storeid, AuthUserRole} = React.useContext(AuthenticatedUserContext);
     const [modalVisible,setModalVisible] = React.useState(false);
-    const[selectedStatus, setSelectedStatus] = useState(null);
     const[orderItem, setOrderItem] = useState('');
     const[data, setData] = useState(null);
 
@@ -109,7 +108,6 @@ const CustomersOrder = ({navigation,route}) => {
           console.log(e);
         }
       }
-      console.log(selectedStatus);
       function viewOrder(item) {
        navigation.navigate("viewOrder",{
          item

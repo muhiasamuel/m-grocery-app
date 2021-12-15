@@ -57,12 +57,14 @@ const OrderDispatch = ({route, navigation}) => {
       const assignOrder=async(key)=>{
         setIsSubmitting(true)
         const orders = order 
-        const status = order.status
+        const orderkey = order?.key
         try{
           const orderDb = await Firebase.firestore().collection("CustomerOrder").doc(order?.key);
          const DB = await Firebase.firestore().collection("Deliverly Persons").doc(key);
-         await DB.collection("my Deliveries").add({
+         const docId = DB.collection("my Deliveries").doc().id
+         await DB.collection("my Deliveries").doc(docId).set({
            orders,
+           docId,
            status:"Dispatched"
          }).then(()=>{
            DB.update({

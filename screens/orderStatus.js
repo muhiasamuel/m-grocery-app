@@ -103,11 +103,11 @@ const OrderView = ({route, navigation}) => {
                       <View style={[styles.ItemsView,{width:SIZES.width*0.4,paddingHorizontal:5, marginVertical:25}]}>
                       <Text style={styles.btntext}>Order Id:{item.key}</Text>
                       {
-                          item?.orderItems.map((data, index)=>(
+                          item?.orderItems.map((data, key)=>(
                               <View>
                               <View
                               style={[styles.ItemsView,{flexDirection:'row', paddingVertical:9,}]}
-                              key={`orderItems-${index}`}>
+                              key={`orderItems-${key}`}>
                               
                                   <Image
                                       source={{uri: data.image}}
