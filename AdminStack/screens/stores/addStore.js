@@ -1,12 +1,12 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, FlatList } from 'react-native';
-import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, FlatList, Modal, RefreshControl,} from 'react-native';
+import { AntDesign, Entypo, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
 import "firebase/storage";
 import 'firebase/firestore';
 import Firebase from '../../../firebaseConfig';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
-import { Avatar, Colors, DataTable } from 'react-native-paper';
+import { Avatar, Colors, DataTable, Headline } from 'react-native-paper';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
 import * as geofire from 'geofire-common';
 import * as Location from 'expo-location';
@@ -14,7 +14,9 @@ import MapView from 'react-native-maps';
 const Store =  ({route, navigation}) => {
   const {storeData, setStoreData,storeid,AuthUserRole} = useContext(AuthenticatedUserContext);
   const [region, setRegion] = useState({});
-  const [mapVisibility, setmapVisibility] = useState(false);
+  const [storeUser, setStoreUser] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [users, setUsers] = useState(null);
   const [pickedImagePath, setPickedImagePath] = useState('');
   const [storeName, setstoreName] = useState('');
   const [storeDetails, setstoreDetails] = useState('');
@@ -26,9 +28,20 @@ const Store =  ({route, navigation}) => {
   const [submitting, setIsSubmitting] =useState(false);
 
   const [isLoading, setIsLoading] =React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getStoreData();
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
+  const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  }
   const auth = Firebase.auth();
   React.useEffect(() => {
     getStoreData();
+    getusers();
     (async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -45,8 +58,42 @@ const Store =  ({route, navigation}) => {
 function updateState(location) {
   setRegion(location.coords)
 }
-console.log(region);
 
+const getusers = async() =>{
+  try{
+    const dataArr = [];
+      const response=Firebase.firestore().collection('users')
+      .where('role', "==", 'storeAdmin')
+      .where('storeid', "==", '')
+      const data= await response.get();
+      data.docs.forEach(item=>{
+        const {username, uid} = item.data();
+        dataArr.push({
+          key: item.id,
+          uid,
+          username
+        });
+        setUsers(dataArr)
+      })
+  }
+  catch(e){
+    console.log(e);
+  }
+}
+console.log(users);
+const onfocus = () => {
+  setModalVisible(!modalVisible)
+}
+
+//delete store
+const deleteStore = async(key) => {
+  const db =  Firebase.firestore().collection("Stores");
+  await db.doc(key).delete().then(() => {
+    alert("item successfully deleted!");
+}).catch((error) => {
+    console.error("Error removing document: ", error);
+});
+}
   const handleSubmit = async() => {
     setIsSubmitting(true)
     const Storename = storeName
@@ -56,8 +103,9 @@ console.log(region);
     const lat = region.latitude;
     const hash = geofire.geohashForLocation([lat, long])
     let imgUrl = await uploadImage();
-      const dbh = Firebase.firestore();
-      dbh.collection("Stores").add({
+    const userUpdate=Firebase.firestore().collection('users').doc(storeUser?.key)
+    const docId = Firebase.firestore().collection("Stores").doc().id     
+    await Firebase.firestore().collection("Stores").doc(docId).set({
         storeId: Date.now().toString(36) + Math.random().toString(36).substr(2),        
         storeName: Storename,
         storeDetails : StoreDetails,
@@ -65,16 +113,22 @@ console.log(region);
         storeIdNo:storeIdNo,
         storeimage: imgUrl,
         geohash: hash,
+        uniqie_code:storeIdNo,
+        storeManager:storeUser?.username,
         lat: lat,
         lng: long,
         region:region,
         createdAt: Date.now()
       }).then(() => {
+        userUpdate.update({
+          storeid:docId
+        })
         setIsSubmitting(false)
         setstoreDetails('');
         setstoreName('');
         setStoreLocation('');
         setPickedImagePath('');
+        setStoreUser(null);
         Alert.alert('store created successifully');
       }) 
 
@@ -189,12 +243,13 @@ console.log(region);
         const response=Firebase.firestore().collection('Stores');
         const data= await response.get();
         data.docs.forEach(item=>{
-          const {storeName,storeId, storeDetails,storeLocation,uniqie_code, storeimage} = item.data();
+          const {storeName,storeId, storeDetails,storeLocation,uniqie_code,storeManager, storeimage} = item.data();
           dataArr.push({
             key: item.id,
             storeId,
             uniqie_code,
             storeName,
+            storeManager,
             storeDetails,
             storeLocation,
             storeimage
@@ -227,6 +282,76 @@ console.log(region);
         </View>
     )
 }
+
+//users
+function renderStoreNames(){
+  const renderItem = ({item}) =>(
+          <View>
+            <TouchableOpacity
+            onPress={() => setStoreUser(item)}
+            style={{flexDirection:'row',alignItems:'center'}}
+          >
+            {storeUser?.uid == item?.uid ?
+            <>
+            <MaterialCommunityIcons name="check-circle-outline" size={30} color={Colors.green500} />
+            </>
+            :
+            <>
+            <Entypo name="circle" size={28} color="black" />
+            
+            </>
+          }
+            
+            <Text style={{...FONTS.body4,paddingLeft:SIZES.padding2*2}} >{item?.username}</Text>
+            </TouchableOpacity>
+
+            
+            
+          </View>
+      )
+      return(
+        <FlatList
+            data={users}
+            keyExtractor={item => `${item.key}`}
+            renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+              paddingBottom:25,
+              backgroundColor:COLORS.white
+            }}
+        />
+      )
+      }
+
+     function renderModal(){
+   
+        return(
+            <Modal 
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                 <Headline>Select Store Admin</Headline>
+                 {renderStoreNames()}
+    
+                 <View >
+                    <TouchableOpacity
+                      style={[styles.btnUpdateStore,{flexDirection:'row',width:100, justifyContent:'center', alignItems:'center'}]}
+                      onPress={() => setModalVisible(!modalVisible)}
+                    >
+                      <Text style={{...FONTS.body2, color:Colors.red800}}>Ok</Text>
+                    </TouchableOpacity>
+                  
+                  </View>
+    
+                </View>
+              </View>   
+    
+            </Modal>
+        )
+    }
 
 //add category Data
 function renderAddStore(){
@@ -267,7 +392,16 @@ function renderAddStore(){
           onChangeText={(text) => setstoreIdNo(text)}
           autoCapitalize={"none"}
       />
+
       </View>
+      <TextInput 
+          onFocus={onfocus}
+          style={[styles.input]}
+          value={storeUser?.username}
+          placeholderTextColor={Colors.grey800}
+          placeholder={"Store Manager"}
+          autoCapitalize={"none"}
+      />
         <View  style ={[styles.centered,{justifyContent:'space-around'}]}>
         {AuthUserRole?.role === `Admin` ?
         
@@ -350,15 +484,24 @@ function renderStoreEdit(){
             <Image style={styles.bodyphoto} source={{uri: item?.storeimage}} />
 
             {
-              storeid ===item.key ?
+              AuthUserRole?.storeid ===item.key  || AuthUserRole?.role === `Admin` ?
+              <View style ={{flexDirection:'row', alignItems:'center', justifyContent:'space-around'}}>
               <TouchableOpacity
+              style={[styles.btnUpdateStore,{backgroundColor:Colors.blue400,paddingVertical:7,borderWidth:2,borderColor:Colors.blue900}]}
               onPress={() => navigation.navigate('editStore',{
               item})}
-            > 
-            <Text style={[styles.btnUpdateStore,{paddingHorizontal:28,...FONTS.h3}]}>Edit</Text>              
+            >
+           <AntDesign name="edit" size={27} color="white" />              
             </TouchableOpacity>
+            <TouchableOpacity
+            onPress = {() =>{deleteStore(item?.key)}}
+            style={[styles.btnUpdateStore,{backgroundColor:Colors.red300,paddingVertical:7,borderColor:Colors.red900,borderWidth:2}]}
+            >
+            <MaterialCommunityIcons name="delete-circle" size={28} color="white" />
+            </TouchableOpacity>
+            </View>
             :
-            <Text style={[styles.btnUpdateStore,{paddingLeft:18,backgroundColor:Colors.red700}]}>Forbidden </Text> 
+            <Text style={[styles.btnUpdateStore,{paddingLeft:18,backgroundColor:Colors.red700}]}>Forbidden</Text> 
             }  
             
             
@@ -393,15 +536,28 @@ function renderStoreEdit(){
 
     return (
       <View style={styles.screen}>
+   
       {catDataVisible == true?
       <>
             <ScrollView>
+              {renderModal()}
             {renderstoreim()}
             {renderAddStore()}          
            </ScrollView> 
            </>
            :
            <>
+              <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      >
+        <Text>Pull down to Refresh</Text>
+      </ScrollView>
             <TouchableOpacity
               style={{alignItems:'center',backgroundColor:Colors.grey50}}
               onPress={() => setcatDataVisible(!catDataVisible)}
@@ -422,7 +578,6 @@ export default Store
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
     justifyContent: 'center',
     backgroundColor:Colors.grey100,
   },
@@ -447,6 +602,12 @@ storeMainview: {
     flex: 1,
     alignItems:'center',
     justifyContent:'center'
+},
+scrollView: {
+  backgroundColor: Colors.blueGrey100,
+  padding:20,
+  alignItems: 'center',
+  justifyContent: 'center',
 },
 storeSubview: {
     padding:SIZES.padding2*0.8,
@@ -533,6 +694,25 @@ storeTitle: {
     paddingHorizontal:SIZES.padding,
     width:SIZES.width*0.3
   },
+  centeredView: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+modalView: {
+  marginTop:SIZES.height*0.2,
+  width:SIZES.width*0.95,        
+  backgroundColor:'rgb(255, 255, 255)',
+  padding: 35,
+  shadowColor: "#000",
+  borderRadius:5,
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5
+},
   bodyphoto: {
     width:SIZES.width*0.23,
     height:65,

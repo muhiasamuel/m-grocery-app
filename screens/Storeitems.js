@@ -288,7 +288,11 @@ const Storeitems = ({route, navigation}) => {
                 <Text style={[styles.Titles,{marginVertical:15,color:COLORS.white,...FONTS.body2, alignSelf:'center'}]}>Add {currentCartItem?.prodname} My to  Cart</Text>
                   
                   <View style={[styles.centered,{marginHorizontal:SIZES.padding2, marginVertical:SIZES.padding2}]} > 
-                    <Image style={[{width:SIZES.width*0.24,height:SIZES.height*0.10,borderRadius:25,backgroundColor:Colors.grey700}]} source = {{uri: currentCartItem?.imageUrls[0].url}} />
+                  {currentCartItem?.imageUrls &&
+                      (  
+                    <Image style={[{width:SIZES.width*0.24,height:SIZES.height*0.10,borderRadius:25,
+                   
+                      backgroundColor:Colors.grey700}]} source = {{uri: currentCartItem?.imageUrls[0].url}}/>)}
                     <View style={{width:SIZES.width*0.3,left:-10}}>
                         <Text style={styles.textStyle}>Price: ksh {basketItem?.price}/ {basketItem?.unit} </Text>
                         <Text style={styles.textStyle}style={styles.textStyle}>Total Price: Ksh {basketItem?.total}</Text>
@@ -357,8 +361,9 @@ const Storeitems = ({route, navigation}) => {
             item,
             storeItems
         })}
-        >
-            <Image style={[styles.bodyphoto,{marginTop:-45}]} source = {{uri: item?.imageUrls[0].url}} />
+        >{item?.imageUrls &&
+        ( <Image style={[styles.bodyphoto,{marginTop:-45}]} source = {{uri: item?.imageUrls[0].url}} />) }
+           
             <Text style={[{color: Colors.lightGreen300, alignSelf:'center',...FONTS.h3,fontWeight:'bold',top:5}]}>{item?.prodname}</Text>
            </TouchableOpacity>
            

@@ -1,6 +1,6 @@
 import React, {  useContext, Component } from 'react';
 import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert, Modal } from 'react-native';
-import { Entypo, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { Entypo, FontAwesome5, AntDesign, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 import "firebase/storage";
 import 'firebase/firestore';
@@ -33,7 +33,9 @@ static contextType = AuthenticatedUserContext;
       categoryname:'',
       modalVisible:false,
       selectedStore:'',
-      prods:null
+      qty:null,
+      prods:null,
+      Stocklevel:''
     }
   }
   componentDidMount() {
@@ -83,7 +85,15 @@ static contextType = AuthenticatedUserContext;
       console.log(e);
     }
   }
-
+//delete prod
+ deleteprods = async(key) => {
+  const db =  Firebase.firestore().collection("Products");
+  await db.doc(key).delete().then(() => {
+    alert("item successfully deleted!");
+}).catch((error) => {
+    console.error("Error removing document: ", error);
+});
+}
 
   getCatData = async () => {
     try{
@@ -118,10 +128,11 @@ static contextType = AuthenticatedUserContext;
         .orderBy("prodStoreid", "asc");
         const data=await response.get();
         data.docs.forEach(item=>{
-          const {prodname, proddetails,prodprice,storeName, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
+          const {prodname, proddetails,prodprice,storeName,stocks,prodqty, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
           dataArr.push({
            key: item.id,
             prodname,
+            prodqty,
             proddetails,
             prodprice,
             imageUrls,
@@ -130,7 +141,8 @@ static contextType = AuthenticatedUserContext;
             prodStoreid,
             prodcatid,
             prodId,
-            productUnit
+            productUnit,
+            stocks
           });
           let {setProducts} = this.context;
             setProducts(dataArr)
@@ -171,9 +183,11 @@ static contextType = AuthenticatedUserContext;
           prodId: Date.now().toString(36) + Math.random().toString(36).substr(2), 
           prodname: productName,
           proddetails : productDetails,
+          stocks:this.state.Stocklevel,
           prodStoreid:  this.state.store,
           prodcatid:  this.state.category,
           prodprice:productPrice,
+          prodqty: this.state.qty,
           productUnit: this.state.selectedValue,
           storeName:this.state.storeName,
           storeCat:this.state.categoryname,
@@ -396,8 +410,26 @@ static contextType = AuthenticatedUserContext;
       />
        
       </View>
+      <View style={styles.pricing}>
+      <TextInput
+         style={[styles.input,{width:SIZES.width*0.30}]}
+          value={this.state.qty}
+          placeholderTextColor={Colors.grey500}
+          placeholder={"qty eg 100, 10"}
+          keyboardType={'number-pad'}
+          onChangeText={(text) => this.setState({qty:text})}
+          autoCapitalize={"none"}
+      />
+            <TextInput
+         style={[styles.input,{width:SIZES.width*0.35}]}
+          value={this.state.Stocklevel}
+          placeholderTextColor={Colors.grey500}
+          placeholder={"unit eg kg, pcs "}
+          onChangeText={(text) => this.setState({Stocklevel:text})}
+          autoCapitalize={"none"}
+      />
                 <TextInput
-          style={styles.input}
+         style={[styles.input,{width:SIZES.width*0.30}]}
           value={this.state.discount}
           placeholderTextColor={Colors.grey500}
           placeholder={"Add Discount"}
@@ -405,6 +437,8 @@ static contextType = AuthenticatedUserContext;
           onChangeText={(text) => this.setState({discount:text})}
           autoCapitalize={"none"}
       />
+
+      </View>
       <View style={styles.CheckBox}>
         <PickerCheckBox
           data={catData}
@@ -464,8 +498,9 @@ static contextType = AuthenticatedUserContext;
 
   )
 }
+
 renderProdsEdit(){
-  const { Products, storeid} = this.context;
+  const { Products, storeid,AuthUserRole } = this.context;
   const { navigation } = this.props;
   const renderItem = ({item}) =>(
           <View style={{
@@ -480,20 +515,28 @@ renderProdsEdit(){
             )}
             <Text style={[styles.storeName,{color:Colors.grey500, width:SIZES.width*0.3}]}>{item?.storeName}</Text>
 
-             {storeid === item?.prodStoreid ?
-              <TouchableOpacity
-              onPress={() => navigation.navigate('editProducts',{
-                item
-              })}
-            >
-              <Text style={[styles.btnUpdateprod,{padding:8}]}>Edit</Text>
-            </TouchableOpacity>
-            :
-            <Text style={[styles.btnUpdateprod,{padding:8, backgroundColor:Colors.red800}]}>Forbidden</Text>  
-             } 
-            
-            
-          </View>
+                  {AuthUserRole?.role === `Admin`  ||AuthUserRole?.storeid === item?.prodStoreid ?
+      
+                  <View style ={{flexDirection:'row', alignItems:'center', justifyContent:'space-around'}}>
+                    <TouchableOpacity
+                     style={[styles.btnUpdateprod,{backgroundColor:Colors.blue400,paddingVertical:7,borderWidth:2,borderColor:Colors.blue900}]}
+                    onPress={() => navigation.navigate('editProducts',{
+                    item
+                  })}
+                  >
+                <AntDesign name="edit" size={27} color="white" />              
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                  onPress = {() => {this.deleteprods(item?.key)}}
+                  style={[styles.btnUpdateprod,{backgroundColor:Colors.red300,paddingVertical:7,borderColor:Colors.red900,borderWidth:2}]}
+                  >
+                  <MaterialCommunityIcons name="delete-circle" size={28} color="white" />
+                  </TouchableOpacity>
+                  </View>
+                  :
+                  <Text style={[styles.btnUpdateprod,{paddingLeft:18,backgroundColor:Colors.red700}]}>Forbidden</Text>
+                    }
+                  </View>
       )
       return(
         <>

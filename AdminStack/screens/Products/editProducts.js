@@ -34,7 +34,8 @@ static contextType = AuthenticatedUserContext;
       categoryname:'',
       modalVisible:false,
       selectedStore:'',
-      prods:null
+      prods:null,
+      stocklevel:''
     }
   }
   componentDidMount() {
@@ -44,7 +45,7 @@ static contextType = AuthenticatedUserContext;
         Alert.alert("Note!!!!",
         "Only Use open image gallery if you want to overwrite the already Existing images for a product..... If You dont open image gallery the existing images will remain...Also you have to reselect Product Store and Category or select to new ones.IMPORTANT!! ")
             
-    }, 4000);
+    }, 1000);
    
   }
   componentDidUpdate() {
@@ -63,6 +64,7 @@ static contextType = AuthenticatedUserContext;
           discount:item.proddiscount,
           store:item.prodStoreid,
           docId:item.key,
+          stocklevel:item.stocks,
           selectedValue:item.productUnit
 
           
@@ -94,6 +96,7 @@ static contextType = AuthenticatedUserContext;
           proddetails : productDetails,
           prodStoreid:  this.state.store,
           prodcatid:  this.state.category,
+          stocks:this.state.stocklevel,
           prodprice:productPrice,
           productUnit: this.state.selectedValue,
           storeName:this.state.storeName,
@@ -288,15 +291,27 @@ static contextType = AuthenticatedUserContext;
       />
        
       </View>
+  
+            <View style={styles.pricing}>
+      <TextInput
+         style={[styles.input,{width:SIZES.width*0.55}]}
+          value={this.state.stocklevel}
+          placeholderTextColor={Colors.grey500}
+          placeholder={"Stocks eg 500kg, 1000packets "}
+          onChangeText={(text) => this.setState({stocklevel:text})}
+          autoCapitalize={"none"}
+      />
                 <TextInput
-          style={styles.input}
+         style={[styles.input,{width:SIZES.width*0.35}]}
           value={this.state.discount}
-          placeholderTextColor="#fff"
-          placeholder={"Add Discount"}
+          placeholderTextColor={Colors.grey500}
+          placeholder={"edit Discount"}
           keyboardType={'number-pad'}
           onChangeText={(text) => this.setState({discount:text})}
           autoCapitalize={"none"}
       />
+
+      </View>
       <View style={styles.CheckBox}>
         <PickerCheckBox
           data={catData}

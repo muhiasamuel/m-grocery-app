@@ -26,9 +26,6 @@ const Adminhome = ({navigation}) => {
       }
 }
 React.useEffect(() =>{
-  setTimeout(()=>{
-    setModalVisible(!modalVisible);
-  }, 200)
   getStoreData();
 },[])
 
@@ -94,12 +91,8 @@ const handleSelectedStore = async() =>{
   }
 }
 //navigate to customer orders if store code is not empty
-const navigateToOrders = () =>{
-  if (storeCode === null) {
-    setModalVisible(!modalVisible);
-  } else {
-    navigation.navigate("CustomersOrders")
-  }
+const navigateToOrders = () =>{  
+    navigation.navigate("CustomersOrders")  
 }
 function handleClose() {
   if (storeCode === null) {
@@ -387,16 +380,14 @@ function renderStore(){
           </TouchableOpacity>
         </View>
         <View style={styles.card}>
-          <TouchableOpacity style ={styles.pannels}
+          <TouchableOpacity style ={[styles.pannels,{backgroundColor:Colors.orange300}]}
              onPress={()=> navigation.navigate("stocks")}
 
           >
             <Title style={styles.titleText}>Stock Levels</Title>
             <Ionicons name="md-shield-checkmark-sharp" size={28} color="black" />
           </TouchableOpacity>
-          <View style ={styles.pannels}>
-            <Title style={styles.titleText}>dddddddddd</Title>
-          </View>
+          
         </View>
         
       </View>

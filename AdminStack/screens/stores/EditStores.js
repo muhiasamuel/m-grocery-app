@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, FlatList } from 'react-native';
-import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView, Alert, FlatList, Modal } from 'react-native';
+import { AntDesign, Entypo, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
 import "firebase/storage";
 import 'firebase/firestore';
@@ -9,7 +9,7 @@ import * as geofire from 'geofire-common';
 import * as Location from 'expo-location';
 import { AuthenticatedUserContext } from '../../../AuthProvider/AuthProvider';
 import { COLORS, FONTS, SIZES  } from '../../../constants/Index';
-import { Colors } from 'react-native-paper';
+import { Colors, Headline } from 'react-native-paper';
 
 const EditStore =  ({route, navigation}) => {
   const {storeData} = useContext(AuthenticatedUserContext);
@@ -17,6 +17,9 @@ const EditStore =  ({route, navigation}) => {
   const [pickedImagePath, setPickedImagePath] = useState('');
   const [storeName, setstoreName] = useState('');
   const [storeIdNo, setstoreIdNo] = useState('');
+  const [storeUser, setStoreUser] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [users, setUsers] = useState(null);
   const [storeDetails, setstoreDetails] = useState('');
   const [location, setStoreLocation] = useState('');
   const [transferred, setTransferred] = useState(0);
@@ -29,6 +32,7 @@ const EditStore =  ({route, navigation}) => {
   React.useEffect(() => {
     let{item} =route.params 
     StoreData(item);
+    getusers();
     setCurrentStore(item);
     (async () => {
       try {
@@ -44,6 +48,7 @@ const EditStore =  ({route, navigation}) => {
   }, [])
   const StoreData = (item) =>{
     setstoreName(item.storeName);
+    setStoreUser(item.storeManager)
     setStoreLocation(item.storeLocation);
     setstoreDetails(item.storeDetails)
     setPickedImagePath(item.storeimage)
@@ -52,6 +57,33 @@ const EditStore =  ({route, navigation}) => {
 //set location
 function updateState(location) {
   setRegion(location.coords)
+}
+//get user data
+
+const getusers = async() =>{
+  try{
+    const dataArr = [];
+      const response=Firebase.firestore().collection('users')
+      .where('role', "==", 'storeAdmin')
+      .where('storeid', "==", '')
+      const data= await response.get();
+      data.docs.forEach(item=>{
+        const {username, uid} = item.data();
+        dataArr.push({
+          key: item.id,
+          uid,
+          username
+        });
+        setUsers(dataArr)
+      })
+  }
+  catch(e){
+    console.log(e);
+  }
+}
+console.log(users);
+const onfocus = () => {
+  setModalVisible(!modalVisible)
 }
   const handleSubmit = async(key) => {
     setIsSubmitting(true)
@@ -63,6 +95,7 @@ function updateState(location) {
     const hash = geofire.geohashForLocation([lat, long])
 
     let imgUrl = await uploadImage();
+    const userUpdate=Firebase.firestore().collection('users').doc(storeUser?.key)
     const db = Firebase.firestore().collection("Stores")
     await db.doc(key).update({
         storeId: Date.now().toString(36) + Math.random().toString(36).substr(2),
@@ -70,6 +103,7 @@ function updateState(location) {
         storeDetails : StoreDetails,
         storeLocation:StoreLocation,
         storeimage: imgUrl,
+        storeManager:storeUser.username,
         uniqie_code:storeIdNo,
         geohash: hash,
         lat: lat,
@@ -77,6 +111,9 @@ function updateState(location) {
         region:region,
         Updated_At: Date.now()
       }).then(() => {
+        userUpdate.update({
+          storeid:key
+        })
         setIsSubmitting(false)
         setstoreDetails('');
         setstoreName('');
@@ -192,7 +229,76 @@ function updateState(location) {
 
 
 
- 
+ //users
+function renderStoreNames(){
+  const renderItem = ({item}) =>(
+          <View>
+            <TouchableOpacity
+            onPress={() => setStoreUser(item)}
+            style={{flexDirection:'row',alignItems:'center'}}
+          >
+            {storeUser?.uid == item?.uid ?
+            <>
+            <MaterialCommunityIcons name="check-circle-outline" size={30} color={Colors.green500} />
+            </>
+            :
+            <>
+            <Entypo name="circle" size={28} color="black" />
+            
+            </>
+          }
+            
+            <Text style={{...FONTS.body4,paddingLeft:SIZES.padding2*2}} >{item?.username}</Text>
+            </TouchableOpacity>
+
+            
+            
+          </View>
+      )
+      return(
+        <FlatList
+            data={users}
+            keyExtractor={item => `${item.key}`}
+            renderItem={renderItem}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+              paddingBottom:25,
+              backgroundColor:COLORS.white
+            }}
+        />
+      )
+      }
+
+     function renderModal(){
+   
+        return(
+            <Modal 
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                 <Headline>Select Store Admin</Headline>
+                 {renderStoreNames()}
+    
+                 <View style={[styles.btnUpdateStore,{flexDirection:'row',width:100, justifyContent:'center', alignItems:'center'}]}>
+                    <TouchableOpacity
+                      
+                      onPress={() => setModalVisible(!modalVisible)}
+                    >
+                      <Text style={{...FONTS.body2, color:Colors.red800}}>Ok</Text>
+                    </TouchableOpacity>
+                  
+                  </View>
+    
+                </View>
+              </View>   
+    
+            </Modal>
+        )
+    }
+
 
 //add category Data
 function renderAddStore(){
@@ -235,6 +341,14 @@ function renderAddStore(){
           autoCapitalize={"none"}
       />
       </View>
+      <TextInput 
+          onFocus={onfocus}
+          style={[styles.input]}
+          value={storeUser?.username}
+          placeholderTextColor={Colors.grey800}
+          placeholder={"Store Manager"}
+          autoCapitalize={"none"}
+      />
         <View  style ={[styles.centered,{justifyContent:'space-around'}]}>
             <TouchableOpacity
             onPress={() => handleSubmit(currentstore.key)}
@@ -292,6 +406,7 @@ function renderstoreim(){
     return (
       <View style={styles.screen}>
             <ScrollView>
+              {renderModal()}
             {renderstoreim()}
             {renderAddStore()}          
            </ScrollView>        
@@ -307,6 +422,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor:Colors.grey100,
   },
+  centeredView: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+modalView: {
+  marginTop:SIZES.height*0.2,
+  width:SIZES.width*0.95,        
+  backgroundColor:'rgb(255, 255, 255)',
+  padding: 35,
+  shadowColor: "#000",
+  borderRadius:5,
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5
+},
   container: {
     marginVertical:SIZES.padding,
     paddingHorizontal:5,

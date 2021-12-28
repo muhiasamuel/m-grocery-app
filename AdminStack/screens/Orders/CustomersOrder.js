@@ -21,7 +21,12 @@ const CustomersOrder = ({navigation,route}) => {
     const[data, setData] = useState(null);
 
     React.useEffect(() =>{
-        getOrdersData(storeid);        
+      if (AuthUserRole?.role === `Admin`) {
+        getOrdersDataForAdmin()
+      } else {
+        getOrdersData(AuthUserRole?.storeid);  
+      }
+              
     }, [])
 
     ///Store Data
@@ -71,7 +76,40 @@ const CustomersOrder = ({navigation,route}) => {
     }
 
   }
+  const getOrdersDataForAdmin = async () => {
+    setIsLoading(true);
+       try{
+         const dataArr = [];        
+         let response=Firebase.firestore().collection('CustomerOrder')
+            .orderBy('status', 'asc');
+           await response.onSnapshot((querySnapshot) =>{
+               querySnapshot.forEach((doc)=>{
+                   const {customerOrder,customer,customerEmail,status, geohash,lat, lng} = doc.data();
+                   dataArr.push({
+                     key: doc.id,
+                     geohash,
+                     customerId:customer.uid,
+                     status,
+                     customerName:customer.username,
+                     customerEmail,
+                     total:customerOrder.total,
+                     customerPhoneNo:customer.phonenumber,
+                     orderItems: customerOrder.orderItems,
+                     basketCount:customerOrder.BasketCount,
+                     lat,
+                     lng,
+                   })
+                    setOrder(dataArr)
+                    setData(dataArr)
+                    setIsLoading(false)
+                 })
+           });
 
+       }
+       catch(e){
+         console.log(e);
+       }
+     }
 
    const getOrdersData = async (item) => {
      setIsLoading(true);
@@ -258,7 +296,7 @@ const CustomersOrder = ({navigation,route}) => {
             renderItem={renderItem}
             keyExtractor={item => `${item?.key}`}
             contentContainerStyle={{
-              paddingBottom:100,
+              paddingBottom:130,
             }}
           />
         </View>

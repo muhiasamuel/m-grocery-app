@@ -219,7 +219,7 @@ function renderWidget(){
                 }}
                 onPress = {() => LogOutUser()}
               >
-                  <FontAwesome name='sign-out' size={30} color={'white'}/>
+                  <AntDesign name="logout" size={28} color="white" />
 
               </TouchableOpacity>
               
