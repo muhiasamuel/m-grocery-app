@@ -1,6 +1,6 @@
 import React, {  useContext, Component } from 'react';
-import { View, Text, StyleSheet,Button, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert, Modal } from 'react-native';
-import { Entypo, FontAwesome5, AntDesign, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
+import { View, Text, StyleSheet,RefreshControl, Image,  ScrollView, TextInput, TouchableOpacity, ActivityIndicator, Picker, SafeAreaView, FlatList, Alert, Modal } from 'react-native';
+import { Entypo, FontAwesome5, AntDesign, Ionicons, MaterialCommunityIcons, MaterialIcons, FontAwesome } from '@expo/vector-icons'
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
 import "firebase/storage";
 import 'firebase/firestore';
@@ -20,6 +20,7 @@ static contextType = AuthenticatedUserContext;
       photos: [],
       pickedImagePath: null,
       prodName:'',
+      refreshing:false,
       prodDetails:'',
       Price:'',
       category:'',
@@ -38,10 +39,30 @@ static contextType = AuthenticatedUserContext;
       Stocklevel:''
     }
   }
+
+  onRefresh = () => {
+    this.setState({refreshing:true})
+    const {AuthUserRole} = this.context;
+    if (AuthUserRole?.role === `Admin`) {
+      this.getProductsDataFordmin
+    } else {
+     this.getProductsData();
+    }
+   this.wait(3600).then(() => this.setState({refreshing:false}));
+  };
+   wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  }
   componentDidMount() {
-    this.getStoreData();
+    const {AuthUserRole} = this.context;
+    if (AuthUserRole?.role === `Admin`) {
+      this.getProductsDataFordmin();
+    } else {
+      this.getProductsData();
+    }
+    this.getStoreData();    
     this.getCatData();
-    this.getProductsData();
+    
    
   }
   componentWillUnmount() {
@@ -120,12 +141,51 @@ static contextType = AuthenticatedUserContext;
       console.log(e);
     }
   }
- getProductsData = async () => {
+ getProductsDataFordmin = async () => {
     try{
       const dataArr = [];
     
         const response=Firebase.firestore().collection("Products")
         .orderBy("prodStoreid", "asc");
+        const data=await response.get();
+        data.docs.forEach(item=>{
+          const {prodname, proddetails,prodprice,storeName,stocks,prodqty, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
+          dataArr.push({
+           key: item.id,
+            prodname,
+            prodqty,
+            proddetails,
+            prodprice,
+            imageUrls,
+            storeName,
+            proddiscount,
+            prodStoreid,
+            prodcatid,
+            prodId,
+            productUnit,
+            stocks
+          });
+          let {setProducts} = this.context;
+            setProducts(dataArr)
+            this.setState({
+              prods:dataArr
+            })
+                      
+            
+        })
+    }
+    catch(e){
+      console.log(e);
+    }
+  }
+  ///store admin prods
+  getProductsData = async () => {
+    let {AuthUserRole} = this.context;
+    try{
+      const dataArr = [];
+    
+        const response=Firebase.firestore().collection("Products")
+        .where('prodStoreid', '==', AuthUserRole?.storeid)
         const data=await response.get();
         data.docs.forEach(item=>{
           const {prodname, proddetails,prodprice,storeName,stocks,prodqty, imageUrls,productUnit, prodId,proddiscount,prodcatid,prodStoreid} = item.data();
@@ -509,28 +569,28 @@ renderProdsEdit(){
             justifyContent:'space-around',
             alignItems:'center'}}>
            
-            <Text style={[styles.storeName,{color:Colors.grey500}]}>{item?.prodname}</Text>
+            <Text style={[styles.storeName,{color:Colors.grey900}]}>{item?.prodname}</Text>
             {item?.imageUrls && (
               <Image style={styles.bodyphoto} source={{uri: item?.imageUrls[0].url}} />
             )}
-            <Text style={[styles.storeName,{color:Colors.grey500, width:SIZES.width*0.3}]}>{item?.storeName}</Text>
+            <Text style={[styles.storeName,{color:Colors.grey900, width:SIZES.width*0.3}]}>{item?.storeName}</Text>
 
                   {AuthUserRole?.role === `Admin`  ||AuthUserRole?.storeid === item?.prodStoreid ?
       
                   <View style ={{flexDirection:'row', alignItems:'center', justifyContent:'space-around'}}>
                     <TouchableOpacity
-                     style={[styles.btnUpdateprod,{backgroundColor:Colors.blue400,paddingVertical:7,borderWidth:2,borderColor:Colors.blue900}]}
+                     style={[styles.btnUpdateprod,{backgroundColor:Colors.grey200,paddingVertical:7,borderWidth:1,borderColor:Colors.blue900}]}
                     onPress={() => navigation.navigate('editProducts',{
                     item
                   })}
                   >
-                <AntDesign name="edit" size={27} color="white" />              
+                <FontAwesome name="edit" size={27} color={Colors.blue900} />              
                   </TouchableOpacity>
                   <TouchableOpacity
                   onPress = {() => {this.deleteprods(item?.key)}}
-                  style={[styles.btnUpdateprod,{backgroundColor:Colors.red300,paddingVertical:7,borderColor:Colors.red900,borderWidth:2}]}
+                  style={[styles.btnUpdateprod,{backgroundColor:Colors.grey200,paddingVertical:7,borderColor:Colors.red900,borderWidth:1}]}
                   >
-                  <MaterialCommunityIcons name="delete-circle" size={28} color="white" />
+                  <MaterialCommunityIcons name="delete-circle" size={28} color={Colors.red900} />
                   </TouchableOpacity>
                   </View>
                   :
@@ -568,7 +628,7 @@ renderProdsEdit(){
       }
 
   render() {
-    const {storeData, catData} = this.context;
+    const {storeData, catData, AuthUserRole} = this.context;
     
     if (this.state.isLoading) {
       return (
@@ -605,9 +665,20 @@ renderProdsEdit(){
       </ScrollView>
     :
     <>
-    <View style = {{flexDirection:'row',justifyContent:'space-around',backgroundColor:COLORS.white}}>
+            <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.onRefresh}
+          />
+        }
+      >
+        <Text>Pull down to Refresh</Text>
+      </ScrollView>
+    <View style = {{flexDirection:'row',justifyContent:'center',backgroundColor:COLORS.white}}>
       
-        
+       {AuthUserRole?.role === `Admin`? 
         <TouchableOpacity
           onPress={() => this.setState({modalVisible:!this.state.modalVisible})}
         >
@@ -617,11 +688,15 @@ renderProdsEdit(){
 
           </View>
         </TouchableOpacity>
+        :
+        <View></View>
+                }
+
    
      <TouchableOpacity
         style={{alignItems:'center'}}
         onPress={() => this.setState({prodVisible:!this.state.prodVisible})}>
-          <Text style={{color:Colors.grey500,...FONTS.body2}}>Add Products Data</Text> 
+          <Text style={{color:Colors.grey900,...FONTS.body2}}>Add Products Data</Text> 
           <Ionicons name="md-chevron-up-circle-outline" size={30} color={Colors.grey800} />
     </TouchableOpacity>
     </View>
@@ -1082,6 +1157,12 @@ storeTitle: {
     ...FONTS.h4, 
     color:COLORS.black, 
     fontStyle:'normal'
+},
+scrollView: {
+  backgroundColor: Colors.blueGrey100,
+  padding:20,
+  alignItems: 'center',
+  justifyContent: 'center',
 },
   buttonContainer: {
     width: SIZES.width,

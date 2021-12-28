@@ -327,17 +327,12 @@ const CustomersOrder = ({navigation,route}) => {
               >
                 <Text style={[styles.textStyle,{fontSize:18}]}>Complete</Text>
               </TouchableOpacity>
-              {
-                      AuthUserRole?.role === `Admin`?
                       <TouchableOpacity
                       style={[styles.storeswitchbtn,{backgroundColor:Colors.red300}]}
                       onPress={() => handleselectedStatus('Declined')}
                       >
                         <Text style={[styles.textStyle,{fontSize:18}]}>Declined</Text>
                       </TouchableOpacity>
-              :
-              <Text></Text>
-              }
            </View>
           
         {isloading ?

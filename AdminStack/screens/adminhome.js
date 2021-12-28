@@ -109,13 +109,13 @@ function handleClose() {
 }
 //store data
 //Store Code For User admin
-function viewStore() {
-  if (storeData === null) {
-    getStoreData()
-  } else { 
-    setStoreModalVisible(!storeModalVisible);
-  }
-}
+// function viewStore() {
+//   if (storeData === null) {
+//     getStoreData()
+//   } else { 
+//     setStoreModalVisible(!storeModalVisible);
+//   }
+// }
 function renderModal(){
   return(
           <Modal 
@@ -261,12 +261,7 @@ function renderStore(){
     return(
       <View style={styles.cardView}>
         <View style={styles.cardrow}>
-          <TouchableOpacity
-          style={styles.storeswitchbtn}
-            onPress = {() => {setModalVisible(!modalVisible); setIsLoading(false)}}
-          >
-            <Text style={[styles.textStyle,{fontSize:18}]}>switch to another store</Text>
-          </TouchableOpacity>
+{/*         
           {
                   AuthUserRole?.role === `Admin`?
                   <TouchableOpacity
@@ -277,7 +272,7 @@ function renderStore(){
                   </TouchableOpacity>
           :
           <Text></Text>
-          }
+          } */}
         </View>
         <View style={styles.cardrow}>
           <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.teal200}]}
@@ -345,7 +340,7 @@ function renderStore(){
             onPress={() => navigateToOrders()}
 
           >
-            <Title style={styles.titleText}>new Orders</Title>
+            <Title style={styles.titleText}>All Orders</Title>
             <View style={styles.card}>
                <Text style={styles.text}>New Orders</Text>
                <Badge>3</Badge>
@@ -361,17 +356,16 @@ function renderStore(){
             </View>
           </TouchableOpacity>
           <TouchableOpacity style ={[styles.pannels, {backgroundColor:Colors.orange300}]}
-            onPress={() => navigateToOrders()}
+            onPress={() => navigation.navigate('manageusers')}
           >
-            <Title style={styles.titleText}>Completed Orders</Title>
+            <Title style={styles.titleText}>Manage Users</Title>
             <View style={styles.card}>
-               <Text style={styles.text}>Delivered Orders</Text>
+               <Text style={styles.text}>All Users</Text>
                <Badge>37</Badge>
                
             </View>
             <View style={styles.card}>
-            <Ionicons name="checkmark-done-circle-outline" size={28} color="black" />
-            <MaterialIcons name="local-grocery-store" size={28} color="green" />
+            <FontAwesome5 name='users' size={28} color="black" />
             </View>
             <View style={styles.cardrow}>
                 <Text>see More Here</Text>

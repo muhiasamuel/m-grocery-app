@@ -4,7 +4,7 @@ import React from "react";
 
 import { createDrawerNavigator,  DrawerContentScrollView,
     DrawerItem } from "@react-navigation/drawer";
-import { CategoryStackNavigator, ContactStackNavigator, MainStackNavigator, OrdersStackNavigator, ProductsStackNavigator, StoresStackNavigator } from "./stackNavigator";
+import { CategoryStackNavigator, ContactStackNavigator, MainStackNavigator, ManageUsersNavigator, OrdersStackNavigator, ProductsStackNavigator, StoresStackNavigator } from "./stackNavigator";
 import BottomTabNavigator from "./tabNavigator";
 import { ProductCategories, Products, Store,CustomersOrder,Stocks } from "../screens";
 import { COLORS } from "../../constants/Index";
@@ -117,6 +117,18 @@ const DrawerNavigator = ({navigation}) => {
         ),
         }}
       name="stocks" component={Stocks}/>
+       <Drawer.Screen 
+       options={{
+        title: 'Manage Users',
+        drawerIcon: ({focused, size}) => (
+            <FontAwesome5
+                name='users'
+                size={size}
+                color={focused ? '#7cc' : 'skyblue'}
+            />
+        ),
+        }}
+      name="manageusers" component={ManageUsersNavigator}/>
 
       <Drawer.Screen
         options={{

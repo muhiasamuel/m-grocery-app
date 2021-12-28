@@ -4,7 +4,7 @@ import React from "react";
 import { createStackNavigator } from '@react-navigation/stack'
 import Adminhome from "../screens/adminhome";
 import Users from "../screens/users";
-import { CustomersOrder, EditCat, EditStore, OrderDispatch, OrderView, ProductCategories, Products, Store } from "../screens";
+import { AppUsers, CustomersOrder, EditCat, EditStore, OrderDispatch, OrderView, ProductCategories, Products, Store } from "../screens";
 import { COLORS } from "../../constants/Index";
 import Ims from "../screens/ims";
 import EditProds from "../screens/Products/editProducts";
@@ -25,8 +25,14 @@ const MainStackNavigator = () => {
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
       <Stack.Screen options={{title: 'Home',  headerShown:false}} name="adminHome" component={Adminhome} />
-      <Stack.Screen options={{title: 'Users'}} name="users" component={Users} />
-    
+      <Stack.Screen options={{title: 'Users'}} name="users" component={Users} />    
+    </Stack.Navigator>
+  );
+}
+const ManageUsersNavigator = () => {
+  return (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+      <Stack.Screen options={{title: 'ManageUsers'}} name="manageallusers" component={AppUsers} />    
     </Stack.Navigator>
   );
 }
@@ -112,4 +118,4 @@ const OrdersStackNavigator = () => {
     </Stack.Navigator>
   );  
 }
-export { MainStackNavigator, ContactStackNavigator,OrdersStackNavigator, StoresStackNavigator,CategoryStackNavigator,ProductsStackNavigator };
+export { MainStackNavigator, ContactStackNavigator,OrdersStackNavigator,ManageUsersNavigator, StoresStackNavigator,CategoryStackNavigator,ProductsStackNavigator };

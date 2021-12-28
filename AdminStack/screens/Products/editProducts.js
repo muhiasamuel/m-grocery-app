@@ -43,7 +43,7 @@ static contextType = AuthenticatedUserContext;
     this.ProductData(item)
     setTimeout(() => {
         Alert.alert("Note!!!!",
-        "Only Use open image gallery if you want to overwrite the already Existing images for a product..... If You dont open image gallery the existing images will remain...Also you have to reselect Product Store and Category or select to new ones.IMPORTANT!! ")
+        "Only Use open image gallery if you want to overwrite the already Existing images for a product..... If You dont open image gallery the existing images will remain.IMPORTANT!! ")
             
     }, 1000);
    
@@ -65,7 +65,10 @@ static contextType = AuthenticatedUserContext;
           store:item.prodStoreid,
           docId:item.key,
           stocklevel:item.stocks,
-          selectedValue:item.productUnit
+          selectedValue:item.productUnit,
+          categoryname:item.storeCat,
+          category:item.prodcatid,
+          storeName:item.storeName,
 
           
       })

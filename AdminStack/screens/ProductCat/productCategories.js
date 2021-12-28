@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Button, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Image, RefreshControl, ScrollView, TextInput, TouchableOpacity, ActivityIndicator, SafeAreaView } from 'react-native';
 import { AntDesign, EvilIcons, Feather, FontAwesome, FontAwesome5, Fontisto, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons'
 import * as ImagePicker from 'expo-image-picker';
 import { COLORS, FONTS, SIZES } from '../../../constants/Index';
@@ -21,10 +21,21 @@ const ProductCategories = ({route, navigation}) => {
   const [uploading, setUploading] =useState(null);
   const [submitting, setIsSubmitting] =useState(false);
 
+  const [refreshing, setRefreshing] = React.useState(false);
+
+
+
   React.useEffect(() => {
     getCatData();
   }, [])
-
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    getCatData();
+    wait(2000).then(() => setRefreshing(false));
+  }, []);
+  const wait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  }
   const getCatData = async () => {
     try{
       const catArr = [];
@@ -66,6 +77,15 @@ const ProductCategories = ({route, navigation}) => {
       }) 
 
   }
+  //delete cat
+        const deletecat = async(key) => {
+          const db =  Firebase.firestore().collection("ProductCategories");
+          await db.doc(key).delete().then(() => {
+            alert("item successfully deleted!");
+        }).catch((error) => {
+            console.error("Error removing document: ", error);
+        });
+        }
 
     // This function is triggered when the "Select an image" button pressed
     const showImagePicker = async () => {
@@ -211,8 +231,7 @@ function renderAddCategories(){
           autoCapitalize={"none"}
       />
               <View  style ={[styles.centered,{justifyContent:'space-around'}]}>
-                {
-                  AuthUserRole?.role === `Admin`?
+                
                   <TouchableOpacity
                   onPress={() => handleSubmit()}
                   >{submitting ?
@@ -222,9 +241,7 @@ function renderAddCategories(){
                           }
                   
                   </TouchableOpacity>
-                  :
-                  <Text style={[styles.btnUpdate,{backgroundColor:Colors.red900,...FONTS.h6}]}>Forbidden</Text> 
-                }
+                
             <TouchableOpacity
               style={{alignItems:'center'}}
               onPress={() => setcatProdDataVisible(!catProdDataVisible)}
@@ -246,13 +263,21 @@ function renderprodCatEdit(){
             <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.catname}</Text>
             <Image style={styles.bodyphoto} source={{uri: item?.catimage}} />
             {AuthUserRole?.role === `Admin` ?
+              <View style ={{flexDirection:'row', alignItems:'center', justifyContent:'space-around'}}>
               <TouchableOpacity
+              style={[styles.btnUpdateprod,{backgroundColor:Colors.grey200,paddingVertical:7,borderWidth:1,borderColor:Colors.blue900}]}
               onPress={() => navigation.navigate('editCats',{
-                item
-              })}
+              item})}
             >
-            <Text style={[styles.btnUpdateprod,{paddingLeft:18,}]}>Edit</Text>
+            <FontAwesome name='edit' size={27} color={Colors.blue800} />              
             </TouchableOpacity>
+            <TouchableOpacity
+            onPress = {() =>{deletecat(item?.key)}}
+            style={[styles.btnUpdateprod,{backgroundColor:Colors.grey200,paddingVertical:2,borderColor:Colors.red900,borderWidth:1}]}
+            >
+            <MaterialCommunityIcons name="delete-circle" size={35} color={Colors.red900} />
+            </TouchableOpacity>
+            </View>
             :
             <Text style={[styles.btnUpdateprod,{paddingLeft:18,backgroundColor:Colors.red900,...FONTS.h6}]}>Forbidden</Text>
             }
@@ -279,7 +304,7 @@ function renderprodCatEdit(){
             renderItem={renderItem}
               showsVerticalScrollIndicator={false}
             contentContainerStyle={{
-              paddingBottom:25,
+              paddingBottom:75,
               backgroundColor:COLORS.white
             }}
         />
@@ -339,6 +364,17 @@ function renderCatImage(){
         </ScrollView> 
           :
           <>
+        <ScrollView
+        contentContainerStyle={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }
+      >
+        <Text>Pull down to Refresh</Text>
+      </ScrollView>
           <TouchableOpacity
             style={{alignItems:'center', backgroundColor:Colors.grey50}}
             onPress={() => setcatProdDataVisible(!catProdDataVisible)}
@@ -357,13 +393,18 @@ export default ProductCategories
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1,
     justifyContent: 'center',
     backgroundColor:Colors.grey100,
     },
   container: {
     marginVertical:SIZES.padding,
     paddingHorizontal:5,
+  },
+  scrollView: {
+    backgroundColor: Colors.blueGrey100,
+    padding:20,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerView: {
     flexDirection:"row", 

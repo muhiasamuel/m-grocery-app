@@ -480,24 +480,24 @@ function renderStoreEdit(){
             justifyContent:'space-around',
             alignItems:'center'}}>
            
-            <Text style={[styles.storeName,{color:Colors.grey600}]}>{item?.storeName}</Text>
+            <Text style={[styles.storeName,{color:COLORS.darkblue}]}>{item?.storeName}</Text>
             <Image style={styles.bodyphoto} source={{uri: item?.storeimage}} />
 
             {
               AuthUserRole?.storeid ===item.key  || AuthUserRole?.role === `Admin` ?
               <View style ={{flexDirection:'row', alignItems:'center', justifyContent:'space-around'}}>
               <TouchableOpacity
-              style={[styles.btnUpdateStore,{backgroundColor:Colors.blue400,paddingVertical:7,borderWidth:2,borderColor:Colors.blue900}]}
+              style={[styles.btnUpdateStore,{backgroundColor:Colors.grey200,paddingVertical:7,borderWidth:1,borderColor:Colors.blue900}]}
               onPress={() => navigation.navigate('editStore',{
               item})}
             >
-           <AntDesign name="edit" size={27} color="white" />              
+           <FontAwesome name='edit' size={27} color={Colors.blue800} />              
             </TouchableOpacity>
             <TouchableOpacity
             onPress = {() =>{deleteStore(item?.key)}}
-            style={[styles.btnUpdateStore,{backgroundColor:Colors.red300,paddingVertical:7,borderColor:Colors.red900,borderWidth:2}]}
+            style={[styles.btnUpdateStore,{backgroundColor:Colors.grey200,paddingVertical:7,borderColor:Colors.red900,borderWidth:1}]}
             >
-            <MaterialCommunityIcons name="delete-circle" size={28} color="white" />
+            <MaterialCommunityIcons name="delete-circle" size={27} color={Colors.red900} />
             </TouchableOpacity>
             </View>
             :

@@ -7,6 +7,7 @@ import Store from './stores/addStore';
 import EditStore from './stores/EditStores';
 import CustomersOrder from './Orders/CustomersOrder';
 import OrderView from './Orders/viewOrder';
+import AppUsers from './users/index';
 import OrderDispatch from './Orders/orderDispatch';
 import Stocks from './Stocks/Stocks';
 export {
@@ -15,6 +16,7 @@ export {
     ProductCategories,
     CustomersOrder,
     EditStore,
+    AppUsers,
     EditProducts,
     EditCat,
     Stocks,
